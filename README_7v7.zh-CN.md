@@ -4,8 +4,8 @@
 服务器为 `/home/robotics/ZJUDancer/rcssservermj` 的同名分支。
 
 本分支现统一维护在 `/home/robotics/ZJUDancer/BHumanCodeRelease`，使用该仓库既有的
-个人 fork 远程；原 `test/HSLServer` 分支独立保留。旧目录
-`booster_mjlab/BHumanCodeRelease` 保留作迁移前副本，后续操作使用上述统一路径。
+个人 fork 远程；原 `test/HSLServer` 分支独立保留。迁移完成后已删除重复目录
+`booster_mjlab/BHumanCodeRelease`，后续操作使用上述统一路径。
 
 客户端复用 B-Human 的行为、球估计、行走、踢球、起身及队内通信。新增 TCP 通信、
 传感器和视觉输入适配以及 `s7v7` 策略，常规比赛采用 `t231`：1 名守门员、2 名后卫、
