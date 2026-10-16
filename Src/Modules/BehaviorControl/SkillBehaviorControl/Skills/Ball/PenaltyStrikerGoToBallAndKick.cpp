@@ -7,6 +7,7 @@
  */
 
 #include "SkillBehaviorControl.h"
+#include "Tools/BehaviorControl/RCSSBehavior.h"
 
 option((SkillBehaviorControl) PenaltyStrikerGoToBallAndKick,
        args((const Pose2f&) kickPose,
@@ -26,7 +27,11 @@ option((SkillBehaviorControl) PenaltyStrikerGoToBallAndKick,
         goto goToBallAndKick;
 
       if(kickPose.translation.squaredNorm() < sqr(prepareKickDistance))
+      {
+        if(RCSSBehavior::truthMode())
+          goto goToBallAndKick;
         goto prepareKick;
+      }
     }
     action
     {
@@ -44,7 +49,7 @@ option((SkillBehaviorControl) PenaltyStrikerGoToBallAndKick,
   {
     transition
     {
-      if(state_time > prepareKickDuration || timeUntilPenaltyShootoutEnds <= minTimeForKick)
+      if(RCSSBehavior::truthMode() || state_time > prepareKickDuration || timeUntilPenaltyShootoutEnds <= minTimeForKick)
         goto goToBallAndKick;
     }
     action

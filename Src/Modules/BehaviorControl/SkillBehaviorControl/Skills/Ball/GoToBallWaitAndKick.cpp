@@ -7,6 +7,7 @@
  */
 
 #include "SkillBehaviorControl.h"
+#include "Tools/BehaviorControl/RCSSBehavior.h"
 
 option((SkillBehaviorControl) GoToBallWaitAndKick,
        load((int) waitingTime,
@@ -37,7 +38,15 @@ option((SkillBehaviorControl) GoToBallWaitAndKick,
         goto kick;
       }
       if(action_done)
+      {
+        if(RCSSBehavior::truthMode())
+        {
+          if(theSkillRequest.passTarget != -1)
+            goto pass;
+          goto kick;
+        }
         goto wait;
+      }
     }
     action
     {
@@ -56,9 +65,9 @@ option((SkillBehaviorControl) GoToBallWaitAndKick,
   {
     transition
     {
-      if(state_time > waitingTime && theSkillRequest.passTarget != -1)
+      if((RCSSBehavior::truthMode() || state_time > waitingTime) && theSkillRequest.passTarget != -1)
         goto pass;
-      if(state_time > waitingTime && theSkillRequest.passTarget == -1)
+      if((RCSSBehavior::truthMode() || state_time > waitingTime) && theSkillRequest.passTarget == -1)
         goto kick;
     }
     action
@@ -73,7 +82,7 @@ option((SkillBehaviorControl) GoToBallWaitAndKick,
     action
     {
       PassToTeammate({.playerNumber = theSkillRequest.passTarget,
-                      .passedWaitingTime = waitingTime});
+                      .passedWaitingTime = RCSSBehavior::truthMode() ? 0 : waitingTime});
     }
   }
 

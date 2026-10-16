@@ -1,4 +1,5 @@
 #include "SkillBehaviorControl.h"
+#include "Tools/BehaviorControl/RCSSBehavior.h"
 #include "Tools/BehaviorControl/WalkSpeedConversion.h"
 
 option((SkillBehaviorControl) PenaltyTaker,
@@ -63,7 +64,7 @@ option((SkillBehaviorControl) PenaltyTaker,
   {
     transition
     {
-      if(std::min(timeSincePenaltyShootoutStarted, state_time) > 5000 || timeUntilPenaltyShootoutEnds <= 10000)
+      if(RCSSBehavior::truthMode() || std::min(timeSincePenaltyShootoutStarted, state_time) > 5000 || timeUntilPenaltyShootoutEnds <= 10000)
       {
         if(kickLeft())
           goto goToBallAndKickLeft;

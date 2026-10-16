@@ -8,6 +8,7 @@
  */
 
 #include "SkillBehaviorControl.h"
+#include "Tools/BehaviorControl/RCSSBehavior.h"
 #include "Debugging/DebugDrawings.h"
 #include "Debugging/DebugDrawings3D.h"
 #include "Tools/BehaviorControl/KickSelection.h"
@@ -286,8 +287,9 @@ option((SkillBehaviorControl) PassToTeammate,
 
   common_transition
   {
-    // In regular playing, always kick the ball immediately (without waiting).
-    if(!isFreeKick() && !isKickOff())
+    // RCSS truth also executes restarts immediately. Keep the normal target
+    // evaluation, approach and missing-receiver fallback, without waiting poses.
+    if(RCSSBehavior::truthMode() || (!isFreeKick() && !isKickOff()))
     {
       if(teammate)
         goto kick;

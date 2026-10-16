@@ -7,6 +7,7 @@
  */
 
 #include "StrategyBehaviorControl.h"
+#include "Tools/BehaviorControl/RCSSBehavior.h"
 #include "Representations/Communication/TeamData.h"
 #include "Tools/BehaviorControl/Strategy/BehaviorBase.h"
 #include "Tools/Modeling/BallPhysics.h"
@@ -28,7 +29,7 @@ std::vector<ModuleBase::Info> StrategyBehaviorControl::getExtModuleInfo()
 
 void StrategyBehaviorControl::update(SkillRequest& skillRequest)
 {
-  wasPenalized = theExtendedGameState.wasPenalized() && theExtendedGameState.returnFromGameControllerPenalty && (theGameState.isPlaying() || theGameState.isReady() || theGameState.isSet());
+  wasPenalized = !RCSSBehavior::truthMode() && theExtendedGameState.wasPenalized() && theExtendedGameState.returnFromGameControllerPenalty && (theGameState.isPlaying() || theGameState.isReady() || theGameState.isSet());
   if(wasPenalized)
     wasPenalized = theFrameInfo.getTimeSince(theGameState.timeWhenPlayerStateStarted) < theBehaviorParameters.noSkillRequestAfterUnpenalizedTime;
 

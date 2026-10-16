@@ -7,6 +7,7 @@
  */
 
 #include "SkillBehaviorControl.h"
+#include "Tools/BehaviorControl/RCSSBehavior.h"
 #include "Tools/BehaviorControl/SectorWheel.h"
 #include "Debugging/DebugDrawings.h"
 
@@ -36,16 +37,17 @@ option((SkillBehaviorControl) DirectKickOff,
             (KickInfo::KickType)(KickInfo::numOfKickTypes) kickType, /**< The kick type to try. */
             (Angle)(0_deg) targetAngle)) /**< The target angle to which the kick-off should go (from the ball in field coordinates). */
 {
+  const int kickDelay = RCSSBehavior::truthMode() ? 0 : forceKickAfterTime;
   initial_state(execute)
   {
     transition
     {
-      if(theFrameInfo.getTimeSince(theExtendedGameState.timeWhenStateStarted[GameState::ownKickOff]) > forceKickAfterTime && wasActive)
+      if(theFrameInfo.getTimeSince(theExtendedGameState.timeWhenStateStarted[GameState::ownKickOff]) > kickDelay && wasActive)
         goto kick;
     }
     action
     {
-      if(theFrameInfo.getTimeSince(theExtendedGameState.timeWhenStateStarted[GameState::ownKickOff]) < forceKickAfterTime)
+      if(theFrameInfo.getTimeSince(theExtendedGameState.timeWhenStateStarted[GameState::ownKickOff]) < kickDelay)
       {
         LookLeftAndRight({.tilt = theBehaviorParameters.defaultLookDownAngle});
         Stand();
