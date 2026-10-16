@@ -40,6 +40,20 @@ CMake、Make；此无界面客户端不依赖 Qt、mold 或 ccache。
 
 ## 启动比赛
 
+直接运行 `build_sim/run_player` 默认不保存日志。加 `--log` 时，将每帧 CSV 保存到
+本仓库根目录的 `logs/`，文件名包含队名、机器人类型、球员号、启动时间和进程号，
+重复启动不会覆盖之前的日志。`logs/` 已加入 `.gitignore`；不再读取 `RCSS_TRACE_DIR`。
+
+```bash
+# 单队 K1，默认不保存
+for n in {1..7}; do ./build_sim/run_player --num "$n" & done
+# 单队 K1，保存行为及比赛时间 CSV
+for n in {1..7}; do ./build_sim/run_player --num "$n" --log & done
+```
+
+T1 在上述命令中添加 `--robot T1`。诊断用 `--trace FILE` 仍可显式指定 CSV 路径，
+与 `--log` 互斥。下文的双队测试启动器仍显式通过 `--trace` 保存其测试日志。
+
 当前 RCSS 客户端默认启用大场踢球实验 `--kick-mode fast-max`，K1/T1 均生效。
 每次运行踢球网络（包括传球和带球）时统一使用当前版本 policy：strong=1、
 overshoot=0、just-hit=1，目标球速取配置上限 3.4 m/s（网络输入经缩放为 0.34）。

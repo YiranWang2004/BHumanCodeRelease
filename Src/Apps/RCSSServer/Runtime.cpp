@@ -48,12 +48,14 @@ Options arguments(int argc, char** argv)
                 << "  --localization truth|measured (default truth) --sim-speed FACTOR\n"
                 << "  --kick-mode fast-max|native (default fast-max)\n"
                 << "  --assets-dir PATH --beam-x X --beam-y Y --beam-theta DEG\n"
+                << "  --log (save CSV in repository logs/; default off)\n"
                 << "  --trace FILE --max-frames N (diagnostics)\n"
                 << "  --test-stand | --test-cmd VX,VY,WZ (native motion diagnostics, SI units)\n";
       std::cout << "  --motion-subframes 1|10 (native Motion scheduling, default 10)\n";
       std::exit(0);
     }
     if(key == "--test-stand") { options.debugStand = true; continue; }
+    if(key == "--log") { options.log = true; continue; }
     if(i + 1 == argc) throw std::runtime_error("Missing value for " + key);
     const std::string value = argv[++i];
     const auto integer = [&]
@@ -91,6 +93,7 @@ Options arguments(int argc, char** argv)
   if(options.robot != "K1" && options.robot != "T1") throw std::runtime_error("--robot must be K1 or T1");
   if(options.localization != "truth" && options.localization != "measured") throw std::runtime_error("--localization must be truth or measured");
   if(options.kickMode != "fast-max" && options.kickMode != "native") throw std::runtime_error("--kick-mode must be fast-max or native");
+  if(options.log && !options.trace.empty()) throw std::runtime_error("Use either --log or --trace, not both");
   if(options.motionSubframes != 1 && options.motionSubframes != 10) throw std::runtime_error("--motion-subframes must be 1 or 10");
   if(options.field != "fifa7vs7") throw std::runtime_error("This 7v7 backend requires --field fifa7vs7");
   if(options.players < 1 || options.players > 7 || options.number < 1 || options.number > options.players || options.teamId < 1 || options.teamId > 99 || options.port < 1 || options.speed <= 0.) throw std::runtime_error("Invalid roster, port, team id or simulation speed");

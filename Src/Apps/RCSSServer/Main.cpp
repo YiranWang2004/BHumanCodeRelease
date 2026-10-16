@@ -12,8 +12,11 @@
 #include <chrono>
 #include <filesystem>
 #include <fstream>
+#include <iomanip>
+#include <ctime>
 #include <iostream>
 #include <memory>
+#include <sstream>
 #include <thread>
 #include <unistd.h>
 
@@ -65,12 +68,18 @@ int main(int argc, char** argv)
   {
     runtime.options = rcss::arguments(argc, argv);
     auto& options = runtime.options;
-    if(options.trace.empty())
-      if(const char* directory = std::getenv("RCSS_TRACE_DIR"))
-      {
-        std::filesystem::create_directories(directory);
-        options.trace = (std::filesystem::path(directory) / (options.team + "_" + std::to_string(options.number) + ".csv")).string();
-      }
+    if(options.log)
+    {
+      const auto directory = std::filesystem::absolute(std::filesystem::path(RCSS_ASSETS_DIR) / "logs").lexically_normal();
+      std::filesystem::create_directories(directory);
+      const auto now = std::chrono::system_clock::now();
+      const auto date = std::chrono::system_clock::to_time_t(now);
+      std::ostringstream name;
+      name << options.team << '_' << options.robot << '_' << options.number << '_'
+           << std::put_time(std::localtime(&date), "%Y%m%d-%H%M%S") << '_' << getpid() << ".csv";
+      options.trace = (directory / name.str()).string();
+      std::cout << "[RCSS] log=" << options.trace << std::endl;
+    }
     options.assets = std::filesystem::absolute(options.assets).string();
     if(chdir(options.assets.c_str())) throw std::runtime_error("Cannot enter B-Human assets directory");
     FunctionList::execute();

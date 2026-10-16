@@ -20,7 +20,7 @@ struct Options
   std::string assets = RCSS_ASSETS_DIR, trace, robot = "K1", kickMode = "fast-max";
   int port = 60000, teamId = 2, number = 1, players = 7, maxFrames = 0, motionSubframes = 10;
   double speed = 1., beamX = 0., beamY = 0., beamYaw = 0.;
-  bool beamExplicit = false, debugWalk = false, debugStand = false;
+  bool beamExplicit = false, debugWalk = false, debugStand = false, log = false;
   Pose2f debugVelocity;
 };
 Options arguments(int argc, char** argv);
