@@ -96,6 +96,11 @@ overshoot=0、just-hit=1，目标球速取配置上限 3.4 m/s（网络输入经
 添加 `--kick-mode native`。
 此覆盖仅编译到 RCSS 后端，实机和原 SimRobot 的 command 逻辑不变。
 
+上述标志名称沿用部署注释。训练实现中三位依次是 `flag_is_strong_kick`、
+`flag_is_inaccurate_kick`、`flag_allow_deviation`；第三位放宽额外踢球姿态和足底朝向约束，
+仍保留出球方向奖励。不能据此保证既最快又最准确。近球准备位的 48 次对照、训练语义及
+可复现方法见 [Kick policy 接管实验](reports/kick_alignment.md)；本轮未改变默认近球整姿行为。
+
 默认 truth 模式还会跳过解除处罚后原版 4 秒站立定位扫视及策略层 3.5 秒的恢复等待。接近球准备踢球或带球时，
 距准备位姿小于 1 m 即持续看球，超过 1.2 m 才允许返回其他头部动作；原版阈值为
 0.25/0.31 m。调用者请求 `LookActive` 时也遵守近球优先规则，以减少球观测过期而
