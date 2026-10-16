@@ -24,6 +24,7 @@ tags
 Thumbs.db
 /Build
 /build_sim
+/build_monitor/
 /Config/Images
 /Config/NeuralNets/CoreMLCache
 /Config/Scenes/Includes/connect.con
