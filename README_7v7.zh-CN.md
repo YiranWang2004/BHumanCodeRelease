@@ -51,7 +51,8 @@ overshoot=0、just-hit=1，目标球速取配置上限 3.4 m/s（网络输入经
 退回 Walk policy 的情况。球失踪时仍保留找球回退，无球队员继续观察环境。
 measured 模式使用原版返回扫视和近球头部阈值。
 本改动不放宽 Kick policy 的球距、观测时效、绕障及运动状态条件，也不保证每次
-实际出脚都更快。
+实际出脚都更快。CSV 的 `behavior` 列记录活动技能和状态，可与 `policy`、
+`kick_inferences`、`ball_age` 对照，区分上层等待与实际网络切换。
 
 终端一启动服务器：
 

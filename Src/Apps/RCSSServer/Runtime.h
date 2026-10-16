@@ -55,6 +55,7 @@ struct Runtime
   float imuYaw = 0.f, nativeYaw = 0.f;
   Pose2f cognitionOdometry;
   std::string policy = "none", tactic = "none", setPlay = "none";
+  std::string behavior;
   unsigned walkInferences = 0, kickInferences = 0, policyTime = 0;
   unsigned teamSent = 0, teamReceived = 0, teamUnsynchronized = 0;
   void stop();

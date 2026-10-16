@@ -1,0 +1,28 @@
+{
+  "date": "2026-10-16",
+  "cases": [
+    {
+      "robot": "K1",
+      "trace": "/tmp/bhuman-truth-approach-20261016-200521/K1.csv",
+      "frames": 500,
+      "play_on_time": 1.2,
+      "first_focus_time": 1.5,
+      "first_focus_ball_distance_m": 1.0984115710805693,
+      "first_kick_policy_time": 1.5,
+      "first_kick_policy": "K1_kick_inner.onnx",
+      "kick_inferences": 94
+    },
+    {
+      "robot": "T1",
+      "trace": "/tmp/bhuman-truth-approach-20261016-200601/T1.csv",
+      "frames": 800,
+      "play_on_time": 1.16,
+      "first_focus_time": 2.73,
+      "first_focus_ball_distance_m": 1.3669313839414179,
+      "first_kick_policy_time": 2.93,
+      "first_kick_policy": "T1_kick_inner.onnx",
+      "kick_inferences": 180
+    }
+  ],
+  "scope": "Isolated real server smoke test; not an old/new timing comparison. K1 starts 1.1m from ball, T1 starts 2.5m from ball. T1 initial 1.1m case did not observe the ball initially and stayed on native ball search; not counted as a successful kick test. Unpenalty config verified against Default priorities, no runtime unpenalty test."
+}

@@ -1,5 +1,6 @@
 #include "Runtime.h"
 #include "Representations/BehaviorControl/StrategyStatus.h"
+#include "Representations/BehaviorControl/ActivationGraph.h"
 #include "Framework/Blackboard.h"
 #include "Framework/Configuration.h"
 #include "Tools/Framework/BHExecutionUnit.h"
@@ -83,6 +84,13 @@ class RCSSFrame : public BHExecutionUnit
     };
     if(stage == 2)
     {
+      r.behavior.clear();
+      if(blackboard.exists("ActivationGraph"))
+        for(const auto& node : static_cast<const ActivationGraph&>(blackboard["ActivationGraph"]).graph)
+        {
+          if(!r.behavior.empty()) r.behavior += '|';
+          r.behavior += node.option + ':' + node.state;
+        }
       if(blackboard.exists("OdometryData")) r.cognitionOdometry = static_cast<const OdometryData&>(blackboard["OdometryData"]);
       copy("RobotPose", r.estimate);
       copy("BallModel", r.ball);
