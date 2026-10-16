@@ -87,19 +87,24 @@ T1 添加 `--robot T1`。默认发送到本机 UDP `10190`；不加 `--monitor` 
 
 ### 大场踢球与 truth 行为
 
-当前 RCSS 客户端默认启用大场踢球实验 `--kick-mode fast-max`，K1/T1 均生效。
-每次运行踢球网络（包括传球和带球）时统一使用当前版本 policy：strong=1、
-overshoot=0、just-hit=1，目标球速取配置上限 3.4 m/s（网络输入经缩放为 0.34）。
-忽略请求中的短传距离，保留请求方向；这表示请求强力、快速触球，并不保证实际球速
-或最快触球时间，上层选球、走近球与对准过程仍照常执行。
-若要恢复原始 command 和新旧踢球网络选择，给 `run_player` 或 `scripts/start_7v7.py`
-添加 `--kick-mode native`。
-此覆盖仅编译到 RCSS 后端，实机和原 SimRobot 的 command 逻辑不变。
+RCSS `truth` 模式下，K1/T1 的所有踢球网络调用统一使用当前版本 policy，
+包括射门、传球、解围、带球触球、开球及各类定位球：
+`strong=1`、`inaccurate=0`、`allow_deviation=0`，目标球速取配置上限 3.4 m/s
+（网络输入经缩放为 0.34）。保留请求方向，忽略请求中的短传距离。
+这对应“提前接管、保留 policy 学到的姿态约束”：上层跳过面向球门的固定球后 0.5 m
+准备位，以及点球大战独立的 WalkToPoint 准备步，由原有踢球流程和 Kick policy
+根据最终出球方向完成接近、绕球和触球调整。原有定时扫视等待继续跳过。
 
-上述标志名称沿用部署注释。训练实现中三位依次是 `flag_is_strong_kick`、
-`flag_is_inaccurate_kick`、`flag_allow_deviation`；第三位放宽额外踢球姿态和足底朝向约束，
-仍保留出球方向奖励。不能据此保证既最快又最准确。近球准备位的 48 次对照、训练语义及
-可复现方法见 [Kick policy 接管实验](reports/kick_alignment.md)；本轮未改变默认近球整姿行为。
+这里的姿态约束是训练奖励所对应的学习行为，并非新增固定站立时长或角度硬门槛。
+最大目标球速也不保证每次实际球速或触球时间。
+原始 48 次速度/精度对照见 [Kick policy 接管实验](reports/kick_alignment.md)。
+
+`--kick-mode fast-max|native` 现在只控制 `measured` 模式：默认 `fast-max` 仍使用
+原来的 `(strong,inaccurate,allow_deviation)=(1,0,1)`；`native` 恢复原始 command 和
+新旧踢球网络选择。truth 始终使用上述 `(1,0,0)` 模式，即使指定 `--kick-mode native`。
+该覆盖仅编译到 RCSS 后端；实机、原 SimRobot 和 measured 的行为流程保持原样。
+本次接管入口、实际 command、点球大战和 measured 对照的验证记录见
+[truth 模式回归结果](reports/truth_kick_aligned.json)。
 
 默认 truth 模式还会跳过解除处罚后原版 4 秒站立定位扫视及策略层 3.5 秒的恢复等待。接近球准备踢球或带球时，
 距准备位姿小于 1 m 即持续看球，超过 1.2 m 才允许返回其他头部动作；原版阈值为
@@ -109,12 +114,15 @@ measured 模式使用原版返回扫视和近球头部阈值。
 本改动不放宽 Kick policy 的球距、观测时效、绕障及运动状态条件，也不保证每次
 实际出脚都更快。CSV 的 `behavior` 列记录活动技能和状态，可与 `policy`、
 `kick_inferences`、`ball_age` 对照，区分上层等待与实际网络切换。
-CSV 末尾的 `play_time` 记录 server 的 `GS(t)` 比赛累计计时（秒），与仿真累计时间
+CSV 的 `play_time` 记录 server 的 `GS(t)` 比赛累计计时（秒），与仿真累计时间
 `time` 分开保存；使用 server 原值，不换算为半场倒计时。
+CSV 还记录最近一次实际 Kick 推理的 `kick_strong`、`kick_inaccurate`、
+`kick_allow_deviation` 和 `kick_target_speed`（m/s），可在 `kick_inferences` 增加的行
+检查输入。这些值会缓存到下一次 Kick 推理，不能仅凭它们判断当前仍在踢球。
 
 RCSS `truth` 模式还会跳过主罚前同类的定时站立扫视：边线球、角球、直接/间接任意球和
 球门球共用的 `GoToBallWaitAndKick:wait`，以及 `PassToTeammate` 的等待点和等待状态。
-主罚队员完成原来的走近与对齐后，直接进入传球或踢球；有接球队员时仍评估传球目标，
+主罚队员直接进入传球或踢球请求，由底层完成走近与对齐；有接球队员时仍评估传球目标，
 没有有效接球队员时使用原来的清球/带球回退。
 本方直接开球的 2 秒扫视、点球主罚的 5 秒初始扫视和点球接近后的 4 秒准备扫视也跳过。
 这些分支仅在 RCSS 构建且 `--localization truth` 时启用；`measured`、实机及原版 SimRobot

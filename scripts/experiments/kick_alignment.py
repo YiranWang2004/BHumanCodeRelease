@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Compare prebuilt K1 alignment variants on an isolated seven-player server.
+"""Compare prebuilt K1/T1 alignment variants on an isolated seven-player server.
 
 The initial replay fixture uses root poses from play_time=219.46 in the reported
 match. It does not replay joint states or velocities. Before starting, hold the
@@ -28,6 +28,7 @@ import time
 from pathlib import Path
 P = argparse.ArgumentParser()
 P.add_argument('--cases', default='replay')
+P.add_argument('--robot', choices=['K1', 'T1'], default='K1')
 P.add_argument('--repeats', type=int, default=1)
 P.add_argument('--seconds', type=float, default=12)
 P.add_argument('--team-id', type=int, default=94)
@@ -52,6 +53,7 @@ log_root.mkdir(exist_ok=True)
 OUT = Path(a.out or tempfile.mkdtemp(prefix='kick-alignment-', dir=log_root)).resolve()
 OUT.mkdir(parents=True, exist_ok=True)
 original = [{'n': 1, 'x': -25.898, 'y': 0.881, 'z': 0.55, 'yaw': 0.443337}, {'n': 2, 'x': -14.435, 'y': 6.804, 'z': 0.55, 'yaw': 0.84285}, {'n': 3, 'x': -16.311, 'y': -8.3, 'z': 0.55, 'yaw': 1.16918}, {'n': 4, 'x': 5.382, 'y': 17.49, 'z': 0.55, 'yaw': 1.5471}, {'n': 5, 'x': 6.512, 'y': 0.549, 'z': 0.55, 'yaw': 0.230009}, {'n': 6, 'x': -1.331, 'y': -11.851, 'z': 0.55, 'yaw': 0.548772}, {'n': 7, 'x': 17.154, 'y': 0.58, 'z': 0.55, 'yaw': 2.4958}]
+original[3]['z'] = 0.67 if a.robot == 'T1' else 0.55
 bootstrap = Path(__file__).with_name('kick_alignment_server.py')
 
 def port():
@@ -140,7 +142,7 @@ def run(name, rep, mode):
         threading.Thread(target=drain, daemon=True).start()
         for n in range(1, 8):
             pose = scene(name, rep)['poses'][n - 1]
-            spawn([BINARIES[mode], '--port', ap, '--team', 'AlignmentTest', '--team-id', a.team_id, '--num', n, '--beam-x', pose['x'], '--beam-y', pose['y'], '--beam-theta', math.degrees(pose['yaw']), '--assets-dir', REPO, '--monitor', '--monitor-port', udp.getsockname()[1], '--sim-speed', 2, '--trace', d / f'{n}.csv', '--max-frames', 3000] + (['--test-stand'] if n != 4 else []), str(n))
+            spawn([BINARIES[mode], '--port', ap, '--team', 'AlignmentTest', '--team-id', a.team_id, '--num', n, '--robot', a.robot if n == 4 else 'K1', '--beam-x', pose['x'], '--beam-y', pose['y'], '--beam-theta', math.degrees(pose['yaw']), '--assets-dir', REPO, '--monitor', '--monitor-port', udp.getsockname()[1], '--sim-speed', 2, '--trace', d / f'{n}.csv', '--max-frames', 3000] + (['--test-stand'] if n != 4 else []), str(n))
             if n == 1:
                 wait_for(lambda: 1 in latest)
         wait_for(lambda: len(latest) == 7 and min((p['sequence'] for p in latest.values())) >= 150)
@@ -198,7 +200,7 @@ def run(name, rep, mode):
         report['success'] = False
     (d / 'report.json').write_text(json.dumps(report, indent=2))
     return report
-(OUT / 'manifest.json').write_text(json.dumps(dict(binaries={k: dict(path=str(v), sha256=hashlib.sha256(v.read_bytes()).hexdigest()) for k, v in BINARIES.items() if v}, server=str(SERVER), seconds=a.seconds, repeats=a.repeats, cases=a.cases, modes=a.modes, note='Matched stationary fixtures, not joint-state replays; only actor 4 moves. Before timing, server holds its root pose and points head at ball. Native visual ball model must be fresh.'), indent=2))
+(OUT / 'manifest.json').write_text(json.dumps(dict(binaries={k: dict(path=str(v), sha256=hashlib.sha256(v.read_bytes()).hexdigest()) for k, v in BINARIES.items() if v}, server=str(SERVER), robot=a.robot, seconds=a.seconds, repeats=a.repeats, cases=a.cases, modes=a.modes, note='Matched stationary fixtures, not joint-state replays; only actor 4 moves. Before timing, server holds its root pose and points head at ball. Native visual ball model must be fresh.'), indent=2))
 reports = []
 for rep in range(a.repeats):
     for name in a.cases.split(','):

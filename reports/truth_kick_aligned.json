@@ -1,0 +1,480 @@
+{
+  "behavior_commit": "ce44c9d16",
+  "expected_truth_command": [
+    1,
+    0,
+    0,
+    3.4
+  ],
+  "command_columns": [
+    "kick_strong",
+    "kick_inaccurate",
+    "kick_allow_deviation",
+    "kick_target_speed"
+  ],
+  "checks": {
+    "K1_matrix": {
+      "artifact": "logs/truth_kick_aligned_20261017/K1_matrix",
+      "command_checks": [
+        {
+          "trace": "4.csv",
+          "samples": 1173,
+          "commands": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              3.4
+            ]
+          ],
+          "models": [
+            "K1_kick_inner.onnx"
+          ]
+        }
+      ],
+      "scenarios": [
+        {
+          "kind": "normal",
+          "frames": 59,
+          "modes": [
+            "PlayOn"
+          ],
+          "states": [],
+          "forbidden": [],
+          "first_kick_delay": 0.42,
+          "kick_samples": 12
+        },
+        {
+          "kind": "kickin",
+          "frames": 57,
+          "modes": [
+            "KickIn_Left",
+            "KickIn_Right"
+          ],
+          "states": [
+            "GoToBallWaitAndKick:pass",
+            "PassToTeammate:kick"
+          ],
+          "forbidden": [],
+          "first_kick_delay": 0.44,
+          "kick_samples": 9
+        },
+        {
+          "kind": "corner",
+          "frames": 57,
+          "modes": [
+            "PlayOn",
+            "corner_kick_left"
+          ],
+          "states": [
+            "GoToBallWaitAndKick:pass",
+            "PassToTeammate:kick"
+          ],
+          "forbidden": [],
+          "first_kick_delay": 0.47,
+          "kick_samples": 15
+        },
+        {
+          "kind": "free",
+          "frames": 56,
+          "modes": [
+            "PlayOn",
+            "free_kick_left"
+          ],
+          "states": [
+            "GoToBallWaitAndKick:pass",
+            "PassToTeammate:kick"
+          ],
+          "forbidden": [],
+          "first_kick_delay": 0.46,
+          "kick_samples": 11
+        },
+        {
+          "kind": "direct",
+          "frames": 57,
+          "modes": [
+            "PlayOn",
+            "direct_free_kick_left"
+          ],
+          "states": [
+            "GoToBallWaitAndKick:kick"
+          ],
+          "forbidden": [],
+          "first_kick_delay": 5.25,
+          "kick_samples": 13
+        },
+        {
+          "kind": "goal",
+          "frames": 58,
+          "modes": [
+            "PlayOn",
+            "goal_kick_left"
+          ],
+          "states": [
+            "GoToBallWaitAndKick:pass",
+            "PassToTeammate:kick"
+          ],
+          "forbidden": [],
+          "first_kick_delay": 0.44,
+          "kick_samples": 16
+        },
+        {
+          "kind": "penalty",
+          "frames": 67,
+          "modes": [
+            "penalty_kick_left"
+          ],
+          "states": [],
+          "forbidden": [],
+          "first_kick_delay": 0.4,
+          "kick_samples": 30
+        },
+        {
+          "kind": "ownkickoff",
+          "frames": 75,
+          "modes": [
+            "KickOff_Left",
+            "PlayOn"
+          ],
+          "states": [
+            "DirectKickOff:kick"
+          ],
+          "forbidden": [],
+          "first_kick_delay": 1.68,
+          "kick_samples": 20
+        },
+        {
+          "kind": "otherkickoff",
+          "frames": 58,
+          "modes": [
+            "KickOff_Right"
+          ],
+          "states": [
+            "DirectKickOff:kick"
+          ],
+          "forbidden": [],
+          "first_kick_delay": null,
+          "kick_samples": 0
+        },
+        {
+          "kind": "shootout",
+          "frames": 57,
+          "modes": [
+            "goal_kick_right",
+            "penalty_shoot_left"
+          ],
+          "states": [],
+          "forbidden": [],
+          "first_kick_delay": 0.5,
+          "kick_samples": 10
+        }
+      ]
+    },
+    "K1_shootout": {
+      "artifact": "logs/truth_kick_aligned_20261017/K1_shootout",
+      "command_checks": [
+        {
+          "trace": "4.csv",
+          "samples": 89,
+          "commands": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              3.4
+            ]
+          ],
+          "models": [
+            "K1_kick_inner.onnx"
+          ]
+        }
+      ],
+      "scenarios": [
+        {
+          "kind": "shootout",
+          "frames": 100,
+          "modes": [
+            "goal_kick_right",
+            "penalty_shoot_left"
+          ],
+          "states": [
+            "PenaltyStrikerGoToBallAndKick:done",
+            "PenaltyStrikerGoToBallAndKick:goToBallAndKick",
+            "PenaltyTaker:goToBallAndKickRight"
+          ],
+          "forbidden": [],
+          "first_kick_delay": 0.4,
+          "kick_samples": 15
+        }
+      ]
+    },
+    "T1_serial_stress": {
+      "artifact": "logs/truth_kick_aligned_20261017/T1_serial_stress",
+      "command_checks": [
+        {
+          "trace": "4.csv",
+          "samples": 423,
+          "commands": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              3.4
+            ]
+          ],
+          "models": [
+            "T1_kick_inner.onnx"
+          ]
+        }
+      ],
+      "scenarios": [
+        {
+          "kind": "normal",
+          "frames": 58,
+          "modes": [
+            "PlayOn"
+          ],
+          "states": [],
+          "forbidden": [],
+          "first_kick_delay": 0.46,
+          "kick_samples": 19
+        },
+        {
+          "kind": "kickin",
+          "frames": 59,
+          "modes": [
+            "KickIn_Left",
+            "PlayOn"
+          ],
+          "states": [
+            "GoToBallWaitAndKick:pass",
+            "PassToTeammate:kick"
+          ],
+          "forbidden": [],
+          "first_kick_delay": 0.46,
+          "kick_samples": 11
+        },
+        {
+          "kind": "corner",
+          "frames": 56,
+          "modes": [
+            "PlayOn",
+            "corner_kick_left"
+          ],
+          "states": [
+            "GoToBallWaitAndKick:pass",
+            "PassToTeammate:kick"
+          ],
+          "forbidden": [],
+          "first_kick_delay": 0.47,
+          "kick_samples": 16
+        },
+        {
+          "kind": "free",
+          "frames": 56,
+          "modes": [
+            "PlayOn",
+            "free_kick_left"
+          ],
+          "states": [
+            "GoToBallWaitAndKick:pass",
+            "PassToTeammate:kick"
+          ],
+          "forbidden": [],
+          "first_kick_delay": 0.48,
+          "kick_samples": 13
+        },
+        {
+          "kind": "direct",
+          "frames": 59,
+          "modes": [
+            "direct_free_kick_left"
+          ],
+          "states": [],
+          "forbidden": [],
+          "first_kick_delay": null,
+          "kick_samples": 0
+        },
+        {
+          "kind": "goal",
+          "frames": 57,
+          "modes": [
+            "goal_kick_left"
+          ],
+          "states": [],
+          "forbidden": [],
+          "first_kick_delay": null,
+          "kick_samples": 0
+        },
+        {
+          "kind": "penalty",
+          "frames": 69,
+          "modes": [
+            "penalty_kick_left"
+          ],
+          "states": [],
+          "forbidden": [],
+          "first_kick_delay": null,
+          "kick_samples": 0
+        },
+        {
+          "kind": "ownkickoff",
+          "frames": 68,
+          "modes": [
+            "KickOff_Left",
+            "PlayOn"
+          ],
+          "states": [],
+          "forbidden": [],
+          "first_kick_delay": null,
+          "kick_samples": 0
+        },
+        {
+          "kind": "otherkickoff",
+          "frames": 58,
+          "modes": [
+            "KickOff_Right"
+          ],
+          "states": [],
+          "forbidden": [],
+          "first_kick_delay": null,
+          "kick_samples": 0
+        },
+        {
+          "kind": "shootout",
+          "frames": 54,
+          "modes": [
+            "goal_kick_right",
+            "penalty_shoot_left"
+          ],
+          "states": [
+            "PenaltyStrikerGoToBallAndKick:goToBallAndKick",
+            "PenaltyTaker:goToBallAndKickLeft"
+          ],
+          "forbidden": [],
+          "first_kick_delay": null,
+          "kick_samples": 0
+        }
+      ]
+    },
+    "T1_fresh": {
+      "artifact": "logs/truth_kick_aligned_20261017/T1_fresh",
+      "command_checks": [
+        {
+          "trace": "0.7_0_0-r0-direct/4.csv",
+          "samples": 71,
+          "commands": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              3.4
+            ]
+          ],
+          "models": [
+            "T1_kick_inner.onnx"
+          ]
+        },
+        {
+          "trace": "replay-r0-direct/4.csv",
+          "samples": 140,
+          "commands": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              3.4
+            ]
+          ],
+          "models": [
+            "T1_kick_inner.onnx"
+          ]
+        }
+      ],
+      "scenarios": [
+        {
+          "case": "0.7_0_0",
+          "repeat": 0,
+          "mode": "direct",
+          "t0": 14.180000000001405,
+          "first_policy": 0.32,
+          "launch": 1.14,
+          "falls": false,
+          "penalized": false,
+          "walkclose_s": 0.0,
+          "speed_120ms": 6.83,
+          "error_deg": 2.62,
+          "command_world_deg": -11.62,
+          "contact_parts": [
+            "r-0-4-Shank_Left_collision_2",
+            "r-0-4-left_foot_link_collision_3"
+          ],
+          "mode_at_launch": "PlayOn",
+          "falls_before_kick": false,
+          "success": true
+        },
+        {
+          "case": "replay",
+          "repeat": 0,
+          "mode": "direct",
+          "t0": 8.739999999999588,
+          "first_policy": 0.27,
+          "launch": 2.7,
+          "falls": false,
+          "penalized": false,
+          "walkclose_s": 0.0,
+          "speed_120ms": 5.628,
+          "error_deg": 2.8,
+          "command_world_deg": -87.79,
+          "contact_parts": [
+            "r-0-4-left_foot_link_collision_3"
+          ],
+          "mode_at_launch": "PlayOn",
+          "falls_before_kick": false,
+          "success": true
+        }
+      ]
+    },
+    "measured_control": {
+      "artifact": "logs/truth_kick_aligned_20261017/measured_control",
+      "command_checks": [
+        {
+          "trace": "4.csv",
+          "samples": 145,
+          "commands": [
+            [
+              1.0,
+              0.0,
+              1.0,
+              3.4
+            ]
+          ],
+          "models": [
+            "K1_kick_inner.onnx"
+          ]
+        }
+      ],
+      "scenarios": [
+        {
+          "kind": "ownkickoff",
+          "frames": 75,
+          "modes": [
+            "KickOff_Left",
+            "PlayOn"
+          ],
+          "states": [
+            "DirectKickOff:execute"
+          ],
+          "forbidden": [],
+          "first_kick_delay": 3.52,
+          "kick_samples": 26,
+          "scan_wait_samples": 21
+        }
+      ]
+    }
+  },
+  "limitations": [
+    "These are entry/command regression checks, not a repeat of the 48-trial accuracy study.",
+    "Sequential T1 teleport tests carried a get-up state into later scenarios; those later timings are excluded from claims. Two independent T1 starts validate normal and touchline approaches without falls."
+  ]
+}

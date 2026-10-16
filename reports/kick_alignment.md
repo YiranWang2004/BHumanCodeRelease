@@ -4,6 +4,9 @@
 `GoToBallWaitAndKick:notAtBall / WalkToPoint:walkClose`，不包括已取消的固定扫视等待。
 逐次结果见 [CSV](kick_alignment.csv)、[JSON](kick_alignment.json)。
 
+后续采用说明：用户确认后，truth 已统一采用本文 C 方案；以下结论和数据保留为修改前的实验记录，
+其中“默认未改变”描述的是实验完成时的状态。当前启动及模式优先级见仓库 README_7v7.zh-CN.md。
+
 ## 结论
 
 **Kick policy 确实可以自己接近、绕到球后并踢球，进入它之前不必先满足固定的
@@ -169,7 +172,7 @@ truth 仍使用原生视觉球估计，并不是把 server 球真值直接喂给
 
 ```bash
 cd /home/robotics/ZJUDancer/BHumanCodeRelease
-git worktree add --detach /tmp/bhuman-kick-study HEAD
+git worktree add --detach /tmp/bhuman-kick-study 8ccee6131
 cmake -S /tmp/bhuman-kick-study/Make/CMake -B /tmp/bhuman-kick-study/build_sim \
   -DBUILD_RCSS_SERVER=ON -DCMAKE_BUILD_TYPE=Release \
   -DRCSS_CXX_COMPILER="$PWD/.hsl-toolchain/bin/clang++"
