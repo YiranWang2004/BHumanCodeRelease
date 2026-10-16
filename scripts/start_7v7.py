@@ -24,6 +24,7 @@ def main():
     parser.add_argument('--team-id-a', type=int, default=81)
     parser.add_argument('--team-id-b', type=int, default=82)
     parser.add_argument('--localization', choices=['truth', 'measured'], default='truth')
+    parser.add_argument('--kick-mode', choices=['fast-max', 'native'], default='fast-max')
     parser.add_argument('--kickoff', choices=['none', 'left', 'right'], default='none')
     parser.add_argument('--sim-speed', type=float, default=1.)
     parser.add_argument('--duration', type=float, help='Optional wall-clock seconds for diagnostics.')
@@ -56,6 +57,7 @@ def main():
             '--num-players', str(args.players), '--field', 'fifa7vs7',
             '--robot', (args.robot_a or args.robot) if team == args.team_a else (args.robot_b or args.robot),
             '--localization', args.localization, '--sim-speed', str(args.sim_speed),
+            '--kick-mode', args.kick_mode,
             '--trace', str(args.log_dir / f'{team}_{number}.csv'),
         ], cwd=repo, stdout=log, stderr=subprocess.STDOUT)
         children.append(child)

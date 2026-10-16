@@ -31,6 +31,15 @@ CMake、Make；此无界面客户端不依赖 Qt、mold 或 ccache。
 
 ## 启动比赛
 
+当前 RCSS 客户端默认启用大场踢球实验 `--kick-mode fast-max`，K1/T1 均生效。
+每次运行踢球网络（包括传球和带球）时统一使用当前版本 policy：strong=1、
+overshoot=0、just-hit=1，目标球速取配置上限 3.4 m/s（网络输入经缩放为 0.34）。
+忽略请求中的短传距离，保留请求方向；这表示请求强力、快速触球，并不保证实际球速
+或最快触球时间，上层选球、走近球与对准过程仍照常执行。
+若要恢复原始 command 和新旧踢球网络选择，给 `run_player` 或 `scripts/start_7v7.py`
+添加 `--kick-mode native`。
+此覆盖仅编译到 RCSS 后端，实机和原 SimRobot 的 command 逻辑不变。
+
 终端一启动服务器：
 
 ```bash

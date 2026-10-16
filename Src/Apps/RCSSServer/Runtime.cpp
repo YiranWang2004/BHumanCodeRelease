@@ -46,6 +46,7 @@ Options arguments(int argc, char** argv)
                 << "  --num N --num-players N --role goal_keeper|striker\n"
                 << "  --robot K1|T1 (default K1) --field fifa7vs7\n"
                 << "  --localization truth|measured (default truth) --sim-speed FACTOR\n"
+                << "  --kick-mode fast-max|native (default fast-max)\n"
                 << "  --assets-dir PATH --beam-x X --beam-y Y --beam-theta DEG\n"
                 << "  --trace FILE --max-frames N (diagnostics)\n"
                 << "  --test-stand | --test-cmd VX,VY,WZ (native motion diagnostics, SI units)\n";
@@ -67,6 +68,7 @@ Options arguments(int argc, char** argv)
     else if(key == "--robot") options.robot = value;
     else if(key == "--field") options.field = value;
     else if(key == "--localization") options.localization = value;
+    else if(key == "--kick-mode") options.kickMode = value;
     else if(key == "--sim-speed") options.speed = numeric(value);
     else if(key == "--assets-dir") options.assets = value;
     else if(key == "--trace") options.trace = value;
@@ -88,6 +90,7 @@ Options arguments(int argc, char** argv)
   }
   if(options.robot != "K1" && options.robot != "T1") throw std::runtime_error("--robot must be K1 or T1");
   if(options.localization != "truth" && options.localization != "measured") throw std::runtime_error("--localization must be truth or measured");
+  if(options.kickMode != "fast-max" && options.kickMode != "native") throw std::runtime_error("--kick-mode must be fast-max or native");
   if(options.motionSubframes != 1 && options.motionSubframes != 10) throw std::runtime_error("--motion-subframes must be 1 or 10");
   if(options.field != "fifa7vs7") throw std::runtime_error("This 7v7 backend requires --field fifa7vs7");
   if(options.players < 1 || options.players > 7 || options.number < 1 || options.number > options.players || options.teamId < 1 || options.teamId > 99 || options.port < 1 || options.speed <= 0.) throw std::runtime_error("Invalid roster, port, team id or simulation speed");
@@ -145,6 +148,11 @@ std::string Runtime::action() const
   }
   return result.str();
 }
+}
+
+bool bhumanRCSSFastMaxKick()
+{
+  return rcss::Runtime::get().options.kickMode == "fast-max";
 }
 
 void bhumanRCSSPolicyInference(const char* model)

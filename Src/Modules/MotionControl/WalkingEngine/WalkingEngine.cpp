@@ -18,6 +18,7 @@ MAKE_MODULE(WalkingEngine);
 #ifdef BHUMAN_RCSS_SERVER
 // RCSS diagnostics: record the network that actually ran, without changing motion.
 extern void bhumanRCSSPolicyInference(const char* model);
+extern bool bhumanRCSSFastMaxKick();
 #endif
 
 WalkingEngine::WalkingEngine():
@@ -842,8 +843,14 @@ void WalkPhase::getNextTargetRequest(JointAngles& target)
     wasKicking = true;
     Angle directionOffset = 0_deg;
 
+    // The RCSS experiment uses the current policy's strong/just-hit commands
+    // at maximum configured velocity, including dribbles and short passes.
+    bool fastMaxKick = false;
+#ifdef BHUMAN_RCSS_SERVER
+    fastMaxKick = bhumanRCSSFastMaxKick();
+#endif
     // Ensure dribble uses the normal kick
-    const bool isOldKick = engine.theMotionRequest.kickType == KickInfo::rlKickDynamicOld && engine.oldBallNetworkParameters.active;
+    const bool isOldKick = !fastMaxKick && engine.theMotionRequest.kickType == KickInfo::rlKickDynamicOld && engine.oldBallNetworkParameters.active;
     const BallNetworkParameters& ballParams = isOldKick ? engine.oldBallNetworkParameters : engine.ballNetworkParameters;
     KickInfo::KickType kickType = engine.theMotionRequest.motion == MotionRequest::dribble && !isOldKick ? KickInfo::rlKickDynamic : engine.theMotionRequest.kickType;
 
@@ -903,11 +910,11 @@ void WalkPhase::getNextTargetRequest(JointAngles& target)
 
     // Special Feature Requests
     // 0 -> normal kick, 1 -> strong kick
-    *input++ = (engine.forceFastKick && !isOldKick) || kickType == KickInfo::rlKickStrong ? 1.f : 0.f; // Is strong kick?
+    *input++ = fastMaxKick || (engine.forceFastKick && !isOldKick) || kickType == KickInfo::rlKickStrong ? 1.f : 0.f; // Is strong kick?
     // 0 -> overshoot in range, 1 -> undershoot in range
     *input++ = 0.f;
     // 0 -> accurate, 1 -> not so accurate
-    *input++ = !isOldKick && (engine.forceFastKick || engine.theMotionRequest.alignPrecisely == KickPrecision::justHitTheBall) ? 1.f : 0.f;
+    *input++ = fastMaxKick || (!isOldKick && (engine.forceFastKick || engine.theMotionRequest.alignPrecisely == KickPrecision::justHitTheBall)) ? 1.f : 0.f;
 
     // Ball velocity (3D)
     Vector2f velocity = engine.theMotionRequest.ballEstimate.velocity;
@@ -924,7 +931,7 @@ void WalkPhase::getNextTargetRequest(JointAngles& target)
 
     // Ball range
     float targetBallVelocity = ballParams.kickVelocityRange.max;
-    if(kickType != KickInfo::rlKickStrong)
+    if(!fastMaxKick && kickType != KickInfo::rlKickStrong)
     {
       const float kickLengthPower = KickLengthConverter::kickLengthToPower(kickType, engine.theMotionRequest.kickLength, engine.theKickInfo, engine.theKickLengthPair);
       const float maxKickLength = std::max(1.f, engine.theKickInfo[kickType].range.min + (engine.theKickInfo[kickType].range.max - engine.theKickInfo[kickType].range.min) * kickLengthPower); // 0 range crashes
