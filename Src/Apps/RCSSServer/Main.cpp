@@ -146,7 +146,7 @@ int main(int argc, char** argv)
         robot = std::make_unique<Robot>(settings, options.team + std::to_string(options.number));
         robot->push_back(new RCSSConsole(settings, options.team + std::to_string(options.number), static_cast<Debug*>(robot->front())));
         robot->start(); started = true;
-        std::cout << "[RCSS] native B-Human " << options.robot << " model=" << options.robot << "BHuman " << options.team << " #" << options.number << " field=" << options.field << " localization=" << options.localization << " kickMode=" << (options.localization == "truth" ? "truth-strong-max-aligned" : options.kickMode) << " motionSubframes=" << options.motionSubframes << std::endl;
+        std::cout << "[RCSS] native B-Human " << options.robot << " model=" << options.robot << "BHuman " << options.team << " #" << options.number << " field=" << options.field << " localization=" << options.localization << " strategy=" << options.strategy << " kickMode=" << (options.localization == "truth" ? "truth-strong-max-aligned" : options.kickMode) << " motionSubframes=" << options.motionSubframes << std::endl;
       }
       {
         std::unique_lock<std::mutex> lock(runtime.mutex);

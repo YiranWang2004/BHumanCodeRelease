@@ -46,6 +46,7 @@ std::string monitorSnapshot(const Runtime& r)
       << ",\"server\":" << quoted(r.options.host + ":" + std::to_string(r.options.port))
       << ",\"team_id\":" << r.options.teamId << ",\"player\":" << r.options.number
       << ",\"robot\":" << quoted(r.options.robot) << ",\"localization\":" << quoted(r.options.localization)
+      << ",\"strategy\":" << quoted(r.options.strategy)
       << ",\"session\":" << quoted([] { static const std::string session = std::to_string(getpid()) + "-" + std::to_string(std::chrono::system_clock::now().time_since_epoch().count()); return session; }()) << ",\"sequence\":" << r.sequence
       << ",\"time\":" << r.frame.time << ",\"play_time\":" << r.frame.playTime
       << ",\"mode\":" << quoted(r.frame.mode) << ",\"left\":" << (r.left ? "true" : "false")

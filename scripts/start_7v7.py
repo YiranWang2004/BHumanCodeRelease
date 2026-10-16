@@ -24,6 +24,7 @@ def main():
     parser.add_argument('--team-id-a', type=int, default=81)
     parser.add_argument('--team-id-b', type=int, default=82)
     parser.add_argument('--localization', choices=['truth', 'measured'], default='truth')
+    parser.add_argument('--strategy', choices=['current', 'balanced', 'attacking'], default='current')
     parser.add_argument('--kick-mode', choices=['fast-max', 'native'], default='fast-max',
                         help='Measured localization only; truth always uses strong/max speed with pose constraints.')
     parser.add_argument('--kickoff', choices=['none', 'left', 'right'], default='none')
@@ -58,6 +59,7 @@ def main():
             '--num-players', str(args.players), '--field', 'fifa7vs7',
             '--robot', (args.robot_a or args.robot) if team == args.team_a else (args.robot_b or args.robot),
             '--localization', args.localization, '--sim-speed', str(args.sim_speed),
+            '--strategy', args.strategy,
             '--kick-mode', args.kick_mode,
             '--trace', str(args.log_dir / f'{team}_{number}.csv'),
         ], cwd=repo, stdout=log, stderr=subprocess.STDOUT)

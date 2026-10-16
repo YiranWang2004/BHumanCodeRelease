@@ -29,6 +29,13 @@ target_include_directories(rcss_team_message_test PRIVATE "${RCSS_SERVER_ROOT}")
 target_compile_definitions(rcss_team_message_test PRIVATE BHUMAN_RCSS_SERVER RCSS_ASSETS_DIR="${BHUMAN_PREFIX}")
 add_test(NAME rcss_team_message COMMAND rcss_team_message_test)
 
+add_executable(rcss_formation_test "${RCSS_SERVER_ROOT}/tests/FormationTest.cpp"
+    "${RCSS_SERVER_ROOT}/Runtime.cpp" "${RCSS_SERVER_ROOT}/Protocol.cpp")
+target_link_libraries(rcss_formation_test PRIVATE B-Human)
+target_include_directories(rcss_formation_test PRIVATE "${RCSS_SERVER_ROOT}")
+target_compile_definitions(rcss_formation_test PRIVATE BHUMAN_RCSS_SERVER RCSS_ASSETS_DIR="${BHUMAN_PREFIX}")
+add_test(NAME rcss_formation COMMAND rcss_formation_test)
+
 # Offline range experiment; consumes the same See messages as run_player.
 add_executable(rcss_decode_players "${RCSS_SERVER_ROOT}/Protocol.cpp"
     "${RCSS_SERVER_ROOT}/experiments/DecodePlayers.cpp")

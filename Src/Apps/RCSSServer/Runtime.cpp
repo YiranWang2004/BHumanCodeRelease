@@ -1,4 +1,5 @@
 #include "Runtime.h"
+#include "Tools/BehaviorControl/Strategy/Strategy.h"
 #include "Math/Rotation.h"
 #include <algorithm>
 #include <cmath>
@@ -46,6 +47,7 @@ Options arguments(int argc, char** argv)
                 << "  --num N --num-players N --role goal_keeper|striker\n"
                 << "  --robot K1|T1 (default K1) --field fifa7vs7\n"
                 << "  --localization truth|measured (default truth) --sim-speed FACTOR\n"
+                << "  --strategy current|balanced|attacking (default current)\n"
                 << "  --kick-mode fast-max|native (measured only; default fast-max)\n"
                 << "    truth always uses strong/max speed with allow_deviation=0\n"
                 << "  --assets-dir PATH --beam-x X --beam-y Y --beam-theta DEG\n"
@@ -73,6 +75,7 @@ Options arguments(int argc, char** argv)
     else if(key == "--robot") options.robot = value;
     else if(key == "--field") options.field = value;
     else if(key == "--localization") options.localization = value;
+    else if(key == "--strategy") options.strategy = value;
     else if(key == "--kick-mode") options.kickMode = value;
     else if(key == "--sim-speed") options.speed = numeric(value);
     else if(key == "--assets-dir") options.assets = value;
@@ -97,6 +100,7 @@ Options arguments(int argc, char** argv)
   }
   if(options.robot != "K1" && options.robot != "T1") throw std::runtime_error("--robot must be K1 or T1");
   if(options.localization != "truth" && options.localization != "measured") throw std::runtime_error("--localization must be truth or measured");
+  if(options.strategy != "current" && options.strategy != "balanced" && options.strategy != "attacking") throw std::runtime_error("--strategy must be current, balanced or attacking");
   if(options.kickMode != "fast-max" && options.kickMode != "native") throw std::runtime_error("--kick-mode must be fast-max or native");
   if(options.log && !options.trace.empty()) throw std::runtime_error("Use either --log or --trace, not both");
   if(options.monitorPort < 1 || options.monitorHost.empty()) throw std::runtime_error("Invalid monitor host or port");
@@ -162,6 +166,14 @@ std::string Runtime::action() const
 bool bhumanRCSSTruthMode()
 {
   return rcss::Runtime::get().options.localization == "truth";
+}
+
+Strategy::Type bhumanRCSSStrategy()
+{
+  const auto& strategy = rcss::Runtime::get().options.strategy;
+  if(strategy == "balanced") return Strategy::balanced7v7;
+  if(strategy == "attacking") return Strategy::attacking7v7;
+  return Strategy::none;
 }
 
 bool bhumanRCSSFastMaxKick()

@@ -24,7 +24,7 @@ cd /home/robotics/ZJUDancer/BHumanCodeRelease
 python3 -m pip install zstandard
 python3 scripts/setup_sim_toolchain.py
 scripts/build_sim.sh
-cmake --build build_sim --target rcss_protocol_test rcss_imu_test -j4
+cmake --build build_sim --target rcss_protocol_test rcss_imu_test rcss_team_message_test rcss_formation_test -j4
 ctest --test-dir build_sim --output-on-failure
 ```
 
@@ -53,6 +53,52 @@ for n in {1..7}; do ./build_sim/run_player --num "$n" --log & done
 
 T1 在上述命令中添加 `--robot T1`。诊断用 `--trace FILE` 仍可显式指定 CSV 路径，
 与 `--log` 互斥。下文的双队测试启动器仍显式通过 `--trace` 保存其测试日志。
+
+### 可选的动态 7v7 阵型
+
+默认 `--strategy current` 保持现有 `t231`（2-3-1）。新增两种可选策略，
+只改变常规比赛的阵型、基准站位及减员时位置优先级，使用今年的角色、动态跑位、
+持球者选择和队内投票算法；开球、界外球、角球、任意球、球门球及点球继续使用
+本分支现有的 7v7 定位球配置，定位球结束后恢复所选策略。
+
+| 参数 | 常规比赛阵型 | 转入进攻阵型 | 退回 t222 |
+| --- | --- | --- | --- |
+| `--strategy current` | 固定 t231 | 不切换 | 不切换 |
+| `--strategy balanced` | t222 ↔ t123 | 至少 6 名场上队员，球在 x ≥ +1 m 一侧持续 3 秒 | 不超过 4 名场上队员，或球在 x ≤ −1 m 一侧持续 3 秒 |
+| `--strategy attacking` | t222 ↔ t033 | 至少 5 名场上队员，球在 x ≥ +1 m 一侧持续 3 秒 | 不超过 4 名场上队员，或球在 x ≤ −1 m 一侧持续 3 秒 |
+
+人数不包含门将，依据原生行为模块维护的有效队员列表；x 为本队坐标，朝对方球门为正。
+条件成立后还需经过现有队内投票。只有 5 名场上队员时，balanced 不会从 t222 转入
+t123，但已经处于 t123 时也不会仅因人数降为 5 而退出。球在中线附近时保持已有阵型。
+
+```bash
+# 常规动态 2-2-2 ↔ 1-2-3；整队统一选择
+for n in {1..7}; do ./build_sim/run_player --num "$n" --strategy balanced & done
+# 更激进的 t222 ↔ t033
+for n in {1..7}; do ./build_sim/run_player --num "$n" --strategy attacking & done
+```
+
+K1/T1、truth/measured 均支持；T1 添加 `--robot T1`。双队测试启动器
+`scripts/start_7v7.py` 也支持同名参数，应用于它启动的两队。所有同队客户端须选同一种
+策略，混用时原生投票无法保证遵循某一套切换规则。监视数据新增 `strategy` 字段，
+现有 `tactic` 字段显示本帧实际采用的阵型，定位球期间可能仍显示 t231。
+
+新增三个阵型的场上基准点取自 Code Release 2025 默认 9×6 m 场地，按
+`x_new = x_old × 当前场长 / 9 m`、`y_new = y_old × 当前场宽 / 6 m` 映射。
+配置直接引用当前球门线和边线尺寸；原来的站位朝向由今年的角色算法自行计算。
+当前 55×36 m 场地对应以下基准点（米；实际分配可左右镜像，实际目标还会动态调整）：
+
+| 阵型 | 后卫 | 中场 | 前锋 |
+| --- | --- | --- | --- |
+| t222 | (−20.17, ±2.10) | (−11.00, ±6.30) | (+8.71, ±9.90) |
+| t123 | (−20.17, +2.10) | (−8.71, −2.10)、(0, +9.30) | (+8.71, 0)、(+17.42, ±12.00) |
+| t033 | (−7.15, +3.72) | (0, ±9.30) | (+8.71, −3.00)、(+17.42, ±12.00) |
+
+保留 2025 的 `t033` 名称以便对照；它实际仍有 1 名后卫、2 名中场、3 名前锋。
+t222/t123 门将基准点沿用当前配置；t033 前移至当前己方罚球点 (−20.18, 0)。
+门将继续执行今年的 `Goalkeeper`：常规比赛主要根据球和球门计算目标，通常不会直接
+走向该基准点，因此此次调整不能等同于恢复 2025 的 `attackingGoalkeeper` 行为。
+配置、原生状态机和独立 server 启动验证见[阵型验证记录](reports/formation_options.md)。
 
 ### 实时桌面监视器
 
@@ -169,10 +215,12 @@ TeamMessageChannel 的网络通路。TCP 连接到同一服务器并不自动转
 7v7 的队内消息定义放在 `Config/Locations/RCSS_fifa7vs7/teamMessage.def`，
 truth/measured、K1/T1 共用。绝对位置范围为每轴 ±32.768 m；机器人相对的球位置、
 行走目标和出球目标为每轴 ±131.072 m，覆盖整块 61 × 42 m 草坪及任意朝向下的跨场目标。
-相应增加编码位数，坐标量化步长约 8 mm；每包比原定义增加 2～3 字节。
+相应增加编码位数，坐标量化步长约 8 mm；坐标扩展本身增加 2～3 字节，
+当前新增阵型还使 proposedTactic、acceptedTactic 各多占 1 位，最终包长按字节向上取整。
 原版 `Config/Scenarios/Default/teamMessage.def` 不变。
 
-RCSS 客户端消息版本为 73，原版构建仍为 72；旧格式消息会被拒绝，避免按错误位宽解码。
+RCSS 客户端消息版本为 74，新增阵型使 tactic 枚举从 3 位增为 4 位；版本 73 的旧
+大场客户端和版本 72 的原始客户端均会被拒绝，避免按错误位宽解码。原版构建的版本号仍为 72。
 更新后需**重新编译并重启整队所有客户端**，不能混用更新前的进程。启动参数不变，
 server 无需为此修改。此修复解决队友坐标超出 ±12.8 m 后被截断、引发错误球位置分歧的问题；
 主罚角色仍使用原版选择算法，truth 模式下的等待策略见上文。

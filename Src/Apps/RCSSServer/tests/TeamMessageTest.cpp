@@ -1,4 +1,5 @@
 #include "Representations/BehaviorControl/BehaviorStatus.h"
+#include "Representations/BehaviorControl/StrategyStatus.h"
 #include "Representations/Modeling/BallModel.h"
 #include "Representations/Modeling/RobotPose.h"
 #include "Tools/Communication/CompressedTeamCommunicationStreams.h"
@@ -108,14 +109,30 @@ int main()
     std::cout << "Negative control: source " << pose.translation.transpose() << " decoded " << clipped.translation.transpose() << " error " << (clipped.translation - pose.translation).norm() << " mm\n";
     require((clipped.translation - Vector2f(-12800.f, -12800.f)).norm() < 1.f, "Original schema unexpectedly changed");
     require((clipped.translation - pose.translation).norm() > 9000.f, "Negative control did not reproduce the match error");
+    FOREACH_ENUM(Tactic::Type, tactic)
+    {
+      StrategyStatus sent;
+      sent.proposedTactic = tactic;
+      sent.acceptedTactic = tactic;
+      sent.proposedMirror = true;
+      sent.acceptedMirror = false;
+      sent.position = Tactic::Position::forwardC;
+      const auto decoded = roundTrip(sent, large.getTypeByName("StrategyStatus"));
+      require(decoded.proposedTactic == tactic && decoded.acceptedTactic == tactic, "Tactic enum clipped");
+      require(decoded.proposedMirror && !decoded.acceptedMirror && decoded.position == sent.position, "Tactic enum corrupted subsequent fields");
+    }
     BHumanMessage packet; packet.playerNumber = 4;
     std::vector<char> bytes(packet.sizeOfBHumanMessage()); packet.write(bytes.data());
     BHumanMessage received;
     require(received.read(bytes.data(), bytes.size()), "Current wire version rejected");
-    // Header byte combines the version and magic byte. Flipping its low bit
-    // changes RCSS version 73 into the old version 72.
-    bytes[0] ^= 1;
-    require(!received.read(bytes.data(), bytes.size()), "Incompatible old layout was accepted");
+    // Header byte combines the version and magic byte. Reject both the old
+    // large-field layout (73) and the original small-field layout (72).
+    for(const int oldVersion : {72, 73})
+    {
+      packet.write(bytes.data());
+      bytes[0] ^= BHUMAN_MESSAGE_STRUCT_VERSION ^ oldVersion;
+      require(!received.read(bytes.data(), bytes.size()), "Incompatible old layout was accepted");
+    }
     std::cout << "Large-field pose/ball/walk/kick codec, original negative control, schema selection and wire version passed; max pose error " << maxError << " mm\n";
     return 0;
   }

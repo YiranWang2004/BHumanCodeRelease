@@ -19,6 +19,7 @@ struct Options
 {
   std::string host = "127.0.0.1", team = "BHuman", field = "fifa7vs7", localization = "truth", role;
   std::string assets = RCSS_ASSETS_DIR, trace, robot = "K1", kickMode = "fast-max";
+  std::string strategy = "current";
   int port = 60000, teamId = 2, number = 1, players = 7, maxFrames = 0, motionSubframes = 10;
   std::string monitorHost = "127.0.0.1";
   int monitorPort = 10190;

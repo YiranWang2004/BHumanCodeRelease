@@ -12,13 +12,22 @@
 #include "Tools/BehaviorControl/Strategy/BehaviorBase.h"
 #include "Tools/Modeling/BallPhysics.h"
 
+#ifdef BHUMAN_RCSS_SERVER
+extern Strategy::Type bhumanRCSSStrategy();
+#endif
+
 MAKE_MODULE(StrategyBehaviorControl, StrategyBehaviorControl::getExtModuleInfo);
 
 StrategyBehaviorControl::StrategyBehaviorControl() :
   theBehavior(theBallSearchParticles, theBallSpecification, theBehaviorParameters,
               theExtendedGameState, theFieldBall, theFieldDimensions, theFieldInterceptBall,
               theFrameInfo, theGameState, theIndirectKick, theTeamBallModel, theWalkingEngineOutput)
-{}
+{
+#ifdef BHUMAN_RCSS_SERVER
+  if(const Strategy::Type selected = bhumanRCSSStrategy(); selected != Strategy::none)
+    strategy = selected;
+#endif
+}
 
 std::vector<ModuleBase::Info> StrategyBehaviorControl::getExtModuleInfo()
 {

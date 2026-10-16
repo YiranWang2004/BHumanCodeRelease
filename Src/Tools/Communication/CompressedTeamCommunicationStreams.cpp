@@ -650,7 +650,7 @@ void CompressedTeamCommunication::TypeRegistry::compile()
 
 void CompressedTeamCommunication::TypeRegistry::generateTCMPluginClass(const std::string& file, const RecordType* type)
 {
-  static_assert(BHUMAN_MESSAGE_STRUCT_VERSION == 72 || BHUMAN_MESSAGE_STRUCT_VERSION == 73, "This method is not adjusted for the current message version");
+  static_assert(BHUMAN_MESSAGE_STRUCT_VERSION == 72 || BHUMAN_MESSAGE_STRUCT_VERSION == 74, "This method is not adjusted for the current message version");
 
   tcmPluginGeneratedRecords.clear();
   tcmPluginGeneratedEnums.clear();

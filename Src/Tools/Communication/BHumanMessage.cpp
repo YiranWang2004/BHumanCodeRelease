@@ -24,7 +24,7 @@ inline T readVal(const void*& data)
 
 size_t BHumanMessage::sizeOfBHumanMessage() const
 {
-  static_assert(BHUMAN_MESSAGE_STRUCT_VERSION == 72 || BHUMAN_MESSAGE_STRUCT_VERSION == 73, "This method is not adjusted for the current message version");
+  static_assert(BHUMAN_MESSAGE_STRUCT_VERSION == 72 || BHUMAN_MESSAGE_STRUCT_VERSION == 74, "This method is not adjusted for the current message version");
 
   return sizeof(uint8_t) // version
          + sizeof(playerNumber)
@@ -36,7 +36,7 @@ size_t BHumanMessage::sizeOfBHumanMessage() const
 
 void BHumanMessage::write(void* data) const
 {
-  static_assert(BHUMAN_MESSAGE_STRUCT_VERSION == 72 || BHUMAN_MESSAGE_STRUCT_VERSION == 73, "This method is not adjusted for the current message version");
+  static_assert(BHUMAN_MESSAGE_STRUCT_VERSION == 72 || BHUMAN_MESSAGE_STRUCT_VERSION == 74, "This method is not adjusted for the current message version");
 
   [[maybe_unused]] const void* const begin = data; //just for length check
 
@@ -56,7 +56,7 @@ void BHumanMessage::write(void* data) const
 
 bool BHumanMessage::read(const void* data, size_t size)
 {
-  static_assert(BHUMAN_MESSAGE_STRUCT_VERSION == 72 || BHUMAN_MESSAGE_STRUCT_VERSION == 73, "This method is not adjusted for the current message version");
+  static_assert(BHUMAN_MESSAGE_STRUCT_VERSION == 72 || BHUMAN_MESSAGE_STRUCT_VERSION == 74, "This method is not adjusted for the current message version");
 
   compressedContainer.clear();
   if(size < sizeOfBHumanMessage())
