@@ -7,6 +7,7 @@
  */
 
 #include "SkillBehaviorControl.h"
+#include "Tools/BehaviorControl/RCSSBehavior.h"
 
 option((SkillBehaviorControl) GoToBallAndDribble,
        args((Angle) targetDirection,
@@ -18,7 +19,7 @@ option((SkillBehaviorControl) GoToBallAndDribble,
 {
   const Pose2f dribblePose(targetDirection, theFieldBall.positionRelative);
 
-  if(lookActiveWithBall)
+  if(lookActiveWithBall && !(RCSSBehavior::truthMode() && dribblePose.translation.norm() <= 1200.f))
     LookActive({.withBall = true,
                 .onlyOwnBall = true});
   else

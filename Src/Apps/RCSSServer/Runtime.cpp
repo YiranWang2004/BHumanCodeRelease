@@ -150,6 +150,11 @@ std::string Runtime::action() const
 }
 }
 
+bool bhumanRCSSTruthMode()
+{
+  return rcss::Runtime::get().options.localization == "truth";
+}
+
 bool bhumanRCSSFastMaxKick()
 {
   return rcss::Runtime::get().options.kickMode == "fast-max";

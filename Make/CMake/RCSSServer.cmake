@@ -1,5 +1,6 @@
 # RCSS diagnostics and simulation-only kick command override.
 target_compile_definitions(B-Human PRIVATE BHUMAN_RCSS_SERVER)
+target_compile_definitions(OptionsAndSkills PRIVATE BHUMAN_RCSS_SERVER)
 set(RCSS_SERVER_ROOT "${BHUMAN_PREFIX}/Src/Apps/RCSSServer")
 file(GLOB RCSS_SERVER_SOURCES CONFIGURE_DEPENDS "${RCSS_SERVER_ROOT}/*.cpp")
 add_executable(run_player ${RCSS_SERVER_SOURCES})

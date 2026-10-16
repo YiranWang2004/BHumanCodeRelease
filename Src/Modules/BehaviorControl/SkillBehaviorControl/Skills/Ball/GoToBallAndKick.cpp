@@ -8,6 +8,7 @@
 
 #include "SkillBehaviorControl.h"
 #include "Tools/BehaviorControl/WalkSpeedConversion.h"
+#include "Tools/BehaviorControl/RCSSBehavior.h"
 
 option((SkillBehaviorControl) GoToBallAndKick,
        args((Angle) targetDirection,
@@ -24,6 +25,8 @@ option((SkillBehaviorControl) GoToBallAndKick,
        vars((Angle)(0_deg) startRotation)) /**< The value of \c theOdometryData.rotation when the \c turnAfterKick state is entered. */
 {
   const Pose2f kickPose = Pose2f(targetDirection, theFieldBall.positionRelative).rotate(theKickInfo[kickType].rotationOffset).translate(theKickInfo[kickType].ballOffset);
+  // Also honor early ball focus when the caller explicitly requested LookActive.
+  const bool useLookActiveWithBall = lookActiveWithBall && !(RCSSBehavior::truthMode() && kickPose.translation.norm() <= 1200.f);
 
   ASSERT(reduceWalkSpeedType != ReduceWalkSpeedType::distanceBased);
   const Pose2f walkingSpeedRatio = WalkSpeedConversion::convertSpeedRatio(reduceWalkSpeedType, speed, Pose2f(1.f, 1.f, 1.f), theFrameInfo, theGameState, theFieldBall, theWalkingEngineOutput, true);
@@ -52,7 +55,7 @@ option((SkillBehaviorControl) GoToBallAndKick,
     {
       PublishMotion({.target = kickPose.translation});
       auto obstacleAvoidance = thePathPlanner.plan(theRobotPose * kickPose, speed, /*ignoreBall*/true);
-      if(lookActiveWithBall)
+      if(useLookActiveWithBall)
         LookActive({.withBall = true,
                     .onlyOwnBall = true});
       else
@@ -92,7 +95,7 @@ option((SkillBehaviorControl) GoToBallAndKick,
     {
       PublishMotion({.target = kickPose.translation});
       auto obstacleAvoidance = theLibWalk.calcObstacleAvoidance(kickPose, /* rough: */ true, /* disableObstacleAvoidance: */ false, /* toBall: */ true);
-      if(lookActiveWithBall)
+      if(useLookActiveWithBall)
         LookActive({.withBall = true,
                     .onlyOwnBall = true});
       else
@@ -132,7 +135,7 @@ option((SkillBehaviorControl) GoToBallAndKick,
     {
       PublishMotion({.target = kickPose.translation});
       auto obstacleAvoidance = theLibWalk.calcObstacleAvoidance(kickPose, /* rough: */ true, /* disableObstacleAvoidance: */ true, /* toBall: */ true);
-      if(lookActiveWithBall)
+      if(useLookActiveWithBall)
         LookActive({.withBall = true,
                     .onlyOwnBall = true});
       else
@@ -188,7 +191,7 @@ option((SkillBehaviorControl) GoToBallAndKick,
     {
       PublishMotion({.target = kickPose.translation});
       auto obstacleAvoidance = theLibWalk.calcObstacleAvoidance(kickPose, /* rough: */ true, /* disableObstacleAvoidance: */ true, /* toBall: */ true);
-      if(lookActiveWithBall)
+      if(useLookActiveWithBall)
         LookActive({.withBall = true,
                     .onlyOwnBall = true});
       else

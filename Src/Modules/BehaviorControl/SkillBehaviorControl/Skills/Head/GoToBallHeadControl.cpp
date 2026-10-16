@@ -7,6 +7,7 @@
  */
 
 #include "SkillBehaviorControl.h"
+#include "Tools/BehaviorControl/RCSSBehavior.h"
 
 option((SkillBehaviorControl) GoToBallHeadControl,
        args((float) distanceToTarget,
@@ -19,6 +20,8 @@ option((SkillBehaviorControl) GoToBallHeadControl,
             (float)(400.f) areaAroundBallRadiusLow, /**< If an obstacle is in the circle around the ball with this radius, the head control switches back to look active. */
             (float)(600.f) areaAroundBallRadiusHigh)) /**< If no obstacle is in the circle around the ball with this radius, the head looks at the kick target direction. */
 {
+  const float ballFocusDistanceLow = RCSSBehavior::truthMode() ? 1000.f : lookAtBallDistanceLow;
+  const float ballFocusDistanceHigh = RCSSBehavior::truthMode() ? 1200.f : lookAtBallDistanceHigh;
   const auto shouldLookAtKickTarget = [&](bool didLookAtKickTarget) -> bool
   {
     // Do not do this if the calling option does not allow it.
@@ -48,7 +51,7 @@ option((SkillBehaviorControl) GoToBallHeadControl,
   {
     transition
     {
-      if(distanceToTarget < lookAtBallDistanceLow)
+      if(distanceToTarget < ballFocusDistanceLow)
         goto lookAtBall;
       else if(shouldLookAtKickTarget(false))
         goto lookAtKickTarget;
@@ -64,7 +67,7 @@ option((SkillBehaviorControl) GoToBallHeadControl,
   {
     transition
     {
-      if(distanceToTarget < lookAtBallDistanceLow)
+      if(distanceToTarget < ballFocusDistanceLow)
         goto lookAtBall;
       else if(!shouldLookAtKickTarget(true))
         goto lookActive;
@@ -80,7 +83,7 @@ option((SkillBehaviorControl) GoToBallHeadControl,
   {
     transition
     {
-      if(distanceToTarget > lookAtBallDistanceHigh)
+      if(distanceToTarget > ballFocusDistanceHigh)
       {
         if(shouldLookAtKickTarget(false))
           goto lookAtKickTarget;
