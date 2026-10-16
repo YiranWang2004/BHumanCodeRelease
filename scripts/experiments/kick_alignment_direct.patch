@@ -1,0 +1,15 @@
+--- a/Src/Modules/BehaviorControl/SkillBehaviorControl/Skills/Ball/GoToBallWaitAndKick.cpp
++++ b/Src/Modules/BehaviorControl/SkillBehaviorControl/Skills/Ball/GoToBallWaitAndKick.cpp
+@@ -30,6 +30,12 @@
+   {
+     transition
+     {
++      if(RCSSBehavior::truthMode())
++      {
++        if(theSkillRequest.passTarget != -1)
++          goto pass;
++        goto kick;
++      }
+       const Pose2f targetPose = calculateWaitingPose();
+       if(targetPose.translation.squaredNorm() < sqr(kickDistanceThreshold) &&
+          std::abs(targetPose.rotation) < kickAngleThreshold &&

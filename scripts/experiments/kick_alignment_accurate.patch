@@ -1,0 +1,11 @@
+--- a/Src/Modules/MotionControl/WalkingEngine/WalkingEngine.cpp
++++ b/Src/Modules/MotionControl/WalkingEngine/WalkingEngine.cpp
+@@ -914,7 +914,7 @@
+     // 0 -> overshoot in range, 1 -> undershoot in range
+     *input++ = 0.f;
+     // 0 -> accurate, 1 -> not so accurate
+-    *input++ = fastMaxKick || (!isOldKick && (engine.forceFastKick || engine.theMotionRequest.alignPrecisely == KickPrecision::justHitTheBall)) ? 1.f : 0.f;
++    *input++ = 0.f; // Experimental accurate-pose command; strong/max-speed unchanged.
+ 
+     // Ball velocity (3D)
+     Vector2f velocity = engine.theMotionRequest.ballEstimate.velocity;
