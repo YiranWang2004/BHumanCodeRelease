@@ -54,6 +54,39 @@ for n in {1..7}; do ./build_sim/run_player --num "$n" --log & done
 T1 在上述命令中添加 `--robot T1`。诊断用 `--trace FILE` 仍可显式指定 CSV 路径，
 与 `--log` 互斥。下文的双队测试启动器仍显式通过 `--trace` 保存其测试日志。
 
+### 实时桌面监视器
+
+首次编译需要系统 SFML 2.5、JsonCpp 开发库和中文字体（Ubuntu：
+`sudo apt install build-essential cmake libsfml-dev libjsoncpp-dev fonts-noto-cjk`）。
+客户端本身不新增这些界面依赖；桌面程序单独编译：
+
+```bash
+cd /home/robotics/ZJUDancer/BHumanCodeRelease
+scripts/build_monitor.sh
+scripts/start_monitor.sh
+```
+
+服务器照常启动，另一个终端启动需要监视的队员：
+
+```bash
+for n in {1..7}; do ./build_sim/run_player --num "$n" --monitor & done
+```
+
+T1 添加 `--robot T1`。默认发送到本机 UDP `10190`；不加 `--monitor` 不发送。
+`--monitor` 与 `--log` 独立，仅打开监视器不会保存日志。
+
+远程查看时，在监视电脑运行 `scripts/start_monitor.sh --port 10190`，
+在比赛电脑将上面的客户端命令添加 `--monitor-host <监视电脑IP> --monitor-port 10190`。
+监视器默认监听 `0.0.0.0`，也可用 `--listen` 指定本机地址。UDP `10190` 是新增的
+遥测端口，与服务器裁判接口的 TCP `60001` 不同。
+
+界面包含 7 人总览、实际配置场地、选中机器人的完整活动行为树、角色/行为/网络切换时间线。
+点击机器人卡片或球场机器人，或按 `1`–`7` 选人；`Tab` 切换已发现球队；在行为树或
+时间线区域滚轮查看，长文本悬停展开。详细字段和状态语义见
+[监视器说明](tools/monitor/README.zh-CN.md)。第一版仅实时查看，不提供离线回放。
+
+### 大场踢球与 truth 行为
+
 当前 RCSS 客户端默认启用大场踢球实验 `--kick-mode fast-max`，K1/T1 均生效。
 每次运行踢球网络（包括传球和带球）时统一使用当前版本 policy：strong=1、
 overshoot=0、just-hit=1，目标球速取配置上限 3.4 m/s（网络输入经缩放为 0.34）。
@@ -167,7 +200,9 @@ python3 scripts/start_7v7.py --robot-a T1 --robot-b K1 --kickoff left
 
 踢球模型的观测、推理与切换条件由原版 WalkingEngine 执行。新增推理记录回调仅在
 `BUILD_RCSS_SERVER=ON` 构建中启用，不改模型输入输出。CSV 的 `policy`、
-`kick_inferences` 表示实际调用了哪些模型；`tactic`、`set_play` 记录原生策略选择。
+`walk_inferences`、`kick_inferences` 记录最近实际调用的模型和 Walk/Kick 累计推理数；
+`policy` 现在也能记录 GetUp 网络，其推理不计入 `kick_inferences`。
+`tactic`、`set_play` 记录原生策略选择。
 原版 `MotionInfo::isKicking()` 固定返回 false，不能用它判断踢球模型是否执行。
 
 ## 比赛状态、定位与物理边界
