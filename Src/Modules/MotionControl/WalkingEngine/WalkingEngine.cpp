@@ -15,6 +15,11 @@
 
 MAKE_MODULE(WalkingEngine);
 
+#ifdef BHUMAN_RCSS_SERVER
+// RCSS diagnostics: record the network that actually ran, without changing motion.
+extern void bhumanRCSSPolicyInference(const char* model);
+#endif
+
 WalkingEngine::WalkingEngine():
   walkPolicy(&Global::getAsmjitRuntime()),
   kickPolicy(&Global::getAsmjitRuntime())
@@ -820,6 +825,9 @@ void WalkPhase::getNextTargetRequest(JointAngles& target)
     // Run network.
     STOPWATCH("module:WalkingEngine:apply")
       engine.walkPolicy.apply();
+#ifdef BHUMAN_RCSS_SERVER
+    bhumanRCSSPolicyInference("K1_walk.onnx");
+#endif
 
     // Get next request
     const float* output = engine.walkPolicy.output(0).data();
@@ -932,6 +940,9 @@ void WalkPhase::getNextTargetRequest(JointAngles& target)
     // Run network.
     STOPWATCH("module:WalkingEngine:apply")
       policy.apply();
+#ifdef BHUMAN_RCSS_SERVER
+    bhumanRCSSPolicyInference(isOldKick ? "K1_kick_inner_soft.onnx" : "K1_kick_inner.onnx");
+#endif
 
     // Get next request
     const float* output = policy.output(0).data();

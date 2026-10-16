@@ -23,6 +23,7 @@ GTAGS
 tags
 Thumbs.db
 /Build
+/build_sim
 /Config/Images
 /Config/NeuralNets/CoreMLCache
 /Config/Scenes/Includes/connect.con
@@ -42,3 +43,5 @@ Thumbs.db
 /Util/Buildchain/macOS/include
 /Util/Buildchain/macOS/lib
 /Util/onnxruntime/lib
+
+/.rcss-toolchain/

@@ -25,6 +25,7 @@ STREAMABLE_WITH_BASE(OwnKickOff, KickOff,
   {,
     ownKickOff,
     ownKickOff11v11,
+    ownKickOff7v7,
   });
 
   static SetPlay::Type toSetPlay(Type type)
@@ -39,6 +40,7 @@ STREAMABLE_WITH_BASE(OpponentKickOff, KickOff,
   {,
     opponentKickOff,
     opponentKickOff11v11,
+    opponentKickOff7v7,
   });
 
   static SetPlay::Type toSetPlay(Type type)

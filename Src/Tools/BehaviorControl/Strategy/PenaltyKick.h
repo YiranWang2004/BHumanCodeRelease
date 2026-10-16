@@ -25,6 +25,7 @@ STREAMABLE_WITH_BASE(OwnPenaltyKick, PenaltyKick,
   {,
     ownPenaltyKick,
     ownPenaltyKick11v11,
+    ownPenaltyKick7v7,
   });
 
   static SetPlay::Type toSetPlay(Type type)
@@ -39,6 +40,7 @@ STREAMABLE_WITH_BASE(OpponentPenaltyKick, PenaltyKick,
   {,
     opponentPenaltyKick,
     opponentPenaltyKick11v11,
+    opponentPenaltyKick7v7,
   });
 
   static SetPlay::Type toSetPlay(Type type)

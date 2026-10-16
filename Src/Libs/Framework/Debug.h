@@ -98,4 +98,5 @@ protected:
   friend class ModuleContainer; // To add receivers and senders
   friend class LocalConsole; // To add receiver and sender in simulation
   friend class PythonConsole; // To add receiver and sender in Python controller
+  friend class RCSSConsole; // To attach the headless RCSS debug sink
 };

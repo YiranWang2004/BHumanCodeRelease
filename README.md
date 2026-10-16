@@ -1,3 +1,5 @@
+> **rcssservermj 7v7 分支：** 中文编译、启动和模型说明见 [README_7v7.zh-CN.md](README_7v7.zh-CN.md)。
+
 # B-Human Code Release
 
 This is the official 2026 B-Human code release. Documentation can be found [here](https://docs.b-human.de/coderelease2026/).

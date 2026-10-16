@@ -24,6 +24,11 @@
 
 cmake_minimum_required(VERSION 3.17)
 
+option(BUILD_RCSS_SERVER "Build the headless rcssservermj 7v7 K1 client" OFF)
+if(BUILD_RCSS_SERVER)
+  set(MINIMAL_PROJECT ON)
+endif()
+
 # Export CMAKE_EXPORT_COMPILE_COMMANDS to build the compile_commands.
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
@@ -31,7 +36,9 @@ if(BUILD_BOOSTER)
   set(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_SOURCE_DIR}/../CMake/BoosterToolchain.cmake")
 endif()
 
-if(CMAKE_HOST_UNIX)
+if(BUILD_RCSS_SERVER AND DEFINED RCSS_CXX_COMPILER)
+  set(CMAKE_CXX_COMPILER "${RCSS_CXX_COMPILER}")
+elseif(CMAKE_HOST_UNIX)
   set(CMAKE_CXX_COMPILER clang++)
 endif()
 
@@ -108,7 +115,7 @@ if(MACOS)
   set(CMAKE_SKIP_RPATH TRUE)
   set(BUILD_BOOSTER ON)
   set(CMAKE_XCODE_ATTRIBUTE_CC "${CMAKE_CURRENT_SOURCE_DIR}/../../Util/Buildchain/macOS/bin/compile")
-elseif(LINUX)
+elseif(LINUX AND NOT BUILD_RCSS_SERVER)
   set(CMAKE_CXX_COMPILER_LAUNCHER env CCACHE_CPP2=yes CCACHE_SLOPPINESS=pch_defines,time_macros "ccache")
 endif()
 
@@ -167,7 +174,7 @@ else()
     if(NOT ARM)
       add_compile_options(-march=native)
     endif()
-    if(NOT MACOS)
+    if(NOT MACOS AND NOT BUILD_RCSS_SERVER)
       add_link_options(-fuse-ld=mold)
     endif()
   endif()
@@ -451,8 +458,12 @@ include("../CMake/Framework.cmake")
 include("../CMake/OptionsAndSkills.cmake")
 include("../CMake/B-Human.cmake")
 
-if(BUILD_DESKTOP)
+if(BUILD_DESKTOP AND NOT BUILD_RCSS_SERVER)
   include("../CMake/Python.cmake")
+endif()
+
+if(BUILD_RCSS_SERVER)
+  include("../CMake/RCSSServer.cmake")
 endif()
 
 if(MINIMAL_PROJECT)
