@@ -69,58 +69,6 @@ python3 scripts/start_7v7.py --localization measured
 两队必须不同。默认在同一台计算机运行所有客户端；跨计算机部署时还需配置原生
 TeamMessageChannel 的网络通路。TCP 连接到同一服务器并不自动转发这些 UDP 消息。
 
-## 一键启动 B-Human K1 对 Apollo 二进制
-
-默认每队 7 人，B-Human 使用 `K1BHuman` 和 Server 特权定位，Apollo 使用随包模型。
-以下命令会一并启动服务器和双方，不需要另外开终端：
-
-```bash
-cd /home/robotics/ZJUDancer/booster_mjlab/BHumanCodeRelease
-python3 scripts/start_bhuman_vs_apollo.py --start-server
-```
-
-已有服务器时省略 `--start-server`，只启动双方：
-
-```bash
-python3 scripts/start_bhuman_vs_apollo.py
-```
-
-等待显示 `7v7 ready` 后，在服务器窗口按 **K**（B-Human 左队开球）或 **J**（Apollo
-右队开球）。左右顺序以空服务器为前提；脚本先确认 B-Human 首人的传感器反馈，再启动
-Apollo。`Ctrl+C` 清理本次创建的双方进程组；只有加了 `--start-server` 才同时关闭服务器。
-已有服务器和其他进程不在清理范围内。
-
-脚本自动查找 `../../apollo/Apollo`、模型资产和
-`../../dancer-robocupdemo/third_party/apollo_runtime/` 中的隔离 glibc 加载器，启动前检查
-依赖和资产。不会替换系统 glibc；缺少隔离运行库时可先运行
-`../../dancer-robocupdemo/scripts/setup_apollo_runtime.sh`。
-自带服务器默认优先使用 `~/miniconda3/envs/robocup_sim/bin/python`；其他环境可通过
-`--server-python /路径/python` 或 `RCSS_PYTHON` 指定。启动器自身只需要 Python 标准库。
-
-```bash
-# 双方就绪后自动由 B-Human 开球
-python3 scripts/start_bhuman_vs_apollo.py --start-server --kickoff left
-
-# 无界面运行，30 秒后停止本次启动的全部进程
-python3 scripts/start_bhuman_vs_apollo.py --start-server --no-render --duration 30
-
-# 自定义端口、人数、Apollo 目录；默认 Apollo 二进制及隔离运行库路径可覆盖
-python3 scripts/start_bhuman_vs_apollo.py --players 3 --port 60000 --monitor-port 60001 \
-  --apollo-dir /home/robotics/ZJUDancer/apollo
-
-# B-Human 改为 T1，Apollo 保持自己的机器人
-python3 scripts/start_bhuman_vs_apollo.py --robot T1
-```
-
-日志和 B-Human 的逐帧 CSV 写入新的 `/tmp/bhuman-vs-apollo-日期时间/`。
-只有双方真实连接、B-Human 传感器帧继续推进后，脚本才报告就绪或执行自动开球。
-任何受管进程提前退出或连接超时都会报告对应日志并清理本次启动的其他进程。
-完整选项见 `python3 scripts/start_bhuman_vs_apollo.py --help`。
-启动器检查可运行 `python3 -m unittest discover -s scripts/tests -v`。
-
-已实测完整 7v7 的 14 人注册与自带服务器退出；另验证了客户端模式下 Ctrl+C
-只清理本次双方进程，已有服务器和无关进程继续运行。4 项启动器检查通过。
-
 ## 选择 T1 或混合机器人比赛
 
 默认仍为 K1。服务器启动命令相同，由客户端初始化消息选择独立的原生模型：
