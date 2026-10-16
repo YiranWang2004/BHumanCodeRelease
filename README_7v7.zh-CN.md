@@ -3,6 +3,10 @@
 分支 `feature/rcssservermj-7v7`，基于官方 Code Release 2026 `2e3374ba8`。
 服务器为 `/home/robotics/ZJUDancer/rcssservermj` 的同名分支。
 
+本分支现统一维护在 `/home/robotics/ZJUDancer/BHumanCodeRelease`，使用该仓库既有的
+个人 fork 远程；原 `test/HSLServer` 分支独立保留。旧目录
+`booster_mjlab/BHumanCodeRelease` 保留作迁移前副本，后续操作使用上述统一路径。
+
 客户端复用 B-Human 的行为、球估计、行走、踢球、起身及队内通信。新增 TCP 通信、
 传感器和视觉输入适配以及 `s7v7` 策略，常规比赛采用 `t231`：1 名守门员、2 名后卫、
 3 名中场、1 名前锋。开球、罚球、角球、球门球、边线球及防守定位球都有独立的
@@ -16,7 +20,7 @@
 ## 首次编译
 
 ```bash
-cd /home/robotics/ZJUDancer/booster_mjlab/BHumanCodeRelease
+cd /home/robotics/ZJUDancer/BHumanCodeRelease
 python3 -m pip install zstandard
 python3 scripts/setup_sim_toolchain.py
 scripts/build_sim.sh
@@ -26,8 +30,8 @@ ctest --test-dir build_sim --output-on-failure
 
 工具链安装脚本为 Linux x86_64 下载带 SHA256 校验的 Clang 18，存入被忽略的
 `.rcss-toolchain/`。已有 Clang ≥16 时可设置 `RCSS_CXX_COMPILER=/路径/clang++`，跳过
-安装脚本。本机已验证使用 `/home/robotics/ZJUDancer/BHumanCodeRelease/.hsl-toolchain/bin/clang++`
-编译；该路径仅是可复用的本地编译器，不依赖另一个仓库的客户端代码或配置。
+安装脚本。构建脚本在默认工具链不可用时会复用本仓库已有的
+`.hsl-toolchain/bin/clang++`；本机使用该编译器验证。
 
 构建脚本初始化官方锁定的 SimRobot、CompiledNN 子模块，并通过官方脚本获取
 ONNX Runtime 1.22.0 到 `Util/onnxruntime/lib/`，首次需联网。需要系统 C/C++ 开发库、
@@ -65,7 +69,7 @@ scripts/start_bhuman_7v7.sh --render
 终端二启动两队：
 
 ```bash
-cd /home/robotics/ZJUDancer/booster_mjlab/BHumanCodeRelease
+cd /home/robotics/ZJUDancer/BHumanCodeRelease
 python3 scripts/start_7v7.py
 ```
 

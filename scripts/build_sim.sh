@@ -4,6 +4,9 @@ REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$REPO_DIR"
 git submodule update --init --recursive Util/SimRobot Util/CompiledNN
 Make/Common/pullONNXRuntime
+if [[ -z "${RCSS_CXX_COMPILER:-}" && ! -x "$REPO_DIR/.rcss-toolchain/bin/clang++" && -x "$REPO_DIR/.hsl-toolchain/bin/clang++" ]]; then
+  RCSS_CXX_COMPILER="$REPO_DIR/.hsl-toolchain/bin/clang++"
+fi
 RCSS_CXX_COMPILER="${RCSS_CXX_COMPILER:-$REPO_DIR/.rcss-toolchain/bin/clang++}"
 if [[ ! -x "$RCSS_CXX_COMPILER" ]]; then
   echo 'Run python3 scripts/setup_sim_toolchain.py first, or set RCSS_CXX_COMPILER to Clang >= 16.' >&2

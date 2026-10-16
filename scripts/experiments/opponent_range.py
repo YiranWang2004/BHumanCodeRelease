@@ -21,7 +21,7 @@ import numpy as np
 def main():
     repo = Path(__file__).resolve().parents[2]
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--server-repo', type=Path, default=repo.parents[1] / 'rcssservermj')
+    parser.add_argument('--server-repo', type=Path, default=repo.parent / 'rcssservermj')
     parser.add_argument('--decoder', type=Path, default=repo / 'build_sim/rcss_decode_players')
     parser.add_argument('--output', type=Path, default=repo / 'reports/opponent_range')
     parser.add_argument('--samples', type=int, default=30)

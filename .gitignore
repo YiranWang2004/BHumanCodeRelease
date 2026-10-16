@@ -45,3 +45,4 @@ Thumbs.db
 /Util/onnxruntime/lib
 
 /.rcss-toolchain/
+/.hsl-toolchain/
