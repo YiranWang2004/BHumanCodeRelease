@@ -49,6 +49,7 @@ Options arguments(int argc, char** argv)
                 << "  --kick-mode fast-max|native (default fast-max)\n"
                 << "  --assets-dir PATH --beam-x X --beam-y Y --beam-theta DEG\n"
                 << "  --log (save CSV in repository logs/; default off)\n"
+                << "  --monitor [--monitor-host HOST] [--monitor-port PORT] (UDP; default off, 127.0.0.1:10190)\n"
                 << "  --trace FILE --max-frames N (diagnostics)\n"
                 << "  --test-stand | --test-cmd VX,VY,WZ (native motion diagnostics, SI units)\n";
       std::cout << "  --motion-subframes 1|10 (native Motion scheduling, default 10)\n";
@@ -56,6 +57,7 @@ Options arguments(int argc, char** argv)
     }
     if(key == "--test-stand") { options.debugStand = true; continue; }
     if(key == "--log") { options.log = true; continue; }
+    if(key == "--monitor") { options.monitor = true; continue; }
     if(i + 1 == argc) throw std::runtime_error("Missing value for " + key);
     const std::string value = argv[++i];
     const auto integer = [&]
@@ -74,6 +76,8 @@ Options arguments(int argc, char** argv)
     else if(key == "--sim-speed") options.speed = numeric(value);
     else if(key == "--assets-dir") options.assets = value;
     else if(key == "--trace") options.trace = value;
+    else if(key == "--monitor-host") options.monitorHost = value;
+    else if(key == "--monitor-port") options.monitorPort = integer();
     else if(key == "--max-frames") options.maxFrames = integer();
     else if(key == "--motion-subframes") options.motionSubframes = integer();
     else if(key == "--beam-x") { options.beamX = numeric(value); options.beamExplicit = true; }
@@ -94,6 +98,7 @@ Options arguments(int argc, char** argv)
   if(options.localization != "truth" && options.localization != "measured") throw std::runtime_error("--localization must be truth or measured");
   if(options.kickMode != "fast-max" && options.kickMode != "native") throw std::runtime_error("--kick-mode must be fast-max or native");
   if(options.log && !options.trace.empty()) throw std::runtime_error("Use either --log or --trace, not both");
+  if(options.monitorPort < 1 || options.monitorHost.empty()) throw std::runtime_error("Invalid monitor host or port");
   if(options.motionSubframes != 1 && options.motionSubframes != 10) throw std::runtime_error("--motion-subframes must be 1 or 10");
   if(options.field != "fifa7vs7") throw std::runtime_error("This 7v7 backend requires --field fifa7vs7");
   if(options.players < 1 || options.players > 7 || options.number < 1 || options.number > options.players || options.teamId < 1 || options.teamId > 99 || options.port < 1 || options.speed <= 0.) throw std::runtime_error("Invalid roster, port, team id or simulation speed");
@@ -168,6 +173,16 @@ void bhumanRCSSPolicyInference(const char* model)
   auto& runtime = rcss::Runtime::get();
   runtime.policy = model;
   runtime.policyTime = rcss::sensorTimestamp;
-  if(runtime.policy == "K1_walk.onnx" || runtime.policy == "T1_walk.onnx") ++runtime.walkInferences;
-  else ++runtime.kickInferences;
+  if(runtime.policy == "K1_walk.onnx" || runtime.policy == "T1_walk.onnx")
+  { runtime.policyKind = "walk"; ++runtime.walkInferences; }
+  else { runtime.policyKind = "kick"; ++runtime.kickInferences; }
+}
+
+void bhumanRCSSGetUpInference(const char* model)
+{
+  auto& runtime = rcss::Runtime::get();
+  runtime.policy = model;
+  runtime.policyKind = "getUp";
+  runtime.policyTime = rcss::sensorTimestamp;
+  ++runtime.getUpInferences;
 }

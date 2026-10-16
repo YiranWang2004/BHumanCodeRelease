@@ -1,6 +1,8 @@
 #include "Runtime.h"
 #include "Representations/BehaviorControl/StrategyStatus.h"
 #include "Representations/BehaviorControl/ActivationGraph.h"
+#include "Representations/BehaviorControl/SkillRequest.h"
+#include "Representations/Modeling/GlobalOpponentsModel.h"
 #include "Framework/Blackboard.h"
 #include "Framework/Configuration.h"
 #include "Tools/Framework/BHExecutionUnit.h"
@@ -85,11 +87,20 @@ class RCSSFrame : public BHExecutionUnit
     if(stage == 2)
     {
       r.behavior.clear();
+      r.behaviorGraph.clear();
+      r.opponents.clear();
+      if(r.options.monitor && blackboard.exists("FieldDimensions")) copy("FieldDimensions", r.fieldDimensions);
+      if(r.options.monitor && blackboard.exists("GlobalOpponentsModel"))
+        for(const auto& opponent : static_cast<const GlobalOpponentsModel&>(blackboard["GlobalOpponentsModel"]).opponents)
+          r.opponents.push_back(opponent.position);
+      if(blackboard.exists("SkillRequest"))
+        r.skill = TypeRegistry::getEnumName(static_cast<const SkillRequest&>(blackboard["SkillRequest"]).skill);
       if(blackboard.exists("ActivationGraph"))
         for(const auto& node : static_cast<const ActivationGraph&>(blackboard["ActivationGraph"]).graph)
         {
           if(!r.behavior.empty()) r.behavior += '|';
           r.behavior += node.option + ':' + node.state;
+          if(r.options.monitor) r.behaviorGraph.push_back({node.option, node.state, node.depth, node.optionTime, node.stateTime, node.arguments});
         }
       if(blackboard.exists("OdometryData")) r.cognitionOdometry = static_cast<const OdometryData&>(blackboard["OdometryData"]);
       copy("RobotPose", r.estimate);
@@ -99,6 +110,8 @@ class RCSSFrame : public BHExecutionUnit
         const auto& status = static_cast<const StrategyStatus&>(blackboard["StrategyStatus"]);
         r.tactic = TypeRegistry::getEnumName(status.acceptedTactic);
         r.setPlay = TypeRegistry::getEnumName(status.acceptedSetPlay);
+        r.role = TypeRegistry::getEnumName(status.role);
+        r.position = TypeRegistry::getEnumName(status.position);
       }
       if(blackboard.exists("GameControllerData"))
       {

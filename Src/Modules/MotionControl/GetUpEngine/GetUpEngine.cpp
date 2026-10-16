@@ -14,6 +14,10 @@
 
 MAKE_MODULE(GetUpEngine);
 
+#ifdef BHUMAN_RCSS_SERVER
+extern void bhumanRCSSGetUpInference(const char* model);
+#endif
+
 GetUpEngine::GetUpEngine() :
   policy(&Global::getAsmjitRuntime())
 {
@@ -225,6 +229,9 @@ void GetUpPhase::executePolicy(JointAngles& target)
     // Run network.
     STOPWATCH("module:GetUpEngine:apply")
       engine.policy.apply();
+#ifdef BHUMAN_RCSS_SERVER
+    bhumanRCSSGetUpInference(engine.policyName.c_str());
+#endif
 
     // Get next request
     const float* output = engine.policy.output(0).data();
@@ -272,6 +279,9 @@ void GetUpPhase::executePolicy(JointAngles& target)
     // Run network.
     STOPWATCH("module:GetUpEngineFast:apply")
       engine.policyFast.apply();
+#ifdef BHUMAN_RCSS_SERVER
+    bhumanRCSSGetUpInference(engine.policyNameFast.c_str());
+#endif
 
     // Get next request
     const float* output = engine.policyFast.output(0).data();

@@ -1,4 +1,5 @@
 #include "Runtime.h"
+#include "Monitor.h"
 #include "Framework/Robot.h"
 #include "Framework/Debug.h"
 #include "Platform/SystemCall.h"
@@ -68,6 +69,9 @@ int main(int argc, char** argv)
   {
     runtime.options = rcss::arguments(argc, argv);
     auto& options = runtime.options;
+    rcss::MonitorSender monitor(options.monitorHost, options.monitorPort, options.monitor);
+    if(options.monitor)
+      std::cout << "[RCSS] monitor=udp://" << options.monitorHost << ':' << options.monitorPort << std::endl;
     if(options.log)
     {
       const auto directory = std::filesystem::absolute(std::filesystem::path(RCSS_ASSETS_DIR) / "logs").lexically_normal();
@@ -161,6 +165,7 @@ int main(int argc, char** argv)
       }
       if(runtime.frame.mode != "BeforeKickOff" && runtime.frame.mode.rfind("Goal_", 0) != 0) beamed = false;
       const auto truth = runtime.truth();
+      monitor.update(runtime);
       if(trace)
         trace << runtime.frame.time << ',' << runtime.frame.mode << ',' << runtime.frame.penalized << ',' << runtime.frame.position[2] << ','
               << truth.translation.x() << ',' << truth.translation.y() << ',' << static_cast<float>(truth.rotation) << ','
@@ -176,7 +181,7 @@ int main(int argc, char** argv)
         std::cout << "[RCSS] t=" << runtime.frame.time << " pm=" << runtime.frame.mode << " h=" << runtime.frame.position[2]
                   << " pose=" << runtime.estimate.translation.transpose() << " motion=" << TypeRegistry::getEnumName(runtime.motion.motion)
                   << " phase=" << TypeRegistry::getEnumName(runtime.motionInfo.executedPhase)
-                  << " lastWalkKickPolicy=" << runtime.policy << " kickInferences=" << runtime.kickInferences
+                  << " lastPolicy=" << runtime.policy << " kickInferences=" << runtime.kickInferences
                   << " teammates=" << runtime.teammates << std::endl;
       connection.send(action + "(syn)");
       if(options.maxFrames && frames >= static_cast<unsigned>(options.maxFrames)) break;
