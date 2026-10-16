@@ -46,7 +46,8 @@ Options arguments(int argc, char** argv)
                 << "  --num N --num-players N --role goal_keeper|striker\n"
                 << "  --robot K1|T1 (default K1) --field fifa7vs7\n"
                 << "  --localization truth|measured (default truth) --sim-speed FACTOR\n"
-                << "  --kick-mode fast-max|native (default fast-max)\n"
+                << "  --kick-mode fast-max|native (measured only; default fast-max)\n"
+                << "    truth always uses strong/max speed with allow_deviation=0\n"
                 << "  --assets-dir PATH --beam-x X --beam-y Y --beam-theta DEG\n"
                 << "  --log (save CSV in repository logs/; default off)\n"
                 << "  --monitor [--monitor-host HOST] [--monitor-port PORT] (UDP; default off, 127.0.0.1:10190)\n"
@@ -176,6 +177,15 @@ void bhumanRCSSPolicyInference(const char* model)
   if(runtime.policy == "K1_walk.onnx" || runtime.policy == "T1_walk.onnx")
   { runtime.policyKind = "walk"; ++runtime.walkInferences; }
   else { runtime.policyKind = "kick"; ++runtime.kickInferences; }
+}
+
+void bhumanRCSSKickCommand(float strong, float inaccurate, float allowDeviation, float targetSpeed)
+{
+  auto& runtime = rcss::Runtime::get();
+  runtime.kickStrong = strong;
+  runtime.kickInaccurate = inaccurate;
+  runtime.kickAllowDeviation = allowDeviation;
+  runtime.kickTargetSpeed = targetSpeed;
 }
 
 void bhumanRCSSGetUpInference(const char* model)

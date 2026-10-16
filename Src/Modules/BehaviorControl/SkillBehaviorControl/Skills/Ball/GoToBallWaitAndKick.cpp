@@ -30,6 +30,14 @@ option((SkillBehaviorControl) GoToBallWaitAndKick,
   {
     transition
     {
+      // Let the ball policy approach using the actual kick/pass direction,
+      // rather than first walking to a goal-facing waiting pose.
+      if(RCSSBehavior::truthMode())
+      {
+        if(theSkillRequest.passTarget != -1)
+          goto pass;
+        goto kick;
+      }
       const Pose2f targetPose = calculateWaitingPose();
       if(targetPose.translation.squaredNorm() < sqr(kickDistanceThreshold) &&
          std::abs(targetPose.rotation) < kickAngleThreshold &&
@@ -38,15 +46,7 @@ option((SkillBehaviorControl) GoToBallWaitAndKick,
         goto kick;
       }
       if(action_done)
-      {
-        if(RCSSBehavior::truthMode())
-        {
-          if(theSkillRequest.passTarget != -1)
-            goto pass;
-          goto kick;
-        }
         goto wait;
-      }
     }
     action
     {

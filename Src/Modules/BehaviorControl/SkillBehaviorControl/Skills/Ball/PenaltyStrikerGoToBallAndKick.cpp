@@ -23,13 +23,11 @@ option((SkillBehaviorControl) PenaltyStrikerGoToBallAndKick,
   {
     transition
     {
-      if(timeUntilPenaltyShootoutEnds <= minTimeForKick)
+      if(RCSSBehavior::truthMode() || timeUntilPenaltyShootoutEnds <= minTimeForKick)
         goto goToBallAndKick;
 
       if(kickPose.translation.squaredNorm() < sqr(prepareKickDistance))
       {
-        if(RCSSBehavior::truthMode())
-          goto goToBallAndKick;
         goto prepareKick;
       }
     }

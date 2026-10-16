@@ -72,6 +72,8 @@ struct Runtime
   FieldDimensions fieldDimensions;
   std::string skill = "none", policyKind = "none";
   unsigned walkInferences = 0, kickInferences = 0, policyTime = 0;
+  // Actual inputs from the most recent kick inference; speed is in m/s.
+  float kickStrong = 0.f, kickInaccurate = 0.f, kickAllowDeviation = 0.f, kickTargetSpeed = 0.f;
   unsigned getUpInferences = 0;
   unsigned teamSent = 0, teamReceived = 0, teamUnsynchronized = 0;
   void stop();

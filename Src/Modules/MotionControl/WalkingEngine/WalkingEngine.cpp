@@ -11,6 +11,7 @@
 #include "Tools/Motion/MotionUtilities.h"
 #include "Tools/Modeling/BallPhysics.h"
 #include "Tools/Motion/KickLengthConverter.h"
+#include "Tools/BehaviorControl/RCSSBehavior.h"
 #include <filesystem>
 
 MAKE_MODULE(WalkingEngine);
@@ -19,6 +20,7 @@ MAKE_MODULE(WalkingEngine);
 // RCSS diagnostics: record the network that actually ran, without changing motion.
 extern void bhumanRCSSPolicyInference(const char* model);
 extern bool bhumanRCSSFastMaxKick();
+extern void bhumanRCSSKickCommand(float strong, float inaccurate, float allowDeviation, float targetSpeed);
 #endif
 
 WalkingEngine::WalkingEngine():
@@ -843,14 +845,15 @@ void WalkPhase::getNextTargetRequest(JointAngles& target)
     wasKicking = true;
     Angle directionOffset = 0_deg;
 
-    // The RCSS experiment uses the current policy's strong/just-hit commands
-    // at maximum configured velocity, including dribbles and short passes.
-    bool fastMaxKick = false;
+    // Truth uses the current policy at strong/max speed with learned pose
+    // constraints, for every caller including dribbles and short passes.
+    const bool truthKick = RCSSBehavior::truthMode();
+    bool forceMaxKick = false;
 #ifdef BHUMAN_RCSS_SERVER
-    fastMaxKick = bhumanRCSSFastMaxKick();
+    forceMaxKick = truthKick || bhumanRCSSFastMaxKick();
 #endif
     // Ensure dribble uses the normal kick
-    const bool isOldKick = !fastMaxKick && engine.theMotionRequest.kickType == KickInfo::rlKickDynamicOld && engine.oldBallNetworkParameters.active;
+    const bool isOldKick = !forceMaxKick && engine.theMotionRequest.kickType == KickInfo::rlKickDynamicOld && engine.oldBallNetworkParameters.active;
     const BallNetworkParameters& ballParams = isOldKick ? engine.oldBallNetworkParameters : engine.ballNetworkParameters;
     KickInfo::KickType kickType = engine.theMotionRequest.motion == MotionRequest::dribble && !isOldKick ? KickInfo::rlKickDynamic : engine.theMotionRequest.kickType;
 
@@ -909,12 +912,14 @@ void WalkPhase::getNextTargetRequest(JointAngles& target)
     *input++ = rawFrequency;
 
     // Special Feature Requests
-    // 0 -> normal kick, 1 -> strong kick
-    *input++ = fastMaxKick || (engine.forceFastKick && !isOldKick) || kickType == KickInfo::rlKickStrong ? 1.f : 0.f; // Is strong kick?
-    // 0 -> overshoot in range, 1 -> undershoot in range
+    const float strongKickRequest = forceMaxKick || (engine.forceFastKick && !isOldKick) || kickType == KickInfo::rlKickStrong ? 1.f : 0.f;
+    const float allowPoseDeviation = truthKick ? 0.f :
+      (forceMaxKick || (!isOldKick && (engine.forceFastKick || engine.theMotionRequest.alignPrecisely == KickPrecision::justHitTheBall)) ? 1.f : 0.f);
+    *input++ = strongKickRequest;
+    // Training: flag_is_inaccurate_kick. Keep the precise direction request.
     *input++ = 0.f;
-    // 0 -> accurate, 1 -> not so accurate
-    *input++ = fastMaxKick || (!isOldKick && (engine.forceFastKick || engine.theMotionRequest.alignPrecisely == KickPrecision::justHitTheBall)) ? 1.f : 0.f;
+    // Training: flag_allow_deviation. Truth retains the learned pose constraints.
+    *input++ = allowPoseDeviation;
 
     // Ball velocity (3D)
     Vector2f velocity = engine.theMotionRequest.ballEstimate.velocity;
@@ -931,7 +936,7 @@ void WalkPhase::getNextTargetRequest(JointAngles& target)
 
     // Ball range
     float targetBallVelocity = ballParams.kickVelocityRange.max;
-    if(!fastMaxKick && kickType != KickInfo::rlKickStrong)
+    if(!forceMaxKick && kickType != KickInfo::rlKickStrong)
     {
       const float kickLengthPower = KickLengthConverter::kickLengthToPower(kickType, engine.theMotionRequest.kickLength, engine.theKickInfo, engine.theKickLengthPair);
       const float maxKickLength = std::max(1.f, engine.theKickInfo[kickType].range.min + (engine.theKickInfo[kickType].range.max - engine.theKickInfo[kickType].range.min) * kickLengthPower); // 0 range crashes
@@ -949,6 +954,7 @@ void WalkPhase::getNextTargetRequest(JointAngles& target)
       policy.apply();
 #ifdef BHUMAN_RCSS_SERVER
     bhumanRCSSPolicyInference(ballParams.kickModel.c_str());
+    bhumanRCSSKickCommand(strongKickRequest, 0.f, allowPoseDeviation, targetBallVelocity * 0.001f);
 #endif
 
     // Get next request

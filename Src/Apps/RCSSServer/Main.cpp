@@ -111,7 +111,7 @@ int main(int argc, char** argv)
     {
       trace.open(options.trace);
       if(!trace) throw std::runtime_error("Cannot open trace file");
-      trace << "time,mode,penalized,height,truth_x,truth_y,truth_yaw,estimate_x,estimate_y,estimate_yaw,odom_x,odom_y,motion,game_state,teammates,objects,phase,player_state,ball_age,ball_x,ball_y,kicking,gc_state,gc_time,cognition_time,motion_ticks,phase_started,odom_yaw,imu_yaw,native_yaw,gyro_z,cog_odom_x,cog_odom_y,cog_odom_yaw,policy,walk_inferences,kick_inferences,policy_time,pose_quality,team_sent,team_received,team_unsynchronized,tactic,set_play,behavior,play_time,kick_direction,kick_type,kick_precision\n";
+      trace << "time,mode,penalized,height,truth_x,truth_y,truth_yaw,estimate_x,estimate_y,estimate_yaw,odom_x,odom_y,motion,game_state,teammates,objects,phase,player_state,ball_age,ball_x,ball_y,kicking,gc_state,gc_time,cognition_time,motion_ticks,phase_started,odom_yaw,imu_yaw,native_yaw,gyro_z,cog_odom_x,cog_odom_y,cog_odom_yaw,policy,walk_inferences,kick_inferences,policy_time,pose_quality,team_sent,team_received,team_unsynchronized,tactic,set_play,behavior,play_time,kick_direction,kick_type,kick_precision,kick_strong,kick_inaccurate,kick_allow_deviation,kick_target_speed\n";
     }
     bool beamed = false;
     unsigned frames = 0;
@@ -146,7 +146,7 @@ int main(int argc, char** argv)
         robot = std::make_unique<Robot>(settings, options.team + std::to_string(options.number));
         robot->push_back(new RCSSConsole(settings, options.team + std::to_string(options.number), static_cast<Debug*>(robot->front())));
         robot->start(); started = true;
-        std::cout << "[RCSS] native B-Human " << options.robot << " model=" << options.robot << "BHuman " << options.team << " #" << options.number << " field=" << options.field << " localization=" << options.localization << " kickMode=" << options.kickMode << " motionSubframes=" << options.motionSubframes << std::endl;
+        std::cout << "[RCSS] native B-Human " << options.robot << " model=" << options.robot << "BHuman " << options.team << " #" << options.number << " field=" << options.field << " localization=" << options.localization << " kickMode=" << (options.localization == "truth" ? "truth-strong-max-aligned" : options.kickMode) << " motionSubframes=" << options.motionSubframes << std::endl;
       }
       {
         std::unique_lock<std::mutex> lock(runtime.mutex);
@@ -176,7 +176,7 @@ int main(int argc, char** argv)
               << (runtime.timestamp - runtime.ball.timeWhenLastSeen) * .001 << ',' << runtime.ball.estimate.position.x() << ',' << runtime.ball.estimate.position.y() << ',' << runtime.motionInfo.isKicking() << ','
               << runtime.gcState << ',' << runtime.gcTime << ',' << runtime.cognitionTime << ',' << runtime.motionTicks << ',' << runtime.motionInfo.lastMotionPhaseStarted << ','
               << static_cast<float>(runtime.odometry.rotation) << ',' << runtime.imuYaw << ',' << runtime.nativeYaw << ',' << runtime.frame.gyro[2] << ','
-              << runtime.cognitionOdometry.translation.x() << ',' << runtime.cognitionOdometry.translation.y() << ',' << static_cast<float>(runtime.cognitionOdometry.rotation) << ',' << runtime.policy << ',' << runtime.walkInferences << ',' << runtime.kickInferences << ',' << runtime.policyTime << ',' << static_cast<int>(runtime.estimate.quality) << ',' << runtime.teamSent << ',' << runtime.teamReceived << ',' << runtime.teamUnsynchronized << ',' << runtime.tactic << ',' << runtime.setPlay << ',' << runtime.behavior << ',' << runtime.frame.playTime << ',' << static_cast<float>(runtime.motion.targetDirection) << ',' << static_cast<int>(runtime.motion.kickType) << ',' << static_cast<int>(runtime.motion.alignPrecisely) << '\n';
+              << runtime.cognitionOdometry.translation.x() << ',' << runtime.cognitionOdometry.translation.y() << ',' << static_cast<float>(runtime.cognitionOdometry.rotation) << ',' << runtime.policy << ',' << runtime.walkInferences << ',' << runtime.kickInferences << ',' << runtime.policyTime << ',' << static_cast<int>(runtime.estimate.quality) << ',' << runtime.teamSent << ',' << runtime.teamReceived << ',' << runtime.teamUnsynchronized << ',' << runtime.tactic << ',' << runtime.setPlay << ',' << runtime.behavior << ',' << runtime.frame.playTime << ',' << static_cast<float>(runtime.motion.targetDirection) << ',' << static_cast<int>(runtime.motion.kickType) << ',' << static_cast<int>(runtime.motion.alignPrecisely) << ',' << runtime.kickStrong << ',' << runtime.kickInaccurate << ',' << runtime.kickAllowDeviation << ',' << runtime.kickTargetSpeed << '\n';
       if(++frames % 100 == 0)
         std::cout << "[RCSS] t=" << runtime.frame.time << " pm=" << runtime.frame.mode << " h=" << runtime.frame.position[2]
                   << " pose=" << runtime.estimate.translation.transpose() << " motion=" << TypeRegistry::getEnumName(runtime.motion.motion)

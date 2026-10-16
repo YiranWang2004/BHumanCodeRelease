@@ -24,7 +24,8 @@ def main():
     parser.add_argument('--team-id-a', type=int, default=81)
     parser.add_argument('--team-id-b', type=int, default=82)
     parser.add_argument('--localization', choices=['truth', 'measured'], default='truth')
-    parser.add_argument('--kick-mode', choices=['fast-max', 'native'], default='fast-max')
+    parser.add_argument('--kick-mode', choices=['fast-max', 'native'], default='fast-max',
+                        help='Measured localization only; truth always uses strong/max speed with pose constraints.')
     parser.add_argument('--kickoff', choices=['none', 'left', 'right'], default='none')
     parser.add_argument('--sim-speed', type=float, default=1.)
     parser.add_argument('--duration', type=float, help='Optional wall-clock seconds for diagnostics.')
