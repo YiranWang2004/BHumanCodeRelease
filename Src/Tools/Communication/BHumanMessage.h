@@ -14,7 +14,11 @@
 #include <limits>
 #include <vector>
 
+#ifdef BHUMAN_RCSS_SERVER
+#define BHUMAN_MESSAGE_STRUCT_VERSION 73      /**< RCSS large-field coordinate layout. Reject older, incompatible packets. */
+#else
 #define BHUMAN_MESSAGE_STRUCT_VERSION 72      /**< This should be incremented with each change. */
+#endif
 
 /**
  * A representation of team message a B-Human robot would send.

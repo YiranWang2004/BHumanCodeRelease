@@ -6,7 +6,7 @@ file(GLOB RCSS_SERVER_SOURCES CONFIGURE_DEPENDS "${RCSS_SERVER_ROOT}/*.cpp")
 add_executable(run_player ${RCSS_SERVER_SOURCES})
 target_link_libraries(run_player PRIVATE B-Human)
 target_include_directories(run_player PRIVATE "${RCSS_SERVER_ROOT}")
-target_compile_definitions(run_player PRIVATE RCSS_ASSETS_DIR="${BHUMAN_PREFIX}")
+target_compile_definitions(run_player PRIVATE BHUMAN_RCSS_SERVER RCSS_ASSETS_DIR="${BHUMAN_PREFIX}")
 set_target_properties(run_player PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
 
 enable_testing()
@@ -19,6 +19,15 @@ add_executable(rcss_imu_test "${RCSS_SERVER_ROOT}/tests/IMUOrientationTest.cpp")
 target_include_directories(rcss_imu_test PRIVATE "${RCSS_SERVER_ROOT}")
 target_link_libraries(rcss_imu_test PRIVATE Math Flags::Default)
 add_test(NAME rcss_imu COMMAND rcss_imu_test)
+
+# Exercise the actual team-message codec and location-specific schema, including
+# the original default schema as a negative control for the field-edge bug.
+add_executable(rcss_team_message_test "${RCSS_SERVER_ROOT}/tests/TeamMessageTest.cpp"
+    "${RCSS_SERVER_ROOT}/Runtime.cpp" "${RCSS_SERVER_ROOT}/Protocol.cpp")
+target_link_libraries(rcss_team_message_test PRIVATE B-Human)
+target_include_directories(rcss_team_message_test PRIVATE "${RCSS_SERVER_ROOT}")
+target_compile_definitions(rcss_team_message_test PRIVATE BHUMAN_RCSS_SERVER RCSS_ASSETS_DIR="${BHUMAN_PREFIX}")
+add_test(NAME rcss_team_message COMMAND rcss_team_message_test)
 
 # Offline range experiment; consumes the same See messages as run_player.
 add_executable(rcss_decode_players "${RCSS_SERVER_ROOT}/Protocol.cpp"
