@@ -826,7 +826,7 @@ void WalkPhase::getNextTargetRequest(JointAngles& target)
     STOPWATCH("module:WalkingEngine:apply")
       engine.walkPolicy.apply();
 #ifdef BHUMAN_RCSS_SERVER
-    bhumanRCSSPolicyInference("K1_walk.onnx");
+    bhumanRCSSPolicyInference(engine.walkNeuronalNetworkParameters.modelName.c_str());
 #endif
 
     // Get next request
@@ -941,7 +941,7 @@ void WalkPhase::getNextTargetRequest(JointAngles& target)
     STOPWATCH("module:WalkingEngine:apply")
       policy.apply();
 #ifdef BHUMAN_RCSS_SERVER
-    bhumanRCSSPolicyInference(isOldKick ? "K1_kick_inner_soft.onnx" : "K1_kick_inner.onnx");
+    bhumanRCSSPolicyInference(ballParams.kickModel.c_str());
 #endif
 
     // Get next request

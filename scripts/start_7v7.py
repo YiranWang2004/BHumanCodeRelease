@@ -15,6 +15,9 @@ def main():
     parser.add_argument('--host', default='127.0.0.1')
     parser.add_argument('--port', type=int, default=60000)
     parser.add_argument('--monitor-port', type=int, default=60001)
+    parser.add_argument('--robot', choices=['K1', 'T1'], default='K1')
+    parser.add_argument('--robot-a', choices=['K1', 'T1'], help='Override the left team robot type.')
+    parser.add_argument('--robot-b', choices=['K1', 'T1'], help='Override the right team robot type.')
     parser.add_argument('--players', type=int, choices=range(1, 8), default=7)
     parser.add_argument('--team-a', default='BHumanBlue')
     parser.add_argument('--team-b', default='BHumanRed')
@@ -51,6 +54,7 @@ def main():
             str(executable), '--host', args.host, '--port', str(args.port),
             '--team', team, '--team-id', str(team_id), '--num', str(number),
             '--num-players', str(args.players), '--field', 'fifa7vs7',
+            '--robot', (args.robot_a or args.robot) if team == args.team_a else (args.robot_b or args.robot),
             '--localization', args.localization, '--sim-speed', str(args.sim_speed),
             '--trace', str(args.log_dir / f'{team}_{number}.csv'),
         ], cwd=repo, stdout=log, stderr=subprocess.STDOUT)

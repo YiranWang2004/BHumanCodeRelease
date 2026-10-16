@@ -39,8 +39,8 @@ void RCSSVisionProvider::update(BallPercept& data)
   data.covarianceOnField = covariance(data.positionOnField);
   data.radiusOnField = theBallSpecification.radius;
   const float az = static_cast<float>(closest->azimuth * Constants::pi / 180.), el = static_cast<float>(closest->elevation * Constants::pi / 180.);
-  const float focalX = 272.f / std::tan(52.5_deg), focalY = 224.f / std::tan(47_deg);
-  data.positionInImage = Vector2f(272.f - focalX * std::tan(az), 224.f - focalY * std::tan(el) / std::cos(az));
+  const float focalX = theCameraInfo.focalLength, focalY = theCameraInfo.focalLengthHeight;
+  data.positionInImage = Vector2f(theCameraInfo.opticalCenter.x() - focalX * std::tan(az), theCameraInfo.opticalCenter.y() - focalY * std::tan(el) / std::cos(az));
   data.radiusInImage = std::max(1.f, focalX * data.radiusOnField / static_cast<float>(closest->distance * 1000.));
 }
 void RCSSVisionProvider::update(FieldLineIntersections& data)

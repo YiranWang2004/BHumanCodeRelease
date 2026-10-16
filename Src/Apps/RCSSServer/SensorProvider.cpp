@@ -8,9 +8,11 @@ MAKE_MODULE(RCSSSensorProvider);
 
 void RCSSSensorProvider::update(CameraInfo& data)
 {
-  data.width = 544; data.height = 448;
-  data.openingAngleWidth = 105_deg; data.openingAngleHeight = 94_deg;
-  data.opticalCenter = Vector2f(272.f, 224.f);
+  const bool t1 = rcss::Runtime::get().options.robot == "T1";
+  data.width = t1 ? 640 : 544; data.height = t1 ? 480 : 448;
+  data.openingAngleWidth = t1 ? 79.2_deg : 105_deg;
+  data.openingAngleHeight = t1 ? 63.6_deg : 94_deg;
+  data.opticalCenter = Vector2f(data.width * .5f, data.height * .5f);
   data.updateFocalLength();
 }
 

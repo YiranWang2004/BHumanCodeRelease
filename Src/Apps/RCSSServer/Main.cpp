@@ -75,24 +75,24 @@ int main(int argc, char** argv)
     if(chdir(options.assets.c_str())) throw std::runtime_error("Cannot enter B-Human assets directory");
     FunctionList::execute();
     Time::initialize(); Time::setSimulatedTime(true);
-    Settings settings("SimulatedK1", .02f / options.motionSubframes, Settings::k1,
+    Settings settings("Simulated" + options.robot, .02f / options.motionSubframes, options.robot == "T1" ? Settings::t1 : Settings::k1,
                       options.teamId, Settings::red, Settings::red, options.number,
                       "RCSS_" + options.field, options.localization == "truth" ? "RCSSTruth" : "RCSSMeasured", 0);
     File::setSearchPath(settings.searchPath);
     InMapFile motorFile("boosterProvider.cfg");
-    if(!motorFile.exists()) throw std::runtime_error("Missing native K1 boosterProvider.cfg");
+    if(!motorFile.exists()) throw std::runtime_error("Missing native robot boosterProvider.cfg");
     motorFile >> runtime.motors;
     InMapFile parametersFile("motorParameters.cfg");
-    if(!parametersFile.exists()) throw std::runtime_error("Missing native K1 motorParameters.cfg");
+    if(!parametersFile.exists()) throw std::runtime_error("Missing native robot motorParameters.cfg");
     parametersFile >> runtime.motorParameters;
     SetupPoses setup;
     InMapFile setupFile("setupPosesProvider.cfg");
     if(!setupFile.exists()) throw std::runtime_error("Missing RCSS setup poses");
     setupFile >> setup;
-    if(runtime.motors.jointMapping.size() != 22) throw std::runtime_error("Invalid K1 native motor configuration");
+    if(runtime.motors.jointMapping.size() != rcss::sensorNames().size()) throw std::runtime_error("Invalid native motor configuration");
     std::signal(SIGINT, signalHandler); std::signal(SIGTERM, signalHandler);
     connection.connect(options.host, options.port);
-    connection.send("(init K1BHuman " + options.team + " " + std::to_string(options.number) + ")");
+    connection.send("(init " + options.robot + "BHuman " + options.team + " " + std::to_string(options.number) + ")");
     std::ofstream trace;
     if(!options.trace.empty())
     {
@@ -108,8 +108,8 @@ int main(int argc, char** argv)
     {
       auto frame = rcss::decode(connection.receive());
       if(frame.time < 0.) { connection.send("(syn)"); continue; }
-      if(frame.joints.size() != 22 || !frame.hasOrientation)
-        throw std::runtime_error("Incomplete K1 sensor frame");
+      if(frame.joints.size() != rcss::sensorNames().size() || !frame.hasOrientation)
+        throw std::runtime_error("Incomplete robot sensor frame");
       for(const auto& joint : frame.joints)
         if(!joint.hasTorque) throw std::runtime_error("Server lacks HJ tau: restart the updated rcssservermj");
       if(simulationStart < 0.) simulationStart = frame.time;
@@ -133,7 +133,7 @@ int main(int argc, char** argv)
         robot = std::make_unique<Robot>(settings, options.team + std::to_string(options.number));
         robot->push_back(new RCSSConsole(settings, options.team + std::to_string(options.number), static_cast<Debug*>(robot->front())));
         robot->start(); started = true;
-        std::cout << "[RCSS] native B-Human K1 model=K1BHuman " << options.team << " #" << options.number << " field=" << options.field << " localization=" << options.localization << " motionSubframes=" << options.motionSubframes << std::endl;
+        std::cout << "[RCSS] native B-Human " << options.robot << " model=" << options.robot << "BHuman " << options.team << " #" << options.number << " field=" << options.field << " localization=" << options.localization << " motionSubframes=" << options.motionSubframes << std::endl;
       }
       {
         std::unique_lock<std::mutex> lock(runtime.mutex);

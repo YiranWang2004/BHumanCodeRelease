@@ -18,6 +18,7 @@
 MODULE(RCSSVisionProvider,
 {,
   REQUIRES(FrameInfo),
+  REQUIRES(CameraInfo),
   REQUIRES(TorsoMatrix),
   REQUIRES(BallSpecification),
   REQUIRES(CameraMatrix),

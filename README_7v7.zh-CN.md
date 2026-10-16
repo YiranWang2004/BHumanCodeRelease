@@ -1,4 +1,4 @@
-# B-Human 2026 接入 rcssservermj：7v7
+# B-Human 2026 接入 rcssservermj：K1/T1 7v7
 
 分支 `feature/rcssservermj-7v7`，基于官方 Code Release 2026 `2e3374ba8`。
 服务器为 `/home/robotics/ZJUDancer/rcssservermj` 的同名分支。
@@ -68,6 +68,40 @@ python3 scripts/start_7v7.py --localization measured
 队内通信保留原生 UDP，队号默认 81、82，使用 UDP 10081、10082；每队队号必须一致，
 两队必须不同。默认在同一台计算机运行所有客户端；跨计算机部署时还需配置原生
 TeamMessageChannel 的网络通路。TCP 连接到同一服务器并不自动转发这些 UDP 消息。
+
+## 选择 T1 或混合机器人比赛
+
+默认仍为 K1。服务器启动命令相同，由客户端初始化消息选择独立的原生模型：
+
+```bash
+# 两队均使用原生 T1BHuman，各 7 人
+python3 scripts/start_7v7.py --robot T1
+
+# 左队 T1，右队 K1
+python3 scripts/start_7v7.py --robot-a T1 --robot-b K1 --kickoff left
+
+# 单个 T1 客户端
+./build_sim/run_player --robot T1 --team BHuman --team-id 81 \
+  --num 2 --num-players 7 --field fifa7vs7 --localization truth
+```
+
+`--robot T1` 同时选择 `SimulatedT1` 的原版配置、T1 专用网络和 23 关节协议，包含腰部
+`q_tj1` / `te1`；不是把 K1 的策略用在 T1 身上。默认依然使用 Server 特权位置，
+只有 `--localization measured` 才启用自主定位。T1 同样直接生成到己方半场，
+进球后瞬间摆回、站立等待，跳过走入场和走回场。
+
+| 功能 | T1 原版配置 |
+|---|---|
+| 行走 | `T1_walk.onnx`，365 维输入、14 维输出 |
+| 踢球 | `T1_kick_inner.onnx` / `T1_kick_inner_soft.onnx`，62 维输入 |
+| 关节控制 | 23 关节，原版 regular/low PD 与力矩上限 |
+| 相机 | 640×480，79.2°×63.6° |
+
+模型目录为服务器的 `src/rcsssmj/resources/robots/T1BHuman/`，从原版 `T1.rsi3`
+及外观网格转换。总质量 31.73435 kg，场景初始高度 0.670 m，保留源刚体惯量、
+关节轴、参考角、限位、转子惯量、碰撞体及传感器位置。T1 的目标关节角按原版
+延迟 **14 ms** 执行，速度低通在每个 2 ms 物理步更新；PD 增益和力矩上限立即更新。
+原 `T1` 和 `K1` 模型不受这套延迟控制影响。
 
 ## 单个客户端与策略模型
 
@@ -139,3 +173,16 @@ TeamMessageChannel 的网络通路。TCP 连接到同一服务器并不自动转
 `/tmp/rcss7v7-placement-validation.log`。
 
 许可证见 `License.md`。This product includes software developed by B-Human (http://www.b-human.de).
+
+## T1 新增模型验证（2026-10-16）
+
+原生 T1 客户端 Release 编译通过，服务器 33 项测试和客户端协议/IMU 两项测试通过。
+服务器回归覆盖 T1 的 23 关节参数、惯量、相机和 IMU 位置、14 ms 延迟及即时增益/限幅，
+以及混合模型加入、退出重连时的控制队列处理。重新生成 K1BHuman 后，文件内容与之前一致。
+
+两队均为 T1 的 2v2 联调运行约 69 秒仿真，四人均未出现躯干低于 0.25 m 的倒地帧，
+每人收到 1 名队友消息，并实际调用了 T1 行走和踢球模型。
+另完成左 T1、右 K1 的 7v7 联调，14 人全部连接、每人收到 6 名队友，
+双方实际调用各自机器人类型的策略；约 17 秒仿真内未出现倒地帧。
+这些是短时功能验证，不作为比赛胜率或长时间稳定性保证。
+日志分别位于 `/tmp/bhuman-t1-smoke/` 和 `/tmp/bhuman-t1-mixed7v7/`。

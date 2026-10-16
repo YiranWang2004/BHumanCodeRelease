@@ -17,7 +17,7 @@ namespace rcss
 struct Options
 {
   std::string host = "127.0.0.1", team = "BHuman", field = "fifa7vs7", localization = "truth", role;
-  std::string assets = RCSS_ASSETS_DIR, trace;
+  std::string assets = RCSS_ASSETS_DIR, trace, robot = "K1";
   int port = 60000, teamId = 2, number = 1, players = 7, maxFrames = 0, motionSubframes = 10;
   double speed = 1., beamX = 0., beamY = 0., beamYaw = 0.;
   bool beamExplicit = false, debugWalk = false, debugStand = false;
@@ -64,7 +64,7 @@ struct Runtime
 };
 // Server positions are in metres; B-Human representations are in millimetres.
 // Measured vision uses only joint angles and roll/pitch (never torso x/y/yaw).
-const std::array<const char*, 22>& sensorNames();
+const std::vector<std::string>& sensorNames();
 // Timestamp of the native thread's current frame. Motion subframes advance
 // this clock while Color/Cognition keep the outer server frame timestamp.
 extern thread_local unsigned sensorTimestamp;

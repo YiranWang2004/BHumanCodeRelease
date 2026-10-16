@@ -12,13 +12,19 @@ namespace rcss
 {
 thread_local unsigned sensorTimestamp = 0;
 Runtime& Runtime::get() { static Runtime runtime; return runtime; }
-const std::array<const char*, 22>& sensorNames()
+const std::vector<std::string>& sensorNames()
 {
-  static const std::array<const char*, 22> names = {
+  static const std::vector<std::string> k1 = {
     "q_hj1", "q_hj2", "q_laj1", "q_laj2", "q_laj3", "q_laj4",
     "q_raj1", "q_raj2", "q_raj3", "q_raj4", "q_llj1", "q_llj2", "q_llj3",
     "q_llj4", "q_llj5", "q_llj6", "q_rlj1", "q_rlj2", "q_rlj3", "q_rlj4", "q_rlj5", "q_rlj6"};
-  return names;
+  static const std::vector<std::string> t1 = []
+  {
+    auto names = k1;
+    names.insert(names.begin() + 10, "q_tj1");
+    return names;
+  }();
+  return Runtime::get().options.robot == "T1" ? t1 : k1;
 }
 Options arguments(int argc, char** argv)
 {
@@ -35,10 +41,10 @@ Options arguments(int argc, char** argv)
     const std::string key = argv[i];
     if(key == "--help" || key == "-h")
     {
-      std::cout << "B-Human K1 / rcssservermj 7v7\n"
+      std::cout << "B-Human K1/T1 / rcssservermj 7v7\n"
                 << "  --host HOST --port PORT --team NAME --team-id N\n"
                 << "  --num N --num-players N --role goal_keeper|striker\n"
-                << "  --field fifa7vs7\n"
+                << "  --robot K1|T1 (default K1) --field fifa7vs7\n"
                 << "  --localization truth|measured (default truth) --sim-speed FACTOR\n"
                 << "  --assets-dir PATH --beam-x X --beam-y Y --beam-theta DEG\n"
                 << "  --trace FILE --max-frames N (diagnostics)\n"
@@ -58,6 +64,7 @@ Options arguments(int argc, char** argv)
     else if(key == "--num") options.number = integer();
     else if(key == "--num-players") options.players = integer();
     else if(key == "--role") options.role = value;
+    else if(key == "--robot") options.robot = value;
     else if(key == "--field") options.field = value;
     else if(key == "--localization") options.localization = value;
     else if(key == "--sim-speed") options.speed = numeric(value);
@@ -79,6 +86,7 @@ Options arguments(int argc, char** argv)
     }
     else throw std::runtime_error("Unknown option: " + key);
   }
+  if(options.robot != "K1" && options.robot != "T1") throw std::runtime_error("--robot must be K1 or T1");
   if(options.localization != "truth" && options.localization != "measured") throw std::runtime_error("--localization must be truth or measured");
   if(options.motionSubframes != 1 && options.motionSubframes != 10) throw std::runtime_error("--motion-subframes must be 1 or 10");
   if(options.field != "fifa7vs7") throw std::runtime_error("This 7v7 backend requires --field fifa7vs7");
@@ -111,12 +119,19 @@ Pose2f Runtime::truth() const
 }
 std::string Runtime::action() const
 {
-  static const std::array<const char*, 22> actuators = {
+  static const std::vector<std::string> k1Actuators = {
     "he1", "he2", "lae1", "lae2", "lae3", "lae4", "rae1", "rae2", "rae3", "rae4",
     "lle1", "lle2", "lle3", "lle4", "lle5", "lle6", "rle1", "rle2", "rle3", "rle4", "rle5", "rle6"};
+  static const std::vector<std::string> t1Actuators = []
+  {
+    auto names = k1Actuators;
+    names.insert(names.begin() + 10, "te1");
+    return names;
+  }();
+  const auto& actuators = options.robot == "T1" ? t1Actuators : k1Actuators;
   std::ostringstream result;
   result << std::setprecision(8);
-  for(size_t i = 0; i < 22; ++i)
+  for(size_t i = 0; i < actuators.size(); ++i)
   {
     const auto joint = motors.jointMapping.at(i);
     const auto& gains = motorParameters.controlParameters[request.jointStiffnessMapping][joint];
@@ -137,6 +152,6 @@ void bhumanRCSSPolicyInference(const char* model)
   auto& runtime = rcss::Runtime::get();
   runtime.policy = model;
   runtime.policyTime = rcss::sensorTimestamp;
-  if(runtime.policy == "K1_walk.onnx") ++runtime.walkInferences;
+  if(runtime.policy == "K1_walk.onnx" || runtime.policy == "T1_walk.onnx") ++runtime.walkInferences;
   else ++runtime.kickInferences;
 }
