@@ -1,0 +1,125 @@
+{
+  "seed": 20261016,
+  "samples": 2160,
+  "visible": 1723,
+  "revisions": {
+    "bhuman": "1c634e5693d4ebdec156ae229606486455b0369f",
+    "server": "dba961bb5e5387846032805a1bfa23cae0aa9ed3"
+  },
+  "mujoco_version": "3.5.0",
+  "numpy_version": "2.4.6",
+  "tolerance_m": 0.25,
+  "field_diagonal_m": 65.73431371817918,
+  "max_tested_reliable_m": 100,
+  "results": [
+    {
+      "distance_m": 5,
+      "visible": 142,
+      "total": 180,
+      "marker_max_m": 0.01001452042283725,
+      "center_p95_m": 0.15221017423059469,
+      "center_max_m": 0.1684704366570384,
+      "reliable": true
+    },
+    {
+      "distance_m": 9,
+      "visible": 143,
+      "total": 180,
+      "marker_max_m": 0.01004570971427738,
+      "center_p95_m": 0.14653301485006387,
+      "center_max_m": 0.16848791369536079,
+      "reliable": true
+    },
+    {
+      "distance_m": 15,
+      "visible": 142,
+      "total": 180,
+      "marker_max_m": 0.010088833444271993,
+      "center_p95_m": 0.1492712990980379,
+      "center_max_m": 0.16404465451920666,
+      "reliable": true
+    },
+    {
+      "distance_m": 25,
+      "visible": 144,
+      "total": 180,
+      "marker_max_m": 0.010725886090713658,
+      "center_p95_m": 0.1480670021893817,
+      "center_max_m": 0.1678547600398969,
+      "reliable": true
+    },
+    {
+      "distance_m": 40,
+      "visible": 144,
+      "total": 180,
+      "marker_max_m": 0.011831341230845052,
+      "center_p95_m": 0.1473540569549369,
+      "center_max_m": 0.16599243741601452,
+      "reliable": true
+    },
+    {
+      "distance_m": 55,
+      "visible": 144,
+      "total": 180,
+      "marker_max_m": 0.013490840397763012,
+      "center_p95_m": 0.1377291600330986,
+      "center_max_m": 0.16218213803180076,
+      "reliable": true
+    },
+    {
+      "distance_m": 60,
+      "visible": 144,
+      "total": 180,
+      "marker_max_m": 0.013402661180083833,
+      "center_p95_m": 0.14903400024294286,
+      "center_max_m": 0.16430625936478882,
+      "reliable": true
+    },
+    {
+      "distance_m": 65,
+      "visible": 144,
+      "total": 180,
+      "marker_max_m": 0.014004425127691206,
+      "center_p95_m": 0.14100610930789673,
+      "center_max_m": 0.17795839350245676,
+      "reliable": true
+    },
+    {
+      "distance_m": 65.73431371817918,
+      "visible": 144,
+      "total": 180,
+      "marker_max_m": 0.015105048287406104,
+      "center_p95_m": 0.14370816250851207,
+      "center_max_m": 0.16855499324504603,
+      "reliable": true
+    },
+    {
+      "distance_m": 70,
+      "visible": 144,
+      "total": 180,
+      "marker_max_m": 0.015205486563435927,
+      "center_p95_m": 0.14952388586527438,
+      "center_max_m": 0.16432217636203575,
+      "reliable": true
+    },
+    {
+      "distance_m": 80,
+      "visible": 144,
+      "total": 180,
+      "marker_max_m": 0.01535962783073376,
+      "center_p95_m": 0.14629033143418724,
+      "center_max_m": 0.1715700106894923,
+      "reliable": true
+    },
+    {
+      "distance_m": 100,
+      "visible": 144,
+      "total": 180,
+      "marker_max_m": 0.018003561112017667,
+      "center_p95_m": 0.14775893429552606,
+      "center_max_m": 0.1725726552891335,
+      "reliable": true
+    }
+  ],
+  "scope": "Real server generator and C++ production decoder; known camera pose, upright reference stance with +/-5deg torso tilt. No online localization, tracking, occlusion realism, falls, gait or temporal latency validation."
+}

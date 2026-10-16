@@ -18,3 +18,8 @@ add_executable(rcss_imu_test "${RCSS_SERVER_ROOT}/tests/IMUOrientationTest.cpp")
 target_include_directories(rcss_imu_test PRIVATE "${RCSS_SERVER_ROOT}")
 target_link_libraries(rcss_imu_test PRIVATE Math Flags::Default)
 add_test(NAME rcss_imu COMMAND rcss_imu_test)
+
+# Offline range experiment; consumes the same See messages as run_player.
+add_executable(rcss_decode_players "${RCSS_SERVER_ROOT}/Protocol.cpp"
+    "${RCSS_SERVER_ROOT}/experiments/DecodePlayers.cpp")
+target_include_directories(rcss_decode_players PRIVATE "${RCSS_SERVER_ROOT}")
