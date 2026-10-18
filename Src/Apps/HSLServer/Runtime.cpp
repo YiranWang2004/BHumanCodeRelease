@@ -38,6 +38,7 @@ Options arguments(int argc, char** argv)
       std::cout << "B-Human K1 / dancer-rcssservermj\n"
                 << "  --host HOST --port PORT --team NAME --team-id N\n"
                 << "  --num N --num-players N --role goal_keeper|striker\n"
+                << "    hsl_l supports up to 11 players; rosters above 7 use native s11v11\n"
                 << "  --field hsl_s|hsl_m|hsl_l|hsl_whrg\n"
                 << "  --localization truth|measured (default measured) --sim-speed FACTOR\n"
                 << "  --assets-dir PATH --beam-x X --beam-y Y --beam-theta DEG\n"
@@ -82,7 +83,8 @@ Options arguments(int argc, char** argv)
   if(options.localization != "truth" && options.localization != "measured") throw std::runtime_error("--localization must be truth or measured");
   if(options.motionSubframes != 1 && options.motionSubframes != 10) throw std::runtime_error("--motion-subframes must be 1 or 10");
   if(options.field != "hsl_s" && options.field != "hsl_m" && options.field != "hsl_l" && options.field != "hsl_whrg") throw std::runtime_error("Unknown HSL field");
-  if(options.players < 1 || options.players > 7 || options.number < 1 || options.number > options.players || options.teamId < 1 || options.teamId > 99 || options.port < 1 || options.speed <= 0.) throw std::runtime_error("Invalid roster, port, team id or simulation speed");
+  const int maxPlayers = options.field == "hsl_l" ? 11 : 7;
+  if(options.players < 1 || options.players > maxPlayers || options.number < 1 || options.number > options.players || options.teamId < 1 || options.teamId > 99 || options.port < 1 || options.speed <= 0.) throw std::runtime_error("Invalid roster, port, team id or simulation speed (hsl_l: 1-11 players; other fields: 1-7)");
   if(options.team.empty() || options.team.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-") != std::string::npos) throw std::runtime_error("Team name must contain only ASCII letters, digits, _ or -");
   if(!options.role.empty() && options.role != (options.number == 1 ? "goal_keeper" : "striker")) throw std::runtime_error("B-Human uses player 1 as goalkeeper and other players as field players");
   return options;

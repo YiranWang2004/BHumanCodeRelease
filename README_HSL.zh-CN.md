@@ -49,6 +49,50 @@ scripts/start_sim_game.sh --field hsl_m --level foundation \
 键盘开球等操作见服务器 README。服务器的 Python editable 安装在修改后重启生效；
 需要先更新服务器模型和代码，再启动客户端。
 
+服务器默认罚停统一为 15 秒，通过 `Pen` 消息映射为原生 GameController 处罚状态和
+倒计时。原生 `ExtendedGameStateProvider` 在超过 12 秒的罚停解除时发出
+`returnFromGameControllerPenalty`，`SelfLocator` 随后重置到场边入场位置假设。
+原先服务器的 10 秒罚停低于该门槛，会跳过这次定位重置。罚停期间不会因瞬移立即
+强制重定位；重定位发生在解除处罚时，并由视觉进一步确定所在边线。
+
+## B-Human 11v11 自踢
+
+先重新编译本仓库的 `run_player`，再分别在两个终端启动服务器和客户端。
+服务器使用新增的 Large 11v11 模式：
+
+```bash
+cd /home/yiranwang/rcssservermj
+.venv/bin/rcssservermj --field hsl_l_26 --level 11v11 --sync --render
+```
+
+客户端复用 demo 的统一入口，`--home-repo` 指向本仓库；未指定 `--guest-repo`
+时客队也使用同一份客户端。双方队名必须不同：
+
+```bash
+cd /home/yiranwang/dancer-robocupdemo
+bash scripts/start_sim_game.sh --field hsl_l --level 11v11 \
+  --localization measured --team-a BHumanA --team-b BHumanB \
+  --home-repo /home/yiranwang/ZJUDancer/BHumanCodeRelease
+```
+
+脚本启动两队各 11 人，1 号为门将。按 Ctrl-C 停止双方客户端。
+`hsl_l` 的 `--num-players 8` 至 `11` 自动叠加原生 `Scenarios/11v11` 策略选择，
+使用 `s11v11`、`t343`（门将＋3 后卫＋4 中场＋3 前锋）和原生 11v11 定位球配置。
+HSL 的线程、measured/truth 定位、运动模块及服务器匹配的场地几何继续使用现有配置。
+其他场地仍最多 7 人；不超过 7 人时保留原有 `s5v5` 选择。
+Large 入场配置已补齐 8–11 号，分别使用独立的下边线外位置。
+
+直接启动单个球员时，可使用 `build_sim/run_player --field hsl_l --num-players 11 --num 11`，
+不需要另传策略参数。启动日志会打印人数及策略，trace CSV 末尾增加
+`tactic`、`position`、`role`，用于确认实际接受的阵型、位置与行为角色。
+`--role striker` 只是启动参数中的场上球员标记，实际战术角色由原生行为动态分配。
+
+2026-10-17 本机联调：客户端编译及两项 CTest 通过；通过统一脚本启动 measured 11v11，
+22 人全部在 Ready 和 monitor 切换的 PlayOn 中接受 `t343`，每人收到 10 名队友，
+记录中未同步队友消息数为 0。原有 measured 3v3 回归通过，truth 定位的 11 号球员
+完成 200 帧并正常退出。本轮为短时接入、战术和通信验证，未跑完整场比赛。
+日志见 `/tmp/bhuman-hsl-roster-s6_pgac4/` 和 `/tmp/bhuman-11v11-truth-9u970_lj/`。
+
 ## 2026 原生 policy
 
 无需同时运行 MachineLearning 或 Isaac Gym。B-Human 加载本仓库原生 ONNX：
@@ -97,6 +141,8 @@ PD 求和、动态力矩限幅，最后由 MuJoCo 应用 XML 的固定执行器�
 measured 模式将球、L/T/X、罚球点和机器人观测交给今年原生模块；坐标转换使用原生
 CameraMatrix、RobotCameraMatrix 和 TorsoMatrix。服务器没有提供的线段和交点方向不虚构。
 场地配置使用 2026 schema，并按服务器的线中心、标记位置和球尺寸匹配。
+服务器的标准 3 号球已全场地统一为 `BallFifa3.rsi3` 的半径 95 mm、质量 0.295 kg；
+HSL Middle 和 WHRG 的客户端 `ballSpecification.cfg` 同步采用这组规格。
 
 IMU 适配在三维四元数状态下积分陀螺仪，以重力方向校正倾斜，避免旧欧拉角积分在翻倒时
 产生奇异误差；不读取真值航向。原版惯导、定位和里程计算法不作修改。

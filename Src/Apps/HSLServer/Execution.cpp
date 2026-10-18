@@ -5,6 +5,7 @@
 #include "Representations/Communication/BHumanMessageOutputGenerator.h"
 #include "Representations/Communication/TeamData.h"
 #include "Representations/Communication/GameControllerData.h"
+#include "Representations/BehaviorControl/StrategyStatus.h"
 #include "Representations/Infrastructure/FrameInfo.h"
 #include "Representations/Infrastructure/SensorData/InertialSensorData.h"
 #include "Representations/Sensing/InertialData.h"
@@ -83,6 +84,13 @@ class HSLFrame : public BHExecutionUnit
       if(blackboard.exists("OdometryData")) r.cognitionOdometry = static_cast<const OdometryData&>(blackboard["OdometryData"]);
       copy("RobotPose", r.estimate);
       copy("BallModel", r.ball);
+      if(blackboard.exists("StrategyStatus"))
+      {
+        const auto& status = static_cast<const StrategyStatus&>(blackboard["StrategyStatus"]);
+        r.tactic = TypeRegistry::getEnumName(status.acceptedTactic);
+        r.position = TypeRegistry::getEnumName(status.position);
+        r.behaviorRole = TypeRegistry::getEnumName(status.role);
+      }
       if(blackboard.exists("GameControllerData"))
       {
         const auto& data = static_cast<const GameControllerData&>(blackboard["GameControllerData"]);

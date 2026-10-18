@@ -57,6 +57,7 @@ struct Runtime
   std::string policy = "none";
   unsigned walkInferences = 0, kickInferences = 0, policyTime = 0;
   unsigned teamSent = 0, teamReceived = 0, teamUnsynchronized = 0;
+  std::string tactic = "none", position = "none", behaviorRole = "none";
   void stop();
   std::string action() const;
   Pose2f truth() const;

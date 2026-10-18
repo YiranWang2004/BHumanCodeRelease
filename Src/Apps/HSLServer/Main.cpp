@@ -7,6 +7,7 @@
 #include "Streaming/FunctionList.h"
 #include "Streaming/InStreams.h"
 #include "Representations/Configuration/SetupPoses.h"
+#include <algorithm>
 #include <csignal>
 #include <cmath>
 #include <chrono>
@@ -78,6 +79,10 @@ int main(int argc, char** argv)
     Settings settings("SimulatedK1", .02f / options.motionSubframes, Settings::k1,
                       options.teamId, Settings::red, Settings::red, options.number,
                       "HSL_" + options.field, options.localization == "truth" ? "HSLTruth" : "HSLMeasured", 0);
+    // The native 11v11 scenario contains only the strategy selection. Overlay
+    // it while preserving the HSL field, localization, and motion modules.
+    if(options.players > 7)
+      settings.searchPath.insert(settings.searchPath.begin(), options.assets + "/Config/Scenarios/11v11/");
     File::setSearchPath(settings.searchPath);
     InMapFile motorFile("boosterProvider.cfg");
     if(!motorFile.exists()) throw std::runtime_error("Missing native K1 boosterProvider.cfg");
@@ -89,6 +94,9 @@ int main(int argc, char** argv)
     InMapFile setupFile("setupPosesProvider.cfg");
     if(!setupFile.exists()) throw std::runtime_error("Missing HSL setup poses");
     setupFile >> setup;
+    for(int number = 1; number <= options.players; ++number)
+      if(std::none_of(setup.poses.begin(), setup.poses.end(), [number](const auto& pose) { return pose.playerNumber == number; }))
+        throw std::runtime_error("Missing HSL setup pose for player " + std::to_string(number));
     if(runtime.motors.jointMapping.size() != 22) throw std::runtime_error("Invalid K1 native motor configuration");
     std::signal(SIGINT, signalHandler); std::signal(SIGTERM, signalHandler);
     connection.connect(options.host, options.port);
@@ -98,7 +106,7 @@ int main(int argc, char** argv)
     {
       trace.open(options.trace);
       if(!trace) throw std::runtime_error("Cannot open trace file");
-      trace << "time,mode,penalized,height,truth_x,truth_y,truth_yaw,estimate_x,estimate_y,estimate_yaw,odom_x,odom_y,motion,game_state,teammates,objects,phase,player_state,ball_age,ball_x,ball_y,kicking,gc_state,gc_time,cognition_time,motion_ticks,phase_started,odom_yaw,imu_yaw,native_yaw,gyro_z,cog_odom_x,cog_odom_y,cog_odom_yaw,policy,walk_inferences,kick_inferences,policy_time,pose_quality,team_sent,team_received,team_unsynchronized\n";
+      trace << "time,mode,penalized,height,truth_x,truth_y,truth_yaw,estimate_x,estimate_y,estimate_yaw,odom_x,odom_y,motion,game_state,teammates,objects,phase,player_state,ball_age,ball_x,ball_y,kicking,gc_state,gc_time,cognition_time,motion_ticks,phase_started,odom_yaw,imu_yaw,native_yaw,gyro_z,cog_odom_x,cog_odom_y,cog_odom_yaw,policy,walk_inferences,kick_inferences,policy_time,pose_quality,team_sent,team_received,team_unsynchronized,tactic,position,role\n";
     }
     bool beamed = false;
     unsigned frames = 0;
@@ -133,7 +141,8 @@ int main(int argc, char** argv)
         robot = std::make_unique<Robot>(settings, options.team + std::to_string(options.number));
         robot->push_back(new HSLConsole(settings, options.team + std::to_string(options.number), static_cast<Debug*>(robot->front())));
         robot->start(); started = true;
-        std::cout << "[HSL] native B-Human K1 model=K1BHuman " << options.team << " #" << options.number << " field=" << options.field << " localization=" << options.localization << " motionSubframes=" << options.motionSubframes << std::endl;
+        std::cout << "[HSL] native B-Human K1 model=K1BHuman " << options.team << " #" << options.number << " field=" << options.field << " localization=" << options.localization << " motionSubframes=" << options.motionSubframes
+                  << " players=" << options.players << " strategy=" << (options.players > 7 ? "s11v11" : "s5v5") << std::endl;
       }
       {
         std::unique_lock<std::mutex> lock(runtime.mutex);
@@ -163,7 +172,8 @@ int main(int argc, char** argv)
               << (runtime.timestamp - runtime.ball.timeWhenLastSeen) * .001 << ',' << runtime.ball.estimate.position.x() << ',' << runtime.ball.estimate.position.y() << ',' << runtime.motionInfo.isKicking() << ','
               << runtime.gcState << ',' << runtime.gcTime << ',' << runtime.cognitionTime << ',' << runtime.motionTicks << ',' << runtime.motionInfo.lastMotionPhaseStarted << ','
               << static_cast<float>(runtime.odometry.rotation) << ',' << runtime.imuYaw << ',' << runtime.nativeYaw << ',' << runtime.frame.gyro[2] << ','
-              << runtime.cognitionOdometry.translation.x() << ',' << runtime.cognitionOdometry.translation.y() << ',' << static_cast<float>(runtime.cognitionOdometry.rotation) << ',' << runtime.policy << ',' << runtime.walkInferences << ',' << runtime.kickInferences << ',' << runtime.policyTime << ',' << static_cast<int>(runtime.estimate.quality) << ',' << runtime.teamSent << ',' << runtime.teamReceived << ',' << runtime.teamUnsynchronized << '\n';
+              << runtime.cognitionOdometry.translation.x() << ',' << runtime.cognitionOdometry.translation.y() << ',' << static_cast<float>(runtime.cognitionOdometry.rotation) << ',' << runtime.policy << ',' << runtime.walkInferences << ',' << runtime.kickInferences << ',' << runtime.policyTime << ',' << static_cast<int>(runtime.estimate.quality) << ',' << runtime.teamSent << ',' << runtime.teamReceived << ',' << runtime.teamUnsynchronized << ','
+              << runtime.tactic << ',' << runtime.position << ',' << runtime.behaviorRole << '\n';
       if(++frames % 100 == 0)
         std::cout << "[HSL] t=" << runtime.frame.time << " pm=" << runtime.frame.mode << " h=" << runtime.frame.position[2]
                   << " pose=" << runtime.estimate.translation.transpose() << " motion=" << TypeRegistry::getEnumName(runtime.motion.motion)
