@@ -1,5 +1,7 @@
 # B-Human 2026 接入 dancer-rcssservermj
 
+适配原理、相对官方代码的逐项差异与教学实验见 [rcssservermj 适配教学文档](RCSSSERVERMJ_ADAPTATION.zh-CN.md)。
+
 分支为 `test/HSLServer`，基于官方 Code Release 2026 `2e3374ba8`。
 本地 `master` 也已更新到该版本。之前基于 2025 的适配保存在 Git 备份标签
 `backup/HSLServer-2025-before-2026`（包含当时未提交的源码和配置）。
