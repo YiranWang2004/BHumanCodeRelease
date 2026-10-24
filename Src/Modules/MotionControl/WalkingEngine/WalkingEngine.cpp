@@ -21,6 +21,10 @@ MAKE_MODULE(WalkingEngine);
 extern void bhumanRCSSPolicyInference(const char* model);
 extern bool bhumanRCSSFastMaxKick();
 extern void bhumanRCSSKickCommand(float strong, float inaccurate, float allowDeviation, float targetSpeed);
+extern bool bhumanRCSSDancerActive();
+extern float bhumanRCSSDancerForwardSpeed();
+extern bool bhumanRCSSDancerStep(bool entryRequested, bool standing, const Pose2f& speed,
+                               float direction, const Vector2f& ball, unsigned nativeFlags, JointAngles& target, bool& kicking);
 #endif
 
 WalkingEngine::WalkingEngine():
@@ -55,6 +59,18 @@ WalkingEngine::WalkingEngine():
   offset.angles[Joints::rAnklePitch] = -0.25f;
 
   resetHistoryData();
+
+#ifdef BHUMAN_RCSS_SERVER
+  // Use the same forward ceiling as the AMP actor before constructing the
+  // translation polygons. Other directions, speed tiers and coupling remain
+  // governed by the existing walking configuration.
+  if(const float forwardSpeed = bhumanRCSSDancerForwardSpeed(); forwardSpeed > 0.f)
+  {
+    configuredParameters.fastWalkSpeed.maxSpeed.translation.x() = forwardSpeed;
+    configuredParameters.maxPossibleSpeed.maxSpeed.translation.x() = forwardSpeed;
+    commonSpeedParameters.xTargetScaling.walkSpeed.max = forwardSpeed;
+  }
+#endif
 
   const DummyPhase dummy(MotionPhase::playDead);
   WalkPhase phase(*this, Pose2f(), dummy);
@@ -712,6 +728,26 @@ WalkPhase::WalkPhase(WalkingEngine& engine, Pose2f useStepTarget, const MotionPh
 
 void WalkPhase::getNextTargetRequest(JointAngles& target)
 {
+#ifdef BHUMAN_RCSS_SERVER
+  const bool dancerBallRequest = engine.ballNetworkParameters.active &&
+    (engine.theMotionRequest.motion == MotionRequest::walkToBallAndKick || engine.theMotionRequest.motion == MotionRequest::dribble);
+  // These flags are diagnostic only. Dancer owns the transition once a ball
+  // request starts its session; transient native branches cannot cancel it.
+  const unsigned dancerNativeFlags = (engine.theMotionRequest.shouldInterceptBall ? 1u : 0u) |
+    (engine.theMotionRequest.shouldWalkOutOfBallLine ? 2u : 0u) |
+    (!engine.theMotionRequest.obstacleAvoidance.path.empty() ? 4u : 0u) |
+    (shouldStop ? 8u : 0u) | (type == MotionPhase::stand ? 16u : 0u);
+  const float dancerDirection = engine.theMotionRequest.targetDirection -
+    (engine.theOdometryDataPreview.rotation - engine.theMotionRequest.odometryData.rotation);
+  if(bhumanRCSSDancerStep(dancerBallRequest, type == MotionPhase::stand, step, dancerDirection,
+                          engine.theMotionRequest.ballEstimate.position, dancerNativeFlags, target, wasKicking))
+  {
+    if(wasKicking) type = MotionPhase::walk;
+    frequency = wasKicking ? 1.8f : engine.frequencyParametersWalk.base;
+    rawFrequency = 0.f;
+    return;
+  }
+#endif
   engine.updateHistoryData(lastTarget);
   ASSERT(engine.historyBuffer.full());
   const Angle odometryRotation = engine.theOdometryDataPreview.rotation - engine.theMotionRequest.odometryData.rotation;
@@ -987,7 +1023,11 @@ bool WalkPhase::isDone(const MotionRequest& motionRequest) const
 
 void WalkPhase::calcJoints(const MotionRequest&, JointRequest& jointRequest, Pose2f& odometryOffset, MotionInfo& motionInfo)
 {
-  calcArmJoints(jointRequest);
+  bool dancer = false;
+#ifdef BHUMAN_RCSS_SERVER
+  dancer = bhumanRCSSDancerActive();
+#endif
+  if(!dancer) calcArmJoints(jointRequest);
 
   jointRequest.angles[Joints::waistYaw] = 0_deg;
 
@@ -997,7 +1037,7 @@ void WalkPhase::calcJoints(const MotionRequest&, JointRequest& jointRequest, Pos
   {
     if(j == Joints::headPitch || j == Joints::headYaw)
       continue;
-    if(std::find(jointList.begin(), jointList.end(), j) != jointList.end())
+    if((dancer && j != Joints::waistYaw) || std::find(jointList.begin(), jointList.end(), j) != jointList.end())
     {
       lastTarget.angles[j] = nextTarget.angles[j];
       jointRequest.angles[j] = lastTarget.angles[j];
@@ -1007,7 +1047,7 @@ void WalkPhase::calcJoints(const MotionRequest&, JointRequest& jointRequest, Pos
       jointRequest.angles[j] = startTarget.angles[j] * (1.f - armInterpolation) + jointRequest.angles[j] * armInterpolation;
   }
 
-  if(type == MotionPhase::stand)
+  if(type == MotionPhase::stand && !dancer)
   {
     const float ratio = (std::sin((engine.theFrameInfo.time / 500.f) * Constants::pi2) + 1.f) / 2.f;
     jointRequest.stiffnessData.stiffnesses[Joints::lAnklePitch] = static_cast<int>(engine.standAnkleStiffness.min * ratio + (1.f - ratio) * engine.standAnkleStiffness.max);

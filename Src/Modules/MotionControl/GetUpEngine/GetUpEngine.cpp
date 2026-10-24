@@ -16,6 +16,7 @@ MAKE_MODULE(GetUpEngine);
 
 #ifdef BHUMAN_RCSS_SERVER
 extern void bhumanRCSSGetUpInference(const char* model);
+extern std::unique_ptr<MotionPhase> bhumanRCSSDancerGetUp(const WalkGenerator& generator);
 #endif
 
 GetUpEngine::GetUpEngine() :
@@ -152,6 +153,9 @@ void GetUpEngine::update(GetUpGenerator& theGetUpGenerator)
 
   theGetUpGenerator.createPhase = [this](const MotionPhase&)->std::unique_ptr<MotionPhase>
   {
+#ifdef BHUMAN_RCSS_SERVER
+    if(auto phase = bhumanRCSSDancerGetUp(theWalkGenerator)) return phase;
+#endif
     return std::make_unique<GetUpPhase>(*this);
   };
 }

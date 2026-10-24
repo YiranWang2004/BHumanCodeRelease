@@ -46,10 +46,13 @@ Options arguments(int argc, char** argv)
                 << "  --host HOST --port PORT --team NAME --team-id N\n"
                 << "  --num N --num-players N --role goal_keeper|striker\n"
                 << "  --robot K1|T1 (default K1) --field fifa7vs7\n"
+                << "  --server-model K1|K1BHuman|T1BHuman (temporary defaults: K1 / T1BHuman)\n"
                 << "  --localization truth|measured (default truth) --sim-speed FACTOR\n"
                 << "  --strategy current|balanced|attacking (default current)\n"
-                << "  --kick-mode fast-max|native (measured only; default fast-max)\n"
-                << "    truth always uses strong/max speed with allow_deviation=0\n"
+                << "  --motion-policy native|dancer (default native; dancer requires K1)\n"
+                << "  --kick-mode fast-max|native (native motion, measured only; default fast-max)\n"
+                << "    native truth uses strong/max speed with allow_deviation=0\n"
+                << "    dancer uses tactical direction, command=(1,0,1), gait=1.8 Hz\n"
                 << "  --assets-dir PATH --beam-x X --beam-y Y --beam-theta DEG\n"
                 << "  --log (save CSV in repository logs/; default off)\n"
                 << "  --monitor [--monitor-host HOST] [--monitor-port PORT] (UDP; default off, 127.0.0.1:10190)\n"
@@ -73,9 +76,11 @@ Options arguments(int argc, char** argv)
     else if(key == "--num-players") options.players = integer();
     else if(key == "--role") options.role = value;
     else if(key == "--robot") options.robot = value;
+    else if(key == "--server-model") options.serverModel = value;
     else if(key == "--field") options.field = value;
     else if(key == "--localization") options.localization = value;
     else if(key == "--strategy") options.strategy = value;
+    else if(key == "--motion-policy") options.motionPolicy = value;
     else if(key == "--kick-mode") options.kickMode = value;
     else if(key == "--sim-speed") options.speed = numeric(value);
     else if(key == "--assets-dir") options.assets = value;
@@ -99,6 +104,13 @@ Options arguments(int argc, char** argv)
     else throw std::runtime_error("Unknown option: " + key);
   }
   if(options.robot != "K1" && options.robot != "T1") throw std::runtime_error("--robot must be K1 or T1");
+  // Temporary standard K1 experiment; explicit K1BHuman restores the old model.
+  if(options.serverModel.empty()) options.serverModel = options.robot == "K1" ? "K1" : "T1BHuman";
+  if((options.robot == "K1" && options.serverModel != "K1" && options.serverModel != "K1BHuman") ||
+     (options.robot == "T1" && options.serverModel != "T1BHuman"))
+    throw std::runtime_error("--server-model does not match --robot");
+  if(options.motionPolicy != "native" && options.motionPolicy != "dancer") throw std::runtime_error("--motion-policy must be native or dancer");
+  if(options.motionPolicy == "dancer" && options.robot != "K1") throw std::runtime_error("Dancer motion policies require --robot K1");
   if(options.localization != "truth" && options.localization != "measured") throw std::runtime_error("--localization must be truth or measured");
   if(options.strategy != "current" && options.strategy != "balanced" && options.strategy != "attacking") throw std::runtime_error("--strategy must be current, balanced or attacking");
   if(options.kickMode != "fast-max" && options.kickMode != "native") throw std::runtime_error("--kick-mode must be fast-max or native");
@@ -155,9 +167,18 @@ std::string Runtime::action() const
     const float stiffness = desired == JointAngles::off || desired == JointAngles::ignore ? 0.f : std::clamp(request.stiffnessData.stiffnesses[joint] * .01f, 0.f, 1.f);
     const float target = stiffness > 0.f ? desired + static_cast<float>(calibration.offsets[joint]) : static_cast<float>(measurements.angles[joint]);
     // Match SimulatedRobot3D: native 2026 requests use the selected PD gains.
-    const float torque = 0.f;
+    const bool dancerRecovery = options.motionPolicy == "dancer" && dancerRecoveryCommand &&
+      dancerRecoverySequence == sequence && motionInfo.executedPhase == MotionPhase::getUp;
+    const float torque = dancerRecovery ? dancerRecoveryTau[i] * stiffness : 0.f;
     if(!std::isfinite(target + torque)) throw std::runtime_error("Non-finite B-Human joint command");
-    result << '(' << actuators[i] << ' ' << target * 180.f / Constants::pi << " 0 " << gains.p * stiffness << ' ' << gains.d * stiffness << ' ' << torque << ' ' << gains.maxTorque << ')';
+    const bool dancer = options.motionPolicy == "dancer" && dancerCommand && dancerSequence == sequence && i >= 2 &&
+                        (motionInfo.executedPhase == MotionPhase::walk || motionInfo.executedPhase == MotionPhase::stand);
+    const double kp = dancerRecovery ? 0. : dancer ? dancerKp[i] : gains.p;
+    const double kd = dancerRecovery ? dancerRecoveryKd[i] : dancer ? dancerKd[i] : gains.d;
+    result << '(' << actuators[i] << ' ' << target * 180.f / Constants::pi << " 0 " << kp * stiffness << ' ' << kd * stiffness << ' ' << torque;
+    // Standard K1 uses its XML joint force limits and native MuJoCo PD.
+    if(options.serverModel != "K1") result << ' ' << gains.maxTorque;
+    result << ')';
   }
   return result.str();
 }
@@ -166,6 +187,11 @@ std::string Runtime::action() const
 bool bhumanRCSSTruthMode()
 {
   return rcss::Runtime::get().options.localization == "truth";
+}
+
+bool bhumanRCSSStandardK1()
+{
+  return rcss::Runtime::get().options.serverModel == "K1";
 }
 
 Strategy::Type bhumanRCSSStrategy()

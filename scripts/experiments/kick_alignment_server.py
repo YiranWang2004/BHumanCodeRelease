@@ -17,8 +17,10 @@ out = open(sys.argv[4], 'w', buffering=1)
 class Restore(MonitorCommand):
 
     def perform(self, ci):
-        ci.request_place_ball((*scene['ball'], 0.11), (0, 0, 0))
-        if scene['kind'] == 'kickin':
+        ci.request_place_ball((*scene['ball'], 0.11), tuple(scene.get('velocity', (0, 0, 0))))
+        if scene['kind'] == 'incoming':
+            ci.referee.play_on()
+        elif scene['kind'] == 'kickin':
             ci.referee.throw_in(TeamSide.LEFT)
         else:
             ci.referee.free_kick(TeamSide.LEFT)
@@ -32,6 +34,8 @@ class Parser(SoccerCommandParser):
 
 class Sim(SoccerSimulation):
     started = None
+    first_contact = None
+    ball_repositioned = False
 
     def _post_step(self, commands):
         super()._post_step(commands)
@@ -54,7 +58,15 @@ class Sim(SoccerSimulation):
                             j.qvel[0] = 0
         if self.started is not None:
             actor = next((p for p in self.sim_agents if p.agent_id.player_no == 4))
-            out.write(json.dumps(dict(t=self.sim_time, ball=self.ball.xpos.tolist(), vel=self.ball._qvel[:3].tolist(), actor=actor.xpos.tolist(), contact=str(self.ball.active_contact), parts=sorted(self.ball.active_contact_body_parts or []), mode=self.game_state.play_mode.value)) + '\n')
+            parts = sorted(self.ball.active_contact_body_parts or [])
+            if self.first_contact is None and any('r-0-4-' in p and 'foot' in p for p in parts):
+                self.first_contact = self.sim_time
+            if scene.get('force_exit_after_contact') and self.first_contact is not None and not self.ball_repositioned and self.sim_time - self.first_contact >= .5:
+                qw, qx, qy, qz = actor.xquat
+                yaw = math.atan2(2 * (qw*qz + qx*qy), 1 - 2 * (qy*qy + qz*qz))
+                self.request_place_ball((actor.xpos[0] + 12 * math.cos(yaw), actor.xpos[1] + 12 * math.sin(yaw), .11), (0, 0, 0))
+                self.ball_repositioned = True
+            out.write(json.dumps(dict(t=self.sim_time, ball=self.ball.xpos.tolist(), vel=self.ball._qvel[:3].tolist(), actor=actor.xpos.tolist(), actor_velocity=actor._qvel.tolist(), actor_quaternion=actor.xquat.tolist(), contact=str(self.ball.active_contact), parts=parts, mode=self.game_state.play_mode.value, ball_repositioned=self.ball_repositioned)) + '\n')
 logging.basicConfig(level=logging.INFO)
 sim = Sim(field=create_soccer_field('fifa7vs7'), rules=create_soccer_rule_book('ssim'), bhuman_physics=True)
 server = SoccerSimServer(sim, agent_port=int(sys.argv[1]), monitor_port=int(sys.argv[2]), sync_mode=True, real_time=False, render=False)

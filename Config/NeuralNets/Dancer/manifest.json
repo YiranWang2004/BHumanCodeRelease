@@ -1,0 +1,18 @@
+{
+  "source_repository": "dancer-robocupdemo",
+  "source_branch": "test/7vs7",
+  "source_commit": "aba39596950847771d9ab558a00afab995ff8335",
+  "sha256": {
+    "amp_vel/2026-10-04_10-24-37.onnx": "0d044e509de3ae231735cbaf41c8660b1b460a59de9ca39b1a408977bd885a5b",
+    "student/5070Ti_equivariant_student.onnx": "c9bc1be6e373145ceccd6d0bd3036b68386909ad33d272c865218b1a4c1fb68e",
+    "amp.json": "9fb50472b3001bcb66677c40375ba1a82d7be60d3ac003df62e640fe51eb9e85",
+    "visualkick.json": "a6e85e27d46ae4a1a43cfa8f1f03d8ac51b14e7a3373eb4c8bf66993ec8c4327",
+    "recovery_mjlab/model_4999.onnx": "0f5eec629d9f3b22600f1378e8f5f6518f9280facbf8ab617bef28cf6ed87852",
+    "getup.json": "8a360f19f346e5ec24dccbda70adea39d40d073ac495d2c9903f595514deb20d"
+  },
+  "deployment_overrides": {
+    "amp_forward_limit_m_s": 2.5,
+    "planner_scope": "RCSS standard K1 with --motion-policy dancer",
+    "evidence": "reports/dancer_amp_speed_results.json"
+  }
+}

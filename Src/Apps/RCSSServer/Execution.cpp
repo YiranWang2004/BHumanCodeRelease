@@ -2,6 +2,7 @@
 #include "Representations/BehaviorControl/StrategyStatus.h"
 #include "Representations/BehaviorControl/ActivationGraph.h"
 #include "Representations/BehaviorControl/SkillRequest.h"
+#include "Tools/BehaviorControl/Strategy/ActiveRole.h"
 #include "Representations/Modeling/GlobalOpponentsModel.h"
 #include "Framework/Blackboard.h"
 #include "Framework/Configuration.h"
@@ -18,6 +19,8 @@
 #include "Streaming/Global.h"
 #include <chrono>
 #include <iostream>
+
+extern void bhumanRCSSDancerMotionInterrupted();
 
 // Keep the original 2026 Color/Cognition/Motion module graphs and inter-thread
 // representations. Only their frame source is replaced with server frames.
@@ -72,6 +75,8 @@ class RCSSFrame : public BHExecutionUnit
         static_cast<const GameState&>(Blackboard::getInstance()["GameState"]).state == GameState::opponentKickOff;
       const bool preparingKickoff = r.frame.mode.rfind("KickOff", 0) == 0 && r.gcState != STATE_PLAYING;
       const bool directPlacement = r.frame.mode == "BeforeKickOff" || r.frame.mode.rfind("Goal_", 0) == 0;
+      r.dancerForcedStop = directPlacement || otherKickoff || nativeKickoffWait || preparingKickoff || r.frame.penalized ||
+        r.options.debugWalk || r.options.debugStand || r.frame.stopped;
       if(directPlacement || otherKickoff || nativeKickoffWait || preparingKickoff || r.frame.penalized) request.motion = MotionRequest::stand;
     }
   }
@@ -93,8 +98,15 @@ class RCSSFrame : public BHExecutionUnit
       if(r.options.monitor && blackboard.exists("GlobalOpponentsModel"))
         for(const auto& opponent : static_cast<const GlobalOpponentsModel&>(blackboard["GlobalOpponentsModel"]).opponents)
           r.opponents.push_back(opponent.position);
+      r.dancerBallOwner = false;
       if(blackboard.exists("SkillRequest"))
-        r.skill = TypeRegistry::getEnumName(static_cast<const SkillRequest&>(blackboard["SkillRequest"]).skill);
+      {
+        const auto skill = static_cast<const SkillRequest&>(blackboard["SkillRequest"]).skill;
+        r.skill = TypeRegistry::getEnumName(skill);
+        // Set plays can assign a ball skill without the normal playBall role.
+        r.dancerBallOwner = skill == SkillRequest::shoot || skill == SkillRequest::pass ||
+          skill == SkillRequest::dribble || skill == SkillRequest::clear || skill == SkillRequest::waitShoot;
+      }
       if(blackboard.exists("ActivationGraph"))
         for(const auto& node : static_cast<const ActivationGraph&>(blackboard["ActivationGraph"]).graph)
         {
@@ -111,6 +123,8 @@ class RCSSFrame : public BHExecutionUnit
         r.tactic = TypeRegistry::getEnumName(status.acceptedTactic);
         r.setPlay = TypeRegistry::getEnumName(status.acceptedSetPlay);
         r.role = TypeRegistry::getEnumName(status.role);
+        r.dancerBallOwner |= status.role == ActiveRole::toRole(ActiveRole::playBall) ||
+          status.role == ActiveRole::toRole(ActiveRole::kickOffForward);
         r.position = TypeRegistry::getEnumName(status.position);
       }
       if(blackboard.exists("GameControllerData"))
@@ -119,10 +133,12 @@ class RCSSFrame : public BHExecutionUnit
         r.gcState = data.state; r.gcTime = data.timeLastPacketReceived;
       }
       if(blackboard.exists("FrameInfo")) r.cognitionTime = static_cast<const FrameInfo&>(blackboard["FrameInfo"]).time;
+      r.dancerGameAllowed = false;
       if(blackboard.exists("GameState"))
       {
         const auto& state = static_cast<const GameState&>(blackboard["GameState"]);
         r.gameState = state.state; r.playerState = state.playerState;
+        r.dancerGameAllowed = state.isPlaying() && !state.stopped && !state.isPenalized() && !state.isForOpponentTeam();
       }
       if(blackboard.exists("TeamData"))
       {
@@ -147,6 +163,8 @@ class RCSSFrame : public BHExecutionUnit
       copy("JointAngles", r.measurements);
       copy("MotionRequest", r.motion);
       copy("MotionInfo", r.motionInfo);
+      if(r.motionInfo.executedPhase != MotionPhase::walk && r.motionInfo.executedPhase != MotionPhase::stand)
+        bhumanRCSSDancerMotionInterrupted();
       if(blackboard.exists("InertialSensorData")) r.imuYaw = static_cast<const InertialSensorData&>(blackboard["InertialSensorData"]).angle.z();
       if(blackboard.exists("InertialData")) r.nativeYaw = Rotation::Euler::getZAngle(static_cast<const InertialData&>(blackboard["InertialData"]).orientation3D);
       if(blackboard.exists("OdometryData")) r.odometry = static_cast<const OdometryData&>(blackboard["OdometryData"]);

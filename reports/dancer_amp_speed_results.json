@@ -1,0 +1,3795 @@
+{
+  "date": "2026-10-25",
+  "scope": "Current dancer AMP, standard K1, fifa7vs7, --bhuman-physics (2 ms Euler), inference/network 20 ms",
+  "conclusion_zh": [
+    "只提高前进 command 确实可提速；完整客户端 2.0/2.5/3.0 command 的实际稳态前进速度约为 1.75/2.14/2.52 m/s。",
+    "2.5 m/s 可作为受控试用上限，不是已证明的安全上限；它通过本轮两向交接测试，但切入姿态波动比基线更大。",
+    "不能认定扩大 command 后仍与原来同样平稳。3.0 m/s 首次交接最大倾角约28度；3.5 m/s 完整客户端直行5次中4次摔倒。",
+    "2.25 m/s 也有一次球移远压力测试中的退出交接附近失稳；在切回 AMP 前，机身已开始下坠，无法仅凭该个例归因于 AMP command 大小。",
+    "正式速度配置、交接条件、policy 权重、机器人模型和服务器物理未修改。仅新增或扩展实验脚本及隔离测试配置。"
+  ],
+  "current_limits": {
+    "amp_input": [
+      2.0,
+      1.75,
+      3.0
+    ],
+    "units": [
+      "m/s",
+      "m/s",
+      "rad/s"
+    ],
+    "planner_forward_normal": 1.25,
+    "planner_forward_fast": 2.0,
+    "planner_back_fast": 1.0,
+    "planner_side_fast": 1.5,
+    "planner_yaw_fast_deg_s": 120
+  },
+  "change_points_if_later_authorized": [
+    "Config/Robots/SimulatedK1/walkingEngine.cfg: fastWalkSpeed/maxPossibleSpeed/xTargetScaling，normalWalkSpeed单独选择",
+    "Config/NeuralNets/Dancer/amp.json: velocity_limits；当前x限幅对称，应继续保留规划层后退限制",
+    "保留转弯与横移耦合限速；本轮未支持整体等比例放大所有方向",
+    "VisualKick 的固定 command=(1,0,1) 与1.8Hz步频不受 AMP 的 velocity_limits 影响"
+  ],
+  "method": {
+    "straight": "Each command has 5 full-client runs with >=14 s PlayOn. Body-forward speed integrated from truth position/yaw over seconds 4..9. Original repeat block 4 excluded as a whole and replaced by a fresh block after a monitor-thread lifecycle fix; one original trial only had 8.21 s PlayOn. All raw trials retained.",
+    "natural_handoff": "Each profile: 9 trials, 14 m initial ball range, heading offsets 0/+25/-25 degrees, 3 repeats with small pose perturbations, 35 s per trial; one real B-Human player 4, no opponents, current perception/head/ownership/gate code.",
+    "controlled_exit": "Each profile: 3 additional 20 s trials. .5 s after first foot contact, the test-only server places the ball 12 m ahead to trigger ball_out_of_range. This is a stress fixture, not a natural-match fall-rate estimate.",
+    "entry_window": "From entry_settle start to 2 s after VisualKick entry. Residual speed is mean server truth horizontal speed during the final .1 s before policy switch. Tilt is root angle from upright.",
+    "exit_window": "From actual VisualKick to AMP policy switch until min(2 s later, next VisualKick entry); native fall/get-up phase or physical height<.35 m or tilt>45 degrees counts as failure.",
+    "all_vs_first_entries": "All-event totals include re-entry after a completed session. The first-entry table includes 12 initial approaches per profile.",
+    "direction_metrics": "Handoff analysis does not use legacy kick_alignment report error_deg/success; some early reports used the native direction field. Final analysis uses physical foot contact, truth motion and policy transitions only.",
+    "limitations": [
+      "单机、有限初始姿态和短时测试，不能给出整场7v7的可靠摔倒率或证明统计等效。",
+      "未核实该ONNX准确对应训练run的command采样范围；部署限幅不等于训练或稳定性上限。",
+      "独立policy物理测试与完整客户端测试存在差异，最终建议优先依据完整客户端。",
+      "3.25 m/s虽通过5次短直行，但没有踢球衔接测试，不作为综合推荐上限。"
+    ]
+  },
+  "straight": {
+    "method": "Each command has 5 full-client runs with >=14 s PlayOn. Body-forward speed integrated from truth position/yaw over seconds 4..9. Original repeat block 4 excluded as a whole and replaced by a fresh block after a monitor-thread lifecycle fix; one original trial only had 8.21 s PlayOn. All raw trials retained.",
+    "groups": [
+      {
+        "command": 2.0,
+        "trials": 5,
+        "mean_actual": 1.7517549931741,
+        "actual_min": 1.7492053161448031,
+        "actual_max": 1.754176750463266,
+        "falls": 0,
+        "min_height": 0.483
+      },
+      {
+        "command": 2.25,
+        "trials": 5,
+        "mean_actual": 1.9464704121814385,
+        "actual_min": 1.9447405708351986,
+        "actual_max": 1.9495418924472678,
+        "falls": 0,
+        "min_height": 0.474
+      },
+      {
+        "command": 2.5,
+        "trials": 5,
+        "mean_actual": 2.1403076287596177,
+        "actual_min": 2.1382634902510476,
+        "actual_max": 2.142289550344803,
+        "falls": 0,
+        "min_height": 0.463
+      },
+      {
+        "command": 3.0,
+        "trials": 5,
+        "mean_actual": 2.5176235824843594,
+        "actual_min": 2.51072879996701,
+        "actual_max": 2.523867341429171,
+        "falls": 0,
+        "min_height": 0.434
+      },
+      {
+        "command": 3.25,
+        "trials": 5,
+        "mean_actual": 2.7150189225087247,
+        "actual_min": 2.703088846016717,
+        "actual_max": 2.7206052964638836,
+        "falls": 0,
+        "min_height": 0.409
+      },
+      {
+        "command": 3.5,
+        "trials": 5,
+        "mean_actual": 2.8383993138381887,
+        "actual_min": 2.8359177305327288,
+        "actual_max": 2.8405753117734247,
+        "falls": 4,
+        "min_height": 0.058
+      }
+    ],
+    "trials": [
+      {
+        "path": "logs/dancer-motion-3w7fpc0h/dancer_2_0_0_trial1/client.csv",
+        "command": 2.0,
+        "actual": 1.754176750463266,
+        "seconds": 15.21,
+        "min_height": 0.484,
+        "fall": false,
+        "fall_time": null
+      },
+      {
+        "path": "logs/dancer-motion-3w7fpc0h/dancer_2_0_0_trial3/client.csv",
+        "command": 2.0,
+        "actual": 1.7492053161448031,
+        "seconds": 15.83,
+        "min_height": 0.483,
+        "fall": false,
+        "fall_time": null
+      },
+      {
+        "path": "logs/dancer-motion-3w7fpc0h/dancer_3.25_0_0_trial1/client.csv",
+        "command": 3.25,
+        "actual": 2.714351523553363,
+        "seconds": 15.65,
+        "min_height": 0.41,
+        "fall": false,
+        "fall_time": null
+      },
+      {
+        "path": "logs/dancer-motion-3w7fpc0h/dancer_2.5_0_0_trial0/client.csv",
+        "command": 2.5,
+        "actual": 2.142289550344803,
+        "seconds": 15.31,
+        "min_height": 0.464,
+        "fall": false,
+        "fall_time": null
+      },
+      {
+        "path": "logs/dancer-motion-3w7fpc0h/dancer_2.5_0_0_trial1/client.csv",
+        "command": 2.5,
+        "actual": 2.140088230498772,
+        "seconds": 15.61,
+        "min_height": 0.463,
+        "fall": false,
+        "fall_time": null
+      },
+      {
+        "path": "logs/dancer-motion-3w7fpc0h/dancer_3.25_0_0_trial0/client.csv",
+        "command": 3.25,
+        "actual": 2.7206052964638836,
+        "seconds": 15.27,
+        "min_height": 0.409,
+        "fall": false,
+        "fall_time": null
+      },
+      {
+        "path": "logs/dancer-motion-3w7fpc0h/dancer_2.5_0_0_trial3/client.csv",
+        "command": 2.5,
+        "actual": 2.140444735950311,
+        "seconds": 15.57,
+        "min_height": 0.463,
+        "fall": false,
+        "fall_time": null
+      },
+      {
+        "path": "logs/dancer-motion-3w7fpc0h/dancer_3.25_0_0_trial2/client.csv",
+        "command": 3.25,
+        "actual": 2.703088846016717,
+        "seconds": 15.91,
+        "min_height": 0.413,
+        "fall": false,
+        "fall_time": null
+      },
+      {
+        "path": "logs/dancer-motion-3w7fpc0h/dancer_3.25_0_0_trial3/client.csv",
+        "command": 3.25,
+        "actual": 2.7171622655944936,
+        "seconds": 15.55,
+        "min_height": 0.411,
+        "fall": false,
+        "fall_time": null
+      },
+      {
+        "path": "logs/dancer-motion-3w7fpc0h/dancer_3.5_0_0_trial3/client.csv",
+        "command": 3.5,
+        "actual": 2.8359177305327288,
+        "seconds": 15.370000000000001,
+        "min_height": 0.208,
+        "fall": true,
+        "fall_time": 14.61
+      },
+      {
+        "path": "logs/dancer-motion-3w7fpc0h/dancer_3.5_0_0_trial1/client.csv",
+        "command": 3.5,
+        "actual": 2.8379729356766648,
+        "seconds": 15.27,
+        "min_height": 0.384,
+        "fall": false,
+        "fall_time": null
+      },
+      {
+        "path": "logs/dancer-motion-3w7fpc0h/dancer_3.5_0_0_trial0/client.csv",
+        "command": 3.5,
+        "actual": 2.8405753117734247,
+        "seconds": 15.33,
+        "min_height": 0.06,
+        "fall": true,
+        "fall_time": 14.250000000000002
+      },
+      {
+        "path": "logs/dancer-motion-3w7fpc0h/dancer_3.5_0_0_trial2/client.csv",
+        "command": 3.5,
+        "actual": 2.8373294287491007,
+        "seconds": 15.69,
+        "min_height": 0.058,
+        "fall": true,
+        "fall_time": 14.83
+      },
+      {
+        "path": "logs/dancer-motion-3w7fpc0h/dancer_3_0_0_trial3/client.csv",
+        "command": 3.0,
+        "actual": 2.5190188710410197,
+        "seconds": 15.25,
+        "min_height": 0.436,
+        "fall": false,
+        "fall_time": null
+      },
+      {
+        "path": "logs/dancer-motion-3w7fpc0h/dancer_2_0_0_trial2/client.csv",
+        "command": 2.0,
+        "actual": 1.7528951270023463,
+        "seconds": 15.29,
+        "min_height": 0.484,
+        "fall": false,
+        "fall_time": null
+      },
+      {
+        "path": "logs/dancer-motion-3w7fpc0h/dancer_2_0_0_trial0/client.csv",
+        "command": 2.0,
+        "actual": 1.7526232395121821,
+        "seconds": 15.67,
+        "min_height": 0.484,
+        "fall": false,
+        "fall_time": null
+      },
+      {
+        "path": "logs/dancer-motion-3w7fpc0h/dancer_3_0_0_trial1/client.csv",
+        "command": 3.0,
+        "actual": 2.523867341429171,
+        "seconds": 15.51,
+        "min_height": 0.434,
+        "fall": false,
+        "fall_time": null
+      },
+      {
+        "path": "logs/dancer-motion-3w7fpc0h/dancer_3_0_0_trial2/client.csv",
+        "command": 3.0,
+        "actual": 2.5163777509381995,
+        "seconds": 15.530000000000001,
+        "min_height": 0.435,
+        "fall": false,
+        "fall_time": null
+      },
+      {
+        "path": "logs/dancer-motion-3w7fpc0h/dancer_2.5_0_0_trial2/client.csv",
+        "command": 2.5,
+        "actual": 2.1404521367531544,
+        "seconds": 15.690000000000001,
+        "min_height": 0.464,
+        "fall": false,
+        "fall_time": null
+      },
+      {
+        "path": "logs/dancer-motion-3w7fpc0h/dancer_3_0_0_trial0/client.csv",
+        "command": 3.0,
+        "actual": 2.518125149046397,
+        "seconds": 15.47,
+        "min_height": 0.436,
+        "fall": false,
+        "fall_time": null
+      },
+      {
+        "path": "logs/dancer-motion-hg_gz59d/dancer_3_0_0/client.csv",
+        "command": 3.0,
+        "actual": 2.51072879996701,
+        "seconds": 15.31,
+        "min_height": 0.435,
+        "fall": false,
+        "fall_time": null
+      },
+      {
+        "path": "logs/dancer-motion-hg_gz59d/dancer_2.5_0_0/client.csv",
+        "command": 2.5,
+        "actual": 2.1382634902510476,
+        "seconds": 15.91,
+        "min_height": 0.463,
+        "fall": false,
+        "fall_time": null
+      },
+      {
+        "path": "logs/dancer-motion-hg_gz59d/dancer_3.5_0_0/client.csv",
+        "command": 3.5,
+        "actual": 2.840201162459025,
+        "seconds": 15.39,
+        "min_height": 0.06,
+        "fall": true,
+        "fall_time": 14.61
+      },
+      {
+        "path": "logs/dancer-motion-hg_gz59d/dancer_3.25_0_0/client.csv",
+        "command": 3.25,
+        "actual": 2.7198866809151663,
+        "seconds": 15.75,
+        "min_height": 0.411,
+        "fall": false,
+        "fall_time": null
+      },
+      {
+        "path": "logs/dancer-motion-hg_gz59d/dancer_2_0_0/client.csv",
+        "command": 2.0,
+        "actual": 1.749874532747903,
+        "seconds": 15.23,
+        "min_height": 0.483,
+        "fall": false,
+        "fall_time": null
+      },
+      {
+        "path": "/home/robotics/ZJUDancer/BHumanCodeRelease/logs/dancer-motion-5o_35e09/dancer_2.25_0_0_trial4/client.csv",
+        "command": 2.25,
+        "actual": 1.945406575056833,
+        "seconds": 15.75,
+        "min_height": 0.475,
+        "fall": false,
+        "fall_time": null
+      },
+      {
+        "path": "/home/robotics/ZJUDancer/BHumanCodeRelease/logs/dancer-motion-5o_35e09/dancer_2.25_0_0_trial1/client.csv",
+        "command": 2.25,
+        "actual": 1.9495418924472678,
+        "seconds": 15.57,
+        "min_height": 0.474,
+        "fall": false,
+        "fall_time": null
+      },
+      {
+        "path": "/home/robotics/ZJUDancer/BHumanCodeRelease/logs/dancer-motion-5o_35e09/dancer_2.25_0_0_trial2/client.csv",
+        "command": 2.25,
+        "actual": 1.9463305058903217,
+        "seconds": 15.45,
+        "min_height": 0.474,
+        "fall": false,
+        "fall_time": null
+      },
+      {
+        "path": "/home/robotics/ZJUDancer/BHumanCodeRelease/logs/dancer-motion-5o_35e09/dancer_2.25_0_0_trial3/client.csv",
+        "command": 2.25,
+        "actual": 1.9463325166775707,
+        "seconds": 15.45,
+        "min_height": 0.475,
+        "fall": false,
+        "fall_time": null
+      },
+      {
+        "path": "/home/robotics/ZJUDancer/BHumanCodeRelease/logs/dancer-motion-5o_35e09/dancer_2.25_0_0_trial0/client.csv",
+        "command": 2.25,
+        "actual": 1.9447405708351986,
+        "seconds": 15.65,
+        "min_height": 0.475,
+        "fall": false,
+        "fall_time": null
+      }
+    ]
+  },
+  "handoff_combined": [
+    {
+      "command": 2.0,
+      "trials": 12,
+      "first_entry_falls": 0,
+      "all_entry_events": 18,
+      "all_entry_window_falls": 1,
+      "all_exit_events": 14,
+      "all_exit_window_falls": 0,
+      "whole_trial_falls": 1,
+      "foot_contact_trials": 12,
+      "pre_settle_speed_mean": 1.7542263051247078,
+      "at_kick_speed_mean": 1.2258733800579917,
+      "at_kick_speed_max": 1.5455068620523282,
+      "first_entry_peak_tilt": 11.179461252129542,
+      "first_entry_mean_peak_tilt": 9.090950753531827,
+      "first_entry_min_height": 0.46795516628888906
+    },
+    {
+      "command": 2.25,
+      "trials": 12,
+      "first_entry_falls": 0,
+      "all_entry_events": 19,
+      "all_entry_window_falls": 0,
+      "all_exit_events": 17,
+      "all_exit_window_falls": 1,
+      "whole_trial_falls": 1,
+      "foot_contact_trials": 12,
+      "pre_settle_speed_mean": 1.9483367044789337,
+      "at_kick_speed_mean": 1.4239857040196504,
+      "at_kick_speed_max": 1.7344372559559882,
+      "first_entry_peak_tilt": 15.244477309328257,
+      "first_entry_mean_peak_tilt": 10.21582708772059,
+      "first_entry_min_height": 0.452900651502898
+    },
+    {
+      "command": 2.5,
+      "trials": 12,
+      "first_entry_falls": 0,
+      "all_entry_events": 20,
+      "all_entry_window_falls": 0,
+      "all_exit_events": 18,
+      "all_exit_window_falls": 0,
+      "whole_trial_falls": 0,
+      "foot_contact_trials": 12,
+      "pre_settle_speed_mean": 2.134523524674805,
+      "at_kick_speed_mean": 1.643451819868536,
+      "at_kick_speed_max": 1.8783391818289645,
+      "first_entry_peak_tilt": 19.302764920905116,
+      "first_entry_mean_peak_tilt": 12.19148756458351,
+      "first_entry_min_height": 0.4297784129063647
+    },
+    {
+      "command": 3.0,
+      "trials": 12,
+      "first_entry_falls": 0,
+      "all_entry_events": 18,
+      "all_entry_window_falls": 0,
+      "all_exit_events": 16,
+      "all_exit_window_falls": 0,
+      "whole_trial_falls": 1,
+      "foot_contact_trials": 12,
+      "pre_settle_speed_mean": 2.2022248869982,
+      "at_kick_speed_mean": 1.7461846198244702,
+      "at_kick_speed_max": 2.188624554074516,
+      "first_entry_peak_tilt": 27.922050738777028,
+      "first_entry_mean_peak_tilt": 14.898743999793922,
+      "first_entry_min_height": 0.4274894665265165
+    }
+  ],
+  "handoff": {
+    "groups": [
+      {
+        "profile": 2.0,
+        "controlled_exit": false,
+        "trials": 9,
+        "first_entries": 9,
+        "first_entry_falls": 0,
+        "foot_contact_trials": 9,
+        "overall_falls": 1,
+        "entry_events": 12,
+        "entry_event_falls": 1,
+        "exit_events": 11,
+        "exit_event_falls": 0,
+        "exit_reasons": [
+          "referee_stop",
+          "session_timeout"
+        ],
+        "before_settle_speed_mean": 1.7567800550914356,
+        "at_kick_speed_mean": 1.24061438021085,
+        "at_kick_speed_max": 1.5455068620523282,
+        "first_entry_max_tilt": 9.893125180077718,
+        "first_entry_min_height": 0.46795516628888906,
+        "first_entry_mean_peak_tilt": 8.95348659251107,
+        "first_entry_max_angular_rate": 3.0473866883747394,
+        "settle_seconds": [
+          0.3
+        ],
+        "exit_max_tilt": 15.6924639763591,
+        "exit_min_height": 0.4543228865626439
+      },
+      {
+        "profile": 2.25,
+        "controlled_exit": false,
+        "trials": 9,
+        "first_entries": 9,
+        "first_entry_falls": 0,
+        "foot_contact_trials": 9,
+        "overall_falls": 0,
+        "entry_events": 13,
+        "entry_event_falls": 0,
+        "exit_events": 13,
+        "exit_event_falls": 0,
+        "exit_reasons": [
+          "referee_stop",
+          "session_timeout"
+        ],
+        "before_settle_speed_mean": 1.9451899884089507,
+        "at_kick_speed_mean": 1.4038928701746685,
+        "at_kick_speed_max": 1.7344372559559882,
+        "first_entry_max_tilt": 15.244477309328257,
+        "first_entry_min_height": 0.452900651502898,
+        "first_entry_mean_peak_tilt": 10.373057997803082,
+        "first_entry_max_angular_rate": 3.2048195838875855,
+        "settle_seconds": [
+          0.3,
+          0.31
+        ],
+        "exit_max_tilt": 16.242308676638494,
+        "exit_min_height": 0.452195968496007
+      },
+      {
+        "profile": 2.5,
+        "controlled_exit": false,
+        "trials": 9,
+        "first_entries": 9,
+        "first_entry_falls": 0,
+        "foot_contact_trials": 9,
+        "overall_falls": 0,
+        "entry_events": 14,
+        "entry_event_falls": 0,
+        "exit_events": 14,
+        "exit_event_falls": 0,
+        "exit_reasons": [
+          "referee_stop",
+          "session_timeout"
+        ],
+        "before_settle_speed_mean": 2.1377924088487377,
+        "at_kick_speed_mean": 1.6334366766785366,
+        "at_kick_speed_max": 1.8783391818289645,
+        "first_entry_max_tilt": 19.302764920905116,
+        "first_entry_min_height": 0.4297784129063647,
+        "first_entry_mean_peak_tilt": 12.330808942204698,
+        "first_entry_max_angular_rate": 3.23108028151463,
+        "settle_seconds": [
+          0.3
+        ],
+        "exit_max_tilt": 16.972329870623064,
+        "exit_min_height": 0.44992373714515527
+      },
+      {
+        "profile": 3.0,
+        "controlled_exit": false,
+        "trials": 9,
+        "first_entries": 9,
+        "first_entry_falls": 0,
+        "foot_contact_trials": 9,
+        "overall_falls": 1,
+        "entry_events": 12,
+        "entry_event_falls": 0,
+        "exit_events": 11,
+        "exit_event_falls": 0,
+        "exit_reasons": [
+          "none",
+          "referee_stop",
+          "session_timeout"
+        ],
+        "before_settle_speed_mean": 2.125356049168805,
+        "at_kick_speed_mean": 1.652216278261518,
+        "at_kick_speed_max": 2.188624554074516,
+        "first_entry_max_tilt": 22.944586655838673,
+        "first_entry_min_height": 0.42796596024617023,
+        "first_entry_mean_peak_tilt": 13.7733744630587,
+        "first_entry_max_angular_rate": 4.023213809996365,
+        "settle_seconds": [
+          0.3
+        ],
+        "exit_max_tilt": 11.944324448141073,
+        "exit_min_height": 0.44893797778623923
+      },
+      {
+        "profile": 2.0,
+        "controlled_exit": true,
+        "trials": 3,
+        "first_entries": 3,
+        "first_entry_falls": 0,
+        "foot_contact_trials": 3,
+        "overall_falls": 0,
+        "entry_events": 6,
+        "entry_event_falls": 0,
+        "exit_events": 3,
+        "exit_event_falls": 0,
+        "exit_reasons": [
+          "ball_out_of_range"
+        ],
+        "before_settle_speed_mean": 1.7465650552245244,
+        "at_kick_speed_mean": 1.1816503795994164,
+        "at_kick_speed_max": 1.2454606492676905,
+        "first_entry_max_tilt": 11.179461252129542,
+        "first_entry_min_height": 0.4714735495145723,
+        "first_entry_mean_peak_tilt": 9.503343236594098,
+        "first_entry_max_angular_rate": 3.0886201043239656,
+        "settle_seconds": [
+          0.3
+        ],
+        "exit_max_tilt": 9.356670506437307,
+        "exit_min_height": 0.4686244773876583
+      },
+      {
+        "profile": 2.25,
+        "controlled_exit": true,
+        "trials": 3,
+        "first_entries": 3,
+        "first_entry_falls": 0,
+        "foot_contact_trials": 3,
+        "overall_falls": 1,
+        "entry_events": 6,
+        "entry_event_falls": 0,
+        "exit_events": 4,
+        "exit_event_falls": 1,
+        "exit_reasons": [
+          "ball_out_of_range",
+          "referee_stop"
+        ],
+        "before_settle_speed_mean": 1.9577768526888824,
+        "at_kick_speed_mean": 1.4842642055545965,
+        "at_kick_speed_max": 1.673848927659211,
+        "first_entry_max_tilt": 11.030165380897637,
+        "first_entry_min_height": 0.4635116779791447,
+        "first_entry_mean_peak_tilt": 9.744134357473113,
+        "first_entry_max_angular_rate": 2.4738396319053506,
+        "settle_seconds": [
+          0.3
+        ],
+        "exit_max_tilt": 90.16856148977271,
+        "exit_min_height": 0.05879313511615305
+      },
+      {
+        "profile": 2.5,
+        "controlled_exit": true,
+        "trials": 3,
+        "first_entries": 3,
+        "first_entry_falls": 0,
+        "foot_contact_trials": 3,
+        "overall_falls": 0,
+        "entry_events": 6,
+        "entry_event_falls": 0,
+        "exit_events": 4,
+        "exit_event_falls": 0,
+        "exit_reasons": [
+          "ball_out_of_range",
+          "referee_stop"
+        ],
+        "before_settle_speed_mean": 2.1247168721530088,
+        "at_kick_speed_mean": 1.6734972494385343,
+        "at_kick_speed_max": 1.7935537305026819,
+        "first_entry_max_tilt": 14.082661437283381,
+        "first_entry_min_height": 0.4491220349749955,
+        "first_entry_mean_peak_tilt": 11.773523431719944,
+        "first_entry_max_angular_rate": 2.9524543210830694,
+        "settle_seconds": [
+          0.3
+        ],
+        "exit_max_tilt": 9.690353753153682,
+        "exit_min_height": 0.44661343555850663
+      },
+      {
+        "profile": 3.0,
+        "controlled_exit": true,
+        "trials": 3,
+        "first_entries": 3,
+        "first_entry_falls": 0,
+        "foot_contact_trials": 3,
+        "overall_falls": 0,
+        "entry_events": 6,
+        "entry_event_falls": 0,
+        "exit_events": 5,
+        "exit_event_falls": 0,
+        "exit_reasons": [
+          "ball_out_of_range",
+          "referee_stop"
+        ],
+        "before_settle_speed_mean": 2.4328314004863834,
+        "at_kick_speed_mean": 2.0280896445133267,
+        "at_kick_speed_max": 2.080426462839938,
+        "first_entry_max_tilt": 27.922050738777028,
+        "first_entry_min_height": 0.4274894665265165,
+        "first_entry_mean_peak_tilt": 18.274852609999588,
+        "first_entry_max_angular_rate": 4.34977324173081,
+        "settle_seconds": [
+          0.3,
+          0.31
+        ],
+        "exit_max_tilt": 12.138940969903624,
+        "exit_min_height": 0.44435670316966386
+      }
+    ],
+    "trials": [
+      {
+        "path": "logs/amp-speed-20261025/handoff-2/14_0_-25-r0-direct",
+        "case": "14_0_-25",
+        "repeat": 0,
+        "speed_profile": 2.0,
+        "controlled_exit": false,
+        "duration": 35.080000000007466,
+        "first_kick": 5.96,
+        "launch": 8.94,
+        "foot_contact": true,
+        "peak_ball_speed": 5.358648329253197,
+        "overall_fall": false,
+        "entries": [
+          {
+            "t": 5.960000000000612,
+            "settle_s": 0.29999999999999893,
+            "before_settle_speed": 1.7460484647335108,
+            "at_kick_speed": 1.487498243903095,
+            "max_approach_command": 2.0,
+            "min_height": 0.46939130166653986,
+            "max_tilt": 9.01053556566341,
+            "max_angular_rate": 2.485734264672051,
+            "fall": false,
+            "observed_seconds": 2.3000000000006775
+          },
+          {
+            "t": 21.61000000000061,
+            "settle_s": 0.3000000000000007,
+            "before_settle_speed": 1.8386286629159891,
+            "at_kick_speed": 1.1289757855659899,
+            "max_approach_command": 2.0,
+            "min_height": 0.4768710061375101,
+            "max_tilt": 20.150291686339113,
+            "max_angular_rate": 3.57122888540105,
+            "fall": false,
+            "observed_seconds": 2.319999999998714
+          }
+        ],
+        "exits": [
+          {
+            "t": 20.11000000000061,
+            "reason": "cooldown",
+            "exit_reason": "session_timeout",
+            "initial_speed": 2.082486366888762,
+            "max_next_command": 2.0,
+            "min_height": 0.4708179652221346,
+            "max_tilt": 5.522041074178591,
+            "max_angular_rate": 1.7703547184706467,
+            "fall": false,
+            "observed_seconds": 1.4999999999991687
+          },
+          {
+            "t": 32.86000000000061,
+            "reason": "referee_stop",
+            "exit_reason": "referee_stop",
+            "initial_speed": 2.2563966719559785,
+            "max_next_command": 0.652394,
+            "min_height": 0.49788411126953436,
+            "max_tilt": 4.413461526135044,
+            "max_angular_rate": 1.7524173035257675,
+            "fall": false,
+            "observed_seconds": 2.0000000000024443
+          }
+        ]
+      },
+      {
+        "path": "logs/amp-speed-20261025/handoff-2/14_0_-25-r1-direct",
+        "case": "14_0_-25",
+        "repeat": 1,
+        "speed_profile": 2.0,
+        "controlled_exit": false,
+        "duration": 35.18000000001253,
+        "first_kick": 5.8,
+        "launch": 8.78,
+        "foot_contact": true,
+        "peak_ball_speed": 5.069052863494256,
+        "overall_fall": false,
+        "entries": [
+          {
+            "t": 5.7999999999987555,
+            "settle_s": 0.3000000000000007,
+            "before_settle_speed": 1.7306799348346513,
+            "at_kick_speed": 1.1396940729185228,
+            "max_approach_command": 2.0,
+            "min_height": 0.47227149919676575,
+            "max_tilt": 8.218878558393333,
+            "max_angular_rate": 1.6543402922664794,
+            "fall": false,
+            "observed_seconds": 2.2999999999987253
+          }
+        ],
+        "exits": [
+          {
+            "t": 19.949999999998752,
+            "reason": "cooldown",
+            "exit_reason": "session_timeout",
+            "initial_speed": 1.1414728890872499,
+            "max_next_command": 2.0,
+            "min_height": 0.46678955858313365,
+            "max_tilt": 8.659278618296156,
+            "max_angular_rate": 1.7347191195298721,
+            "fall": false,
+            "observed_seconds": 2.0200000000024687
+          }
+        ]
+      },
+      {
+        "path": "logs/amp-speed-20261025/handoff-2/14_0_-25-r2-direct",
+        "case": "14_0_-25",
+        "repeat": 2,
+        "speed_profile": 2.0,
+        "controlled_exit": false,
+        "duration": 35.280000000005536,
+        "first_kick": 5.64,
+        "launch": 8.56,
+        "foot_contact": true,
+        "peak_ball_speed": 5.028324191524392,
+        "overall_fall": false,
+        "entries": [
+          {
+            "t": 5.640000000000489,
+            "settle_s": 0.29999999999999893,
+            "before_settle_speed": 1.730751825798748,
+            "at_kick_speed": 1.0845564909370984,
+            "max_approach_command": 2.0,
+            "min_height": 0.46795516628888906,
+            "max_tilt": 9.743071374667615,
+            "max_angular_rate": 2.2912312448694987,
+            "fall": false,
+            "observed_seconds": 2.300000000000768
+          }
+        ],
+        "exits": [
+          {
+            "t": 19.79000000000049,
+            "reason": "cooldown",
+            "exit_reason": "session_timeout",
+            "initial_speed": 2.019928515961175,
+            "max_next_command": 2.0,
+            "min_height": 0.4543228865626439,
+            "max_tilt": 5.229156550052891,
+            "max_angular_rate": 1.8234719604311542,
+            "fall": false,
+            "observed_seconds": 2.0199999999988805
+          }
+        ]
+      },
+      {
+        "path": "logs/amp-speed-20261025/handoff-2/14_0_0-r0-direct",
+        "case": "14_0_0",
+        "repeat": 0,
+        "speed_profile": 2.0,
+        "controlled_exit": false,
+        "duration": 35.08000000000287,
+        "first_kick": 5.94,
+        "launch": 8.94,
+        "foot_contact": true,
+        "peak_ball_speed": 4.651061762324479,
+        "overall_fall": true,
+        "entries": [
+          {
+            "t": 5.940000000000289,
+            "settle_s": 0.3000000000000007,
+            "before_settle_speed": 1.732167866735715,
+            "at_kick_speed": 1.149492603231112,
+            "max_approach_command": 2.0,
+            "min_height": 0.4736009749807857,
+            "max_tilt": 8.168894082451006,
+            "max_angular_rate": 1.7711629262230086,
+            "fall": false,
+            "observed_seconds": 2.300000000000768
+          },
+          {
+            "t": 21.590000000000288,
+            "settle_s": 0.3000000000000007,
+            "before_settle_speed": 0.9680359726520933,
+            "at_kick_speed": 0.30236309494726116,
+            "max_approach_command": 2.0,
+            "min_height": 0.06558964816985079,
+            "max_tilt": 97.41843356486288,
+            "max_angular_rate": 11.650194333092054,
+            "fall": true,
+            "observed_seconds": 2.319999999998714
+          }
+        ],
+        "exits": [
+          {
+            "t": 20.090000000000288,
+            "reason": "cooldown",
+            "exit_reason": "session_timeout",
+            "initial_speed": 1.7948588153579605,
+            "max_next_command": 1.93515,
+            "min_height": 0.46957891894779485,
+            "max_tilt": 4.473396366285081,
+            "max_angular_rate": 1.9235324728552834,
+            "fall": false,
+            "observed_seconds": 1.4999999999991687
+          }
+        ]
+      },
+      {
+        "path": "logs/amp-speed-20261025/handoff-2/14_0_0-r1-direct",
+        "case": "14_0_0",
+        "repeat": 1,
+        "speed_profile": 2.0,
+        "controlled_exit": false,
+        "duration": 35.10000000000465,
+        "first_kick": 5.62,
+        "launch": 8.58,
+        "foot_contact": true,
+        "peak_ball_speed": 4.883296132288932,
+        "overall_fall": false,
+        "entries": [
+          {
+            "t": 5.620000000000434,
+            "settle_s": 0.3000000000000007,
+            "before_settle_speed": 1.764691392360545,
+            "at_kick_speed": 1.1032077788488721,
+            "max_approach_command": 2.0,
+            "min_height": 0.47322233431602734,
+            "max_tilt": 9.27469545617048,
+            "max_angular_rate": 1.5343010671381452,
+            "fall": false,
+            "observed_seconds": 2.300000000000768
+          }
+        ],
+        "exits": [
+          {
+            "t": 19.770000000000437,
+            "reason": "cooldown",
+            "exit_reason": "session_timeout",
+            "initial_speed": 2.121436557650225,
+            "max_next_command": 2.0,
+            "min_height": 0.46572077873733325,
+            "max_tilt": 5.347672934993223,
+            "max_angular_rate": 4.1899059468282465,
+            "fall": false,
+            "observed_seconds": 2.0199999999988805
+          }
+        ]
+      },
+      {
+        "path": "logs/amp-speed-20261025/handoff-2/14_0_0-r2-direct",
+        "case": "14_0_0",
+        "repeat": 2,
+        "speed_profile": 2.0,
+        "controlled_exit": false,
+        "duration": 35.120000000003635,
+        "first_kick": 5.92,
+        "launch": 8.88,
+        "foot_contact": true,
+        "peak_ball_speed": 4.86949120698586,
+        "overall_fall": false,
+        "entries": [
+          {
+            "t": 5.920000000000348,
+            "settle_s": 0.29999999999999893,
+            "before_settle_speed": 1.7879649105672752,
+            "at_kick_speed": 1.2414473997491975,
+            "max_approach_command": 2.0,
+            "min_height": 0.4702462594860508,
+            "max_tilt": 8.810025225142082,
+            "max_angular_rate": 2.27209574744402,
+            "fall": false,
+            "observed_seconds": 2.300000000000768
+          }
+        ],
+        "exits": [
+          {
+            "t": 20.07000000000035,
+            "reason": "cooldown",
+            "exit_reason": "session_timeout",
+            "initial_speed": 2.100689261452431,
+            "max_next_command": 2.0,
+            "min_height": 0.4670199969580425,
+            "max_tilt": 4.118154559875516,
+            "max_angular_rate": 2.2461496946111796,
+            "fall": false,
+            "observed_seconds": 2.0199999999988805
+          }
+        ]
+      },
+      {
+        "path": "logs/amp-speed-20261025/handoff-2/14_0_25-r0-direct",
+        "case": "14_0_25",
+        "repeat": 0,
+        "speed_profile": 2.0,
+        "controlled_exit": false,
+        "duration": 35.08000000000788,
+        "first_kick": 5.98,
+        "launch": 8.9,
+        "foot_contact": true,
+        "peak_ball_speed": 4.954687794844128,
+        "overall_fall": false,
+        "entries": [
+          {
+            "t": 5.980000000000459,
+            "settle_s": 0.3000000000000007,
+            "before_settle_speed": 1.7892791818713072,
+            "at_kick_speed": 1.2985668068333023,
+            "max_approach_command": 2.0,
+            "min_height": 0.4732223726256463,
+            "max_tilt": 9.801068244210937,
+            "max_angular_rate": 1.7056972140157032,
+            "fall": false,
+            "observed_seconds": 2.300000000000251
+          }
+        ],
+        "exits": [
+          {
+            "t": 20.130000000000457,
+            "reason": "cooldown",
+            "exit_reason": "session_timeout",
+            "initial_speed": 2.0776688484875074,
+            "max_next_command": 2.0,
+            "min_height": 0.46820760020210006,
+            "max_tilt": 9.254677984005628,
+            "max_angular_rate": 3.402082654738134,
+            "fall": false,
+            "observed_seconds": 2.0199999999988805
+          }
+        ]
+      },
+      {
+        "path": "logs/amp-speed-20261025/handoff-2/14_0_25-r1-direct",
+        "case": "14_0_25",
+        "repeat": 1,
+        "speed_profile": 2.0,
+        "controlled_exit": false,
+        "duration": 35.12000000000092,
+        "first_kick": 5.91,
+        "launch": 8.92,
+        "foot_contact": true,
+        "peak_ball_speed": 6.314382650903992,
+        "overall_fall": false,
+        "entries": [
+          {
+            "t": 5.9100000000001245,
+            "settle_s": 0.3000000000000007,
+            "before_settle_speed": 1.7589551802987147,
+            "at_kick_speed": 1.5455068620523282,
+            "max_approach_command": 2.0,
+            "min_height": 0.4719017043381452,
+            "max_tilt": 7.661085645823045,
+            "max_angular_rate": 3.0473866883747394,
+            "fall": false,
+            "observed_seconds": 2.3200000000007748
+          },
+          {
+            "t": 21.550000000000125,
+            "settle_s": 0.3000000000000007,
+            "before_settle_speed": 1.8219112948688938,
+            "at_kick_speed": 1.4883707065188971,
+            "max_approach_command": 2.0,
+            "min_height": 0.4746144695617583,
+            "max_tilt": 16.043084014023265,
+            "max_angular_rate": 4.19756094765069,
+            "fall": false,
+            "observed_seconds": 2.319999999998714
+          }
+        ],
+        "exits": [
+          {
+            "t": 20.050000000000125,
+            "reason": "cooldown",
+            "exit_reason": "session_timeout",
+            "initial_speed": 1.939740912711278,
+            "max_next_command": 2.0,
+            "min_height": 0.47719098041599967,
+            "max_tilt": 5.436649327541421,
+            "max_angular_rate": 2.1935549356189603,
+            "fall": false,
+            "observed_seconds": 1.4999999999991687
+          },
+          {
+            "t": 23.770000000000124,
+            "reason": "referee_stop",
+            "exit_reason": "referee_stop",
+            "initial_speed": 0.36169973134150546,
+            "max_next_command": 1e-06,
+            "min_height": 0.5210981370066131,
+            "max_tilt": 15.6924639763591,
+            "max_angular_rate": 1.7660435394651208,
+            "fall": false,
+            "observed_seconds": 2.0199999999988805
+          }
+        ]
+      },
+      {
+        "path": "logs/amp-speed-20261025/handoff-2/14_0_25-r2-direct",
+        "case": "14_0_25",
+        "repeat": 2,
+        "speed_profile": 2.0,
+        "controlled_exit": false,
+        "duration": 35.200000000006746,
+        "first_kick": 5.66,
+        "launch": 8.6,
+        "foot_contact": true,
+        "peak_ball_speed": 4.902763379851442,
+        "overall_fall": false,
+        "entries": [
+          {
+            "t": 5.660000000000597,
+            "settle_s": 0.29999999999999893,
+            "before_settle_speed": 1.7704817386224527,
+            "at_kick_speed": 1.1155591634241226,
+            "max_approach_command": 2.0,
+            "min_height": 0.473715827963352,
+            "max_tilt": 9.893125180077718,
+            "max_angular_rate": 1.5701619415205252,
+            "fall": false,
+            "observed_seconds": 2.300000000000768
+          }
+        ],
+        "exits": [
+          {
+            "t": 19.8100000000006,
+            "reason": "cooldown",
+            "exit_reason": "session_timeout",
+            "initial_speed": 2.112825296880185,
+            "max_next_command": 2.0,
+            "min_height": 0.4699293451802939,
+            "max_tilt": 4.634766044918719,
+            "max_angular_rate": 2.0241909538250566,
+            "fall": false,
+            "observed_seconds": 2.0199999999988805
+          }
+        ]
+      },
+      {
+        "path": "logs/amp-speed-20261025/handoff-2.25/14_0_-25-r0-direct",
+        "case": "14_0_-25",
+        "repeat": 0,
+        "speed_profile": 2.25,
+        "controlled_exit": false,
+        "duration": 35.20000000001264,
+        "first_kick": 5.34,
+        "launch": 8.28,
+        "foot_contact": true,
+        "peak_ball_speed": 4.88115717831193,
+        "overall_fall": false,
+        "entries": [
+          {
+            "t": 5.339999999998723,
+            "settle_s": 0.3000000000000007,
+            "before_settle_speed": 1.9682357834462634,
+            "at_kick_speed": 1.2709764957023333,
+            "max_approach_command": 2.25,
+            "min_height": 0.47227685694069954,
+            "max_tilt": 9.786621698051595,
+            "max_angular_rate": 1.7277914922500501,
+            "fall": false,
+            "observed_seconds": 2.2999999999987253
+          }
+        ],
+        "exits": [
+          {
+            "t": 19.489999999998723,
+            "reason": "cooldown",
+            "exit_reason": "session_timeout",
+            "initial_speed": 2.23253018415682,
+            "max_next_command": 2.25,
+            "min_height": 0.46050666346315206,
+            "max_tilt": 7.113098036754262,
+            "max_angular_rate": 1.9441853553136006,
+            "fall": false,
+            "observed_seconds": 2.0200000000024687
+          }
+        ]
+      },
+      {
+        "path": "logs/amp-speed-20261025/handoff-2.25/14_0_-25-r1-direct",
+        "case": "14_0_-25",
+        "repeat": 1,
+        "speed_profile": 2.25,
+        "controlled_exit": false,
+        "duration": 35.16000000000105,
+        "first_kick": 5.53,
+        "launch": 8.48,
+        "foot_contact": true,
+        "peak_ball_speed": 5.2016634041237975,
+        "overall_fall": false,
+        "entries": [
+          {
+            "t": 5.530000000000131,
+            "settle_s": 0.3000000000000007,
+            "before_settle_speed": 1.9236272450496945,
+            "at_kick_speed": 1.3801767243139116,
+            "max_approach_command": 2.25,
+            "min_height": 0.47235928191584414,
+            "max_tilt": 9.671521754531204,
+            "max_angular_rate": 2.3391255833247278,
+            "fall": false,
+            "observed_seconds": 2.3200000000007748
+          },
+          {
+            "t": 21.170000000000133,
+            "settle_s": 0.3000000000000007,
+            "before_settle_speed": 1.9475810460705543,
+            "at_kick_speed": 1.2063607674338082,
+            "max_approach_command": 2.25,
+            "min_height": 0.47078466534147817,
+            "max_tilt": 16.242308676638494,
+            "max_angular_rate": 4.532761108165604,
+            "fall": false,
+            "observed_seconds": 2.319999999998714
+          }
+        ],
+        "exits": [
+          {
+            "t": 19.670000000000133,
+            "reason": "cooldown",
+            "exit_reason": "session_timeout",
+            "initial_speed": 1.8164795953394548,
+            "max_next_command": 2.25,
+            "min_height": 0.452195968496007,
+            "max_tilt": 6.8518186513407855,
+            "max_angular_rate": 1.0471340590682896,
+            "fall": false,
+            "observed_seconds": 1.4999999999991687
+          },
+          {
+            "t": 22.77000000000013,
+            "reason": "referee_stop",
+            "exit_reason": "referee_stop",
+            "initial_speed": 0.7058039674415678,
+            "max_next_command": 1e-06,
+            "min_height": 0.5253733862526349,
+            "max_tilt": 16.242308676638494,
+            "max_angular_rate": 2.063768802542557,
+            "fall": false,
+            "observed_seconds": 2.0199999999988805
+          }
+        ]
+      },
+      {
+        "path": "logs/amp-speed-20261025/handoff-2.25/14_0_-25-r2-direct",
+        "case": "14_0_-25",
+        "repeat": 2,
+        "speed_profile": 2.25,
+        "controlled_exit": false,
+        "duration": 35.08000000000092,
+        "first_kick": 5.55,
+        "launch": 8.5,
+        "foot_contact": true,
+        "peak_ball_speed": 5.9850014666703375,
+        "overall_fall": false,
+        "entries": [
+          {
+            "t": 5.550000000000129,
+            "settle_s": 0.3000000000000007,
+            "before_settle_speed": 1.9251314856699033,
+            "at_kick_speed": 1.3123202712630617,
+            "max_approach_command": 2.25,
+            "min_height": 0.4677770297967574,
+            "max_tilt": 9.00553823947505,
+            "max_angular_rate": 1.6653593361667267,
+            "fall": false,
+            "observed_seconds": 2.3200000000007748
+          },
+          {
+            "t": 21.19000000000013,
+            "settle_s": 0.3000000000000007,
+            "before_settle_speed": 1.973173423523169,
+            "at_kick_speed": 1.281641015786455,
+            "max_approach_command": 2.25,
+            "min_height": 0.45609609854596395,
+            "max_tilt": 20.58776085891399,
+            "max_angular_rate": 4.541400087775806,
+            "fall": false,
+            "observed_seconds": 2.319999999998714
+          }
+        ],
+        "exits": [
+          {
+            "t": 19.69000000000013,
+            "reason": "cooldown",
+            "exit_reason": "session_timeout",
+            "initial_speed": 2.0196168599482234,
+            "max_next_command": 2.25,
+            "min_height": 0.47221195802722066,
+            "max_tilt": 6.62103493673456,
+            "max_angular_rate": 1.1218214641155295,
+            "fall": false,
+            "observed_seconds": 1.4999999999991687
+          },
+          {
+            "t": 23.23000000000013,
+            "reason": "referee_stop",
+            "exit_reason": "referee_stop",
+            "initial_speed": 0.6455652962743785,
+            "max_next_command": 1e-06,
+            "min_height": 0.5162380240665932,
+            "max_tilt": 12.648077359666718,
+            "max_angular_rate": 1.9752239056835437,
+            "fall": false,
+            "observed_seconds": 2.0199999999988805
+          }
+        ]
+      },
+      {
+        "path": "logs/amp-speed-20261025/handoff-2.25/14_0_0-r0-direct",
+        "case": "14_0_0",
+        "repeat": 0,
+        "speed_profile": 2.25,
+        "controlled_exit": false,
+        "duration": 35.20000000000451,
+        "first_kick": 5.42,
+        "launch": 8.28,
+        "foot_contact": true,
+        "peak_ball_speed": 5.12204074229667,
+        "overall_fall": false,
+        "entries": [
+          {
+            "t": 5.420000000000412,
+            "settle_s": 0.29999999999999893,
+            "before_settle_speed": 1.9733954033307652,
+            "at_kick_speed": 1.5188908715091165,
+            "max_approach_command": 2.25,
+            "min_height": 0.47316113291026474,
+            "max_tilt": 7.864626525214615,
+            "max_angular_rate": 2.77192654768063,
+            "fall": false,
+            "observed_seconds": 2.300000000000768
+          }
+        ],
+        "exits": [
+          {
+            "t": 18.87000000000041,
+            "reason": "referee_stop",
+            "exit_reason": "referee_stop",
+            "initial_speed": 2.0793354449721897,
+            "max_next_command": 1e-06,
+            "min_height": 0.5137815429209004,
+            "max_tilt": 3.5550587068006574,
+            "max_angular_rate": 0.900952930597814,
+            "fall": false,
+            "observed_seconds": 2.0199999999988805
+          }
+        ]
+      },
+      {
+        "path": "logs/amp-speed-20261025/handoff-2.25/14_0_0-r1-direct",
+        "case": "14_0_0",
+        "repeat": 1,
+        "speed_profile": 2.25,
+        "controlled_exit": false,
+        "duration": 35.12000000000103,
+        "first_kick": 5.47,
+        "launch": 8.34,
+        "foot_contact": true,
+        "peak_ball_speed": 4.94367304875554,
+        "overall_fall": false,
+        "entries": [
+          {
+            "t": 5.470000000000132,
+            "settle_s": 0.29999999999999893,
+            "before_settle_speed": 1.9491754293935006,
+            "at_kick_speed": 1.7344372559559882,
+            "max_approach_command": 2.25,
+            "min_height": 0.47247054870226096,
+            "max_tilt": 6.59412766309202,
+            "max_angular_rate": 3.2048195838875855,
+            "fall": false,
+            "observed_seconds": 2.3200000000007748
+          }
+        ],
+        "exits": [
+          {
+            "t": 19.59000000000013,
+            "reason": "referee_stop",
+            "exit_reason": "referee_stop",
+            "initial_speed": 2.028308066277234,
+            "max_next_command": 1e-06,
+            "min_height": 0.5086252183958275,
+            "max_tilt": 3.588832162312476,
+            "max_angular_rate": 1.8932808707641717,
+            "fall": false,
+            "observed_seconds": 2.0199999999988805
+          }
+        ]
+      },
+      {
+        "path": "logs/amp-speed-20261025/handoff-2.25/14_0_0-r2-direct",
+        "case": "14_0_0",
+        "repeat": 2,
+        "speed_profile": 2.25,
+        "controlled_exit": false,
+        "duration": 35.16000000000097,
+        "first_kick": 5.55,
+        "launch": 8.52,
+        "foot_contact": true,
+        "peak_ball_speed": 4.9456083993755255,
+        "overall_fall": false,
+        "entries": [
+          {
+            "t": 5.550000000000123,
+            "settle_s": 0.29999999999999893,
+            "before_settle_speed": 1.9331143675900024,
+            "at_kick_speed": 1.4308890993947108,
+            "max_approach_command": 2.25,
+            "min_height": 0.4724286356603876,
+            "max_tilt": 10.382712680053956,
+            "max_angular_rate": 2.3251616885764754,
+            "fall": false,
+            "observed_seconds": 2.3200000000007748
+          },
+          {
+            "t": 21.190000000000122,
+            "settle_s": 0.29999999999999716,
+            "before_settle_speed": 1.9764222163653773,
+            "at_kick_speed": 1.3262015526663071,
+            "max_approach_command": 2.25,
+            "min_height": 0.42503869611827116,
+            "max_tilt": 29.185608843373114,
+            "max_angular_rate": 3.779122352966498,
+            "fall": false,
+            "observed_seconds": 2.319999999998714
+          }
+        ],
+        "exits": [
+          {
+            "t": 19.690000000000122,
+            "reason": "cooldown",
+            "exit_reason": "session_timeout",
+            "initial_speed": 2.0939746317248096,
+            "max_next_command": 2.25,
+            "min_height": 0.4651552204793754,
+            "max_tilt": 4.687780686787817,
+            "max_angular_rate": 1.5500724427195878,
+            "fall": false,
+            "observed_seconds": 1.4999999999991687
+          },
+          {
+            "t": 31.370000000000122,
+            "reason": "referee_stop",
+            "exit_reason": "referee_stop",
+            "initial_speed": 0.6827747105638127,
+            "max_next_command": 0.331776,
+            "min_height": 0.4919799114665206,
+            "max_tilt": 6.732312054416536,
+            "max_angular_rate": 1.837418194771801,
+            "fall": false,
+            "observed_seconds": 2.0200000000024687
+          }
+        ]
+      },
+      {
+        "path": "logs/amp-speed-20261025/handoff-2.25/14_0_25-r0-direct",
+        "case": "14_0_25",
+        "repeat": 0,
+        "speed_profile": 2.25,
+        "controlled_exit": false,
+        "duration": 35.26000000000298,
+        "first_kick": 5.66,
+        "launch": 8.52,
+        "foot_contact": true,
+        "peak_ball_speed": 4.860877942591829,
+        "overall_fall": false,
+        "entries": [
+          {
+            "t": 5.660000000000281,
+            "settle_s": 0.3100000000000005,
+            "before_settle_speed": 1.9209521883799328,
+            "at_kick_speed": 1.471677944487144,
+            "max_approach_command": 2.25,
+            "min_height": 0.456052606029995,
+            "max_tilt": 11.448597512453702,
+            "max_angular_rate": 2.448121453261098,
+            "fall": false,
+            "observed_seconds": 2.3200000000007748
+          }
+        ],
+        "exits": [
+          {
+            "t": 19.81000000000028,
+            "reason": "cooldown",
+            "exit_reason": "session_timeout",
+            "initial_speed": 1.1002720765917886,
+            "max_next_command": 2.25,
+            "min_height": 0.461523154832672,
+            "max_tilt": 10.642684861090542,
+            "max_angular_rate": 1.707369504560884,
+            "fall": false,
+            "observed_seconds": 2.0199999999988805
+          }
+        ]
+      },
+      {
+        "path": "logs/amp-speed-20261025/handoff-2.25/14_0_25-r1-direct",
+        "case": "14_0_25",
+        "repeat": 1,
+        "speed_profile": 2.25,
+        "controlled_exit": false,
+        "duration": 35.16000000000998,
+        "first_kick": 5.32,
+        "launch": 8.26,
+        "foot_contact": true,
+        "peak_ball_speed": 5.920938596987078,
+        "overall_fall": false,
+        "entries": [
+          {
+            "t": 5.319999999999704,
+            "settle_s": 0.29999999999999893,
+            "before_settle_speed": 1.9464702652572468,
+            "at_kick_speed": 1.2496959694210588,
+            "max_approach_command": 2.25,
+            "min_height": 0.452900651502898,
+            "max_tilt": 13.359298598027346,
+            "max_angular_rate": 2.671418556964014,
+            "fall": false,
+            "observed_seconds": 2.29999999999883
+          }
+        ],
+        "exits": [
+          {
+            "t": 18.569999999999702,
+            "reason": "referee_stop",
+            "exit_reason": "referee_stop",
+            "initial_speed": 1.9490789407101954,
+            "max_next_command": 1e-06,
+            "min_height": 0.5216574406075976,
+            "max_tilt": 3.465965471473656,
+            "max_angular_rate": 0.8708134375600454,
+            "fall": false,
+            "observed_seconds": 2.0199999999988805
+          }
+        ]
+      },
+      {
+        "path": "logs/amp-speed-20261025/handoff-2.25/14_0_25-r2-direct",
+        "case": "14_0_25",
+        "repeat": 2,
+        "speed_profile": 2.25,
+        "controlled_exit": false,
+        "duration": 35.28000000000912,
+        "first_kick": 5.46,
+        "launch": 8.5,
+        "foot_contact": true,
+        "peak_ball_speed": 6.212885139236985,
+        "overall_fall": false,
+        "entries": [
+          {
+            "t": 5.460000000000084,
+            "settle_s": 0.29999999999999893,
+            "before_settle_speed": 1.9666077275632485,
+            "at_kick_speed": 1.2659711995246918,
+            "max_approach_command": 2.25,
+            "min_height": 0.45594329390932,
+            "max_tilt": 15.244477309328257,
+            "max_angular_rate": 2.8779522261185866,
+            "fall": false,
+            "observed_seconds": 2.2999999999997183
+          },
+          {
+            "t": 21.110000000000085,
+            "settle_s": 0.29999999999999716,
+            "before_settle_speed": 2.00986595559377,
+            "at_kick_speed": 1.4008339705053445,
+            "max_approach_command": 2.25,
+            "min_height": 0.43380597090701095,
+            "max_tilt": 17.759645933153134,
+            "max_angular_rate": 4.274774592239828,
+            "fall": false,
+            "observed_seconds": 2.3200000000002063
+          }
+        ],
+        "exits": [
+          {
+            "t": 19.610000000000085,
+            "reason": "cooldown",
+            "exit_reason": "session_timeout",
+            "initial_speed": 2.2345891622230423,
+            "max_next_command": 2.25,
+            "min_height": 0.4581274439319508,
+            "max_tilt": 6.0394515439433984,
+            "max_angular_rate": 1.1726831554588022,
+            "fall": false,
+            "observed_seconds": 1.4999999999991687
+          },
+          {
+            "t": 23.630000000000088,
+            "reason": "referee_stop",
+            "exit_reason": "referee_stop",
+            "initial_speed": 0.5722548772266534,
+            "max_next_command": 1e-06,
+            "min_height": 0.5231524622914124,
+            "max_tilt": 12.451010951400304,
+            "max_angular_rate": 1.9799479468354462,
+            "fall": false,
+            "observed_seconds": 2.0200000000024687
+          }
+        ]
+      },
+      {
+        "path": "logs/amp-speed-20261025/handoff-2.5/14_0_-25-r0-direct",
+        "case": "14_0_-25",
+        "repeat": 0,
+        "speed_profile": 2.5,
+        "controlled_exit": false,
+        "duration": 35.24000000000933,
+        "first_kick": 5.48,
+        "launch": 8.4,
+        "foot_contact": true,
+        "peak_ball_speed": 5.162869439796702,
+        "overall_fall": false,
+        "entries": [
+          {
+            "t": 5.479999999999984,
+            "settle_s": 0.3000000000000007,
+            "before_settle_speed": 2.123611382540827,
+            "at_kick_speed": 1.6623520922202446,
+            "max_approach_command": 2.5,
+            "min_height": 0.46812540609159387,
+            "max_tilt": 11.26922964848988,
+            "max_angular_rate": 3.23108028151463,
+            "fall": false,
+            "observed_seconds": 2.299999999999434
+          }
+        ],
+        "exits": [
+          {
+            "t": 19.169999999999987,
+            "reason": "referee_stop",
+            "exit_reason": "referee_stop",
+            "initial_speed": 2.0112730807578747,
+            "max_next_command": 1e-06,
+            "min_height": 0.49972511529351654,
+            "max_tilt": 5.3551874650643825,
+            "max_angular_rate": 1.3723944831445016,
+            "fall": false,
+            "observed_seconds": 2.0199999999988805
+          }
+        ]
+      },
+      {
+        "path": "logs/amp-speed-20261025/handoff-2.5/14_0_-25-r1-direct",
+        "case": "14_0_-25",
+        "repeat": 1,
+        "speed_profile": 2.5,
+        "controlled_exit": false,
+        "duration": 35.18000000000461,
+        "first_kick": 5.04,
+        "launch": 7.8,
+        "foot_contact": true,
+        "peak_ball_speed": 5.05040871103289,
+        "overall_fall": false,
+        "entries": [
+          {
+            "t": 5.040000000000424,
+            "settle_s": 0.3000000000000007,
+            "before_settle_speed": 2.1438166455783265,
+            "at_kick_speed": 1.678447594246248,
+            "max_approach_command": 2.5,
+            "min_height": 0.4629367395603544,
+            "max_tilt": 10.745503660249856,
+            "max_angular_rate": 2.4942413922150393,
+            "fall": false,
+            "observed_seconds": 2.300000000000768
+          },
+          {
+            "t": 20.690000000000424,
+            "settle_s": 0.3000000000000007,
+            "before_settle_speed": 2.176726579813356,
+            "at_kick_speed": 1.633808026160439,
+            "max_approach_command": 2.5,
+            "min_height": 0.42471371424196325,
+            "max_tilt": 27.373484939557954,
+            "max_angular_rate": 4.086060353037264,
+            "fall": false,
+            "observed_seconds": 2.319999999998714
+          }
+        ],
+        "exits": [
+          {
+            "t": 19.190000000000424,
+            "reason": "cooldown",
+            "exit_reason": "session_timeout",
+            "initial_speed": 2.286806688288037,
+            "max_next_command": 2.5,
+            "min_height": 0.44992373714515527,
+            "max_tilt": 5.500946831410809,
+            "max_angular_rate": 1.154024728705558,
+            "fall": false,
+            "observed_seconds": 1.4999999999991687
+          },
+          {
+            "t": 23.150000000000425,
+            "reason": "referee_stop",
+            "exit_reason": "referee_stop",
+            "initial_speed": 0.6450427067398637,
+            "max_next_command": 1.0,
+            "min_height": 0.49179091942568043,
+            "max_tilt": 4.059343692276832,
+            "max_angular_rate": 1.9579383248462503,
+            "fall": false,
+            "observed_seconds": 2.0199999999988805
+          }
+        ]
+      },
+      {
+        "path": "logs/amp-speed-20261025/handoff-2.5/14_0_-25-r2-direct",
+        "case": "14_0_-25",
+        "repeat": 2,
+        "speed_profile": 2.5,
+        "controlled_exit": false,
+        "duration": 35.200000000003705,
+        "first_kick": 5.3,
+        "launch": 8.18,
+        "foot_contact": true,
+        "peak_ball_speed": 5.608428111376548,
+        "overall_fall": false,
+        "entries": [
+          {
+            "t": 5.300000000000347,
+            "settle_s": 0.3000000000000007,
+            "before_settle_speed": 2.1401650611955074,
+            "at_kick_speed": 1.4593694196305942,
+            "max_approach_command": 2.5,
+            "min_height": 0.46939003390143735,
+            "max_tilt": 9.621764836094052,
+            "max_angular_rate": 1.5551427165843408,
+            "fall": false,
+            "observed_seconds": 2.300000000000768
+          },
+          {
+            "t": 20.950000000000344,
+            "settle_s": 0.3000000000000007,
+            "before_settle_speed": 1.5212849597770446,
+            "at_kick_speed": 0.8306822202157884,
+            "max_approach_command": 2.5,
+            "min_height": 0.48539356048899596,
+            "max_tilt": 16.972329870623064,
+            "max_angular_rate": 3.5525149987333187,
+            "fall": false,
+            "observed_seconds": 2.319999999998714
+          }
+        ],
+        "exits": [
+          {
+            "t": 19.450000000000344,
+            "reason": "cooldown",
+            "exit_reason": "session_timeout",
+            "initial_speed": 1.874736403104096,
+            "max_next_command": 2.5,
+            "min_height": 0.4687072463646294,
+            "max_tilt": 5.631013307264962,
+            "max_angular_rate": 2.528731043294483,
+            "fall": false,
+            "observed_seconds": 1.4999999999991687
+          },
+          {
+            "t": 22.53000000000035,
+            "reason": "referee_stop",
+            "exit_reason": "referee_stop",
+            "initial_speed": 0.24494936112570384,
+            "max_next_command": 1e-06,
+            "min_height": 0.5132117948184922,
+            "max_tilt": 16.972329870623064,
+            "max_angular_rate": 2.0023714900600984,
+            "fall": false,
+            "observed_seconds": 2.0199999999988805
+          }
+        ]
+      },
+      {
+        "path": "logs/amp-speed-20261025/handoff-2.5/14_0_0-r0-direct",
+        "case": "14_0_0",
+        "repeat": 0,
+        "speed_profile": 2.5,
+        "controlled_exit": false,
+        "duration": 35.28000000000112,
+        "first_kick": 5.31,
+        "launch": 8.12,
+        "foot_contact": true,
+        "peak_ball_speed": 5.021843627620331,
+        "overall_fall": false,
+        "entries": [
+          {
+            "t": 5.310000000000123,
+            "settle_s": 0.29999999999999893,
+            "before_settle_speed": 2.1640311696962073,
+            "at_kick_speed": 1.6263172360684843,
+            "max_approach_command": 2.5,
+            "min_height": 0.46433254959063913,
+            "max_tilt": 8.827061622353071,
+            "max_angular_rate": 1.5420780374768754,
+            "fall": false,
+            "observed_seconds": 2.3200000000007748
+          }
+        ],
+        "exits": [
+          {
+            "t": 19.090000000000124,
+            "reason": "referee_stop",
+            "exit_reason": "referee_stop",
+            "initial_speed": 1.8022274325013354,
+            "max_next_command": 1e-06,
+            "min_height": 0.5192619320541652,
+            "max_tilt": 5.146884667687931,
+            "max_angular_rate": 1.8482372328912449,
+            "fall": false,
+            "observed_seconds": 2.0199999999988805
+          }
+        ]
+      },
+      {
+        "path": "logs/amp-speed-20261025/handoff-2.5/14_0_0-r1-direct",
+        "case": "14_0_0",
+        "repeat": 1,
+        "speed_profile": 2.5,
+        "controlled_exit": false,
+        "duration": 35.10000000000353,
+        "first_kick": 5.3,
+        "launch": 8.14,
+        "foot_contact": true,
+        "peak_ball_speed": 4.795157178040076,
+        "overall_fall": false,
+        "entries": [
+          {
+            "t": 5.300000000000342,
+            "settle_s": 0.3000000000000007,
+            "before_settle_speed": 2.1210677391917456,
+            "at_kick_speed": 1.5990329447373108,
+            "max_approach_command": 2.5,
+            "min_height": 0.4297784129063647,
+            "max_tilt": 19.302764920905116,
+            "max_angular_rate": 3.0506742806965597,
+            "fall": false,
+            "observed_seconds": 2.300000000000768
+          },
+          {
+            "t": 20.950000000000344,
+            "settle_s": 0.3000000000000007,
+            "before_settle_speed": 0.48855591277204274,
+            "at_kick_speed": 0.0848454048098445,
+            "max_approach_command": 2.5,
+            "min_height": 0.4882176977881765,
+            "max_tilt": 18.531163514956397,
+            "max_angular_rate": 3.5401448589420177,
+            "fall": false,
+            "observed_seconds": 2.319999999998714
+          }
+        ],
+        "exits": [
+          {
+            "t": 19.450000000000344,
+            "reason": "cooldown",
+            "exit_reason": "session_timeout",
+            "initial_speed": 1.5900427469398128,
+            "max_next_command": 1.94585,
+            "min_height": 0.4742623170769577,
+            "max_tilt": 5.945432310902004,
+            "max_angular_rate": 1.4689227238651303,
+            "fall": false,
+            "observed_seconds": 1.4999999999991687
+          },
+          {
+            "t": 22.51000000000034,
+            "reason": "referee_stop",
+            "exit_reason": "referee_stop",
+            "initial_speed": 0.4719554123714082,
+            "max_next_command": 1e-06,
+            "min_height": 0.5171840550584118,
+            "max_tilt": 12.398201363134566,
+            "max_angular_rate": 2.6604671914530913,
+            "fall": false,
+            "observed_seconds": 2.0199999999988805
+          }
+        ]
+      },
+      {
+        "path": "logs/amp-speed-20261025/handoff-2.5/14_0_0-r2-direct",
+        "case": "14_0_0",
+        "repeat": 2,
+        "speed_profile": 2.5,
+        "controlled_exit": false,
+        "duration": 35.080000000002045,
+        "first_kick": 4.95,
+        "launch": 7.84,
+        "foot_contact": true,
+        "peak_ball_speed": 5.1027184337588025,
+        "overall_fall": false,
+        "entries": [
+          {
+            "t": 4.950000000000221,
+            "settle_s": 0.3000000000000007,
+            "before_settle_speed": 2.1370358928690574,
+            "at_kick_speed": 1.7728190007757536,
+            "max_approach_command": 2.5,
+            "min_height": 0.4622560390435823,
+            "max_tilt": 12.227863996852983,
+            "max_angular_rate": 2.8861908943206966,
+            "fall": false,
+            "observed_seconds": 2.3200000000007748
+          }
+        ],
+        "exits": [
+          {
+            "t": 18.59000000000022,
+            "reason": "referee_stop",
+            "exit_reason": "referee_stop",
+            "initial_speed": 2.0181712079069474,
+            "max_next_command": 1e-06,
+            "min_height": 0.49200423120117504,
+            "max_tilt": 5.069683381170814,
+            "max_angular_rate": 1.6551801142123004,
+            "fall": false,
+            "observed_seconds": 2.0199999999988805
+          }
+        ]
+      },
+      {
+        "path": "logs/amp-speed-20261025/handoff-2.5/14_0_25-r0-direct",
+        "case": "14_0_25",
+        "repeat": 0,
+        "speed_profile": 2.5,
+        "controlled_exit": false,
+        "duration": 35.160000000004246,
+        "first_kick": 5.34,
+        "launch": 8.1,
+        "foot_contact": true,
+        "peak_ball_speed": 4.985401476704704,
+        "overall_fall": false,
+        "entries": [
+          {
+            "t": 5.340000000000394,
+            "settle_s": 0.29999999999999893,
+            "before_settle_speed": 2.124852450977666,
+            "at_kick_speed": 1.525823148798046,
+            "max_approach_command": 2.5,
+            "min_height": 0.4520879861802585,
+            "max_tilt": 16.309703355338904,
+            "max_angular_rate": 2.9740033351309907,
+            "fall": false,
+            "observed_seconds": 2.300000000000768
+          },
+          {
+            "t": 20.990000000000393,
+            "settle_s": 0.3000000000000007,
+            "before_settle_speed": 2.0040847404158946,
+            "at_kick_speed": 1.2705710374167098,
+            "max_approach_command": 2.5,
+            "min_height": 0.43548379448895624,
+            "max_tilt": 27.213221223863233,
+            "max_angular_rate": 3.9826228197792535,
+            "fall": false,
+            "observed_seconds": 2.319999999998714
+          }
+        ],
+        "exits": [
+          {
+            "t": 19.490000000000393,
+            "reason": "cooldown",
+            "exit_reason": "session_timeout",
+            "initial_speed": 2.0222943958520174,
+            "max_next_command": 2.5,
+            "min_height": 0.46491981572242874,
+            "max_tilt": 5.567608395235871,
+            "max_angular_rate": 1.092633875265339,
+            "fall": false,
+            "observed_seconds": 1.4999999999991687
+          },
+          {
+            "t": 23.130000000000393,
+            "reason": "referee_stop",
+            "exit_reason": "referee_stop",
+            "initial_speed": 0.3657436412290417,
+            "max_next_command": 1e-06,
+            "min_height": 0.5227674346103802,
+            "max_tilt": 14.714199978693603,
+            "max_angular_rate": 2.0153903172513115,
+            "fall": false,
+            "observed_seconds": 2.0199999999988805
+          }
+        ]
+      },
+      {
+        "path": "logs/amp-speed-20261025/handoff-2.5/14_0_25-r1-direct",
+        "case": "14_0_25",
+        "repeat": 1,
+        "speed_profile": 2.5,
+        "controlled_exit": false,
+        "duration": 35.200000000008075,
+        "first_kick": 5.24,
+        "launch": 8.2,
+        "foot_contact": true,
+        "peak_ball_speed": 5.894960714566302,
+        "overall_fall": false,
+        "entries": [
+          {
+            "t": 5.240000000000439,
+            "settle_s": 0.3000000000000007,
+            "before_settle_speed": 2.1644313342874,
+            "at_kick_speed": 1.498429471801183,
+            "max_approach_command": 2.5,
+            "min_height": 0.44339867133412025,
+            "max_tilt": 15.235746873722434,
+            "max_angular_rate": 2.5682317064997524,
+            "fall": false,
+            "observed_seconds": 2.300000000000768
+          }
+        ],
+        "exits": [
+          {
+            "t": 18.850000000000442,
+            "reason": "referee_stop",
+            "exit_reason": "referee_stop",
+            "initial_speed": 2.219241470483729,
+            "max_next_command": 1e-06,
+            "min_height": 0.4919292516870375,
+            "max_tilt": 3.4205243896896373,
+            "max_angular_rate": 1.544308418692881,
+            "fall": false,
+            "observed_seconds": 2.0199999999988805
+          }
+        ]
+      },
+      {
+        "path": "logs/amp-speed-20261025/handoff-2.5/14_0_25-r2-direct",
+        "case": "14_0_25",
+        "repeat": 2,
+        "speed_profile": 2.5,
+        "controlled_exit": false,
+        "duration": 35.18000000001155,
+        "first_kick": 5.46,
+        "launch": 8.18,
+        "foot_contact": true,
+        "peak_ball_speed": 5.438303919483449,
+        "overall_fall": false,
+        "entries": [
+          {
+            "t": 5.459999999999122,
+            "settle_s": 0.29999999999999716,
+            "before_settle_speed": 2.1211200033019,
+            "at_kick_speed": 1.8783391818289645,
+            "max_approach_command": 2.5,
+            "min_height": 0.4657140182635213,
+            "max_tilt": 7.437641565835985,
+            "max_angular_rate": 1.9566188494683412,
+            "fall": false,
+            "observed_seconds": 2.2999999999987253
+          },
+          {
+            "t": 21.109999999999125,
+            "settle_s": 0.30000000000000426,
+            "before_settle_speed": 2.06725460777222,
+            "at_kick_speed": 1.501599788454824,
+            "max_approach_command": 2.5,
+            "min_height": 0.4382312549994347,
+            "max_tilt": 22.565791754567137,
+            "max_angular_rate": 4.214155049329972,
+            "fall": false,
+            "observed_seconds": 2.3200000000028353
+          }
+        ],
+        "exits": [
+          {
+            "t": 19.609999999999125,
+            "reason": "cooldown",
+            "exit_reason": "session_timeout",
+            "initial_speed": 2.0881971260577585,
+            "max_next_command": 2.5,
+            "min_height": 0.45902382004718684,
+            "max_tilt": 4.980600425010227,
+            "max_angular_rate": 0.9621970177606824,
+            "fall": false,
+            "observed_seconds": 1.5000000000018332
+          },
+          {
+            "t": 22.869999999999123,
+            "reason": "referee_stop",
+            "exit_reason": "referee_stop",
+            "initial_speed": 0.31514232953119,
+            "max_next_command": 1e-06,
+            "min_height": 0.5241035710437073,
+            "max_tilt": 5.864769182626112,
+            "max_angular_rate": 1.7252054924667912,
+            "fall": false,
+            "observed_seconds": 2.0200000000024687
+          }
+        ]
+      },
+      {
+        "path": "logs/amp-speed-20261025/handoff-3/14_0_-25-r0-direct",
+        "case": "14_0_-25",
+        "repeat": 0,
+        "speed_profile": 3.0,
+        "controlled_exit": false,
+        "duration": 35.14000000000262,
+        "first_kick": 4.85,
+        "launch": 7.78,
+        "foot_contact": true,
+        "peak_ball_speed": 4.970512018005549,
+        "overall_fall": false,
+        "entries": [
+          {
+            "t": 4.8500000000002625,
+            "settle_s": 0.3000000000000007,
+            "before_settle_speed": 1.813082836447664,
+            "at_kick_speed": 1.31785621993987,
+            "max_approach_command": 3.0,
+            "min_height": 0.47224530019894756,
+            "max_tilt": 9.871380972805262,
+            "max_angular_rate": 2.121521957875382,
+            "fall": false,
+            "observed_seconds": 2.3200000000007748
+          }
+        ],
+        "exits": [
+          {
+            "t": 18.710000000000264,
+            "reason": "referee_stop",
+            "exit_reason": "referee_stop",
+            "initial_speed": 2.1940184522443174,
+            "max_next_command": 1e-06,
+            "min_height": 0.5134756609540136,
+            "max_tilt": 3.972285673231023,
+            "max_angular_rate": 1.3578201366280698,
+            "fall": false,
+            "observed_seconds": 2.0199999999988805
+          }
+        ]
+      },
+      {
+        "path": "logs/amp-speed-20261025/handoff-3/14_0_-25-r1-direct",
+        "case": "14_0_-25",
+        "repeat": 1,
+        "speed_profile": 3.0,
+        "controlled_exit": false,
+        "duration": 35.26000000001073,
+        "first_kick": 5.18,
+        "launch": 8.1,
+        "foot_contact": true,
+        "peak_ball_speed": 5.125343417560264,
+        "overall_fall": false,
+        "entries": [
+          {
+            "t": 5.179999999999469,
+            "settle_s": 0.29999999999999716,
+            "before_settle_speed": 2.0795280710293174,
+            "at_kick_speed": 1.66769467360726,
+            "max_approach_command": 3.0,
+            "min_height": 0.46443949416414526,
+            "max_tilt": 11.962697598094508,
+            "max_angular_rate": 3.4303586655171343,
+            "fall": false,
+            "observed_seconds": 2.2999999999987253
+          },
+          {
+            "t": 20.829999999999472,
+            "settle_s": 0.29999999999999716,
+            "before_settle_speed": 2.2425746382070457,
+            "at_kick_speed": 1.483374560815829,
+            "max_approach_command": 3.0,
+            "min_height": 0.43070985327220696,
+            "max_tilt": 22.741161837134953,
+            "max_angular_rate": 3.1705659977416922,
+            "fall": false,
+            "observed_seconds": 2.3200000000028353
+          }
+        ],
+        "exits": [
+          {
+            "t": 19.329999999999472,
+            "reason": "cooldown",
+            "exit_reason": "session_timeout",
+            "initial_speed": 2.021638601890698,
+            "max_next_command": 3.0,
+            "min_height": 0.44893797778623923,
+            "max_tilt": 6.7625987050901415,
+            "max_angular_rate": 1.1711070907812482,
+            "fall": false,
+            "observed_seconds": 1.4999999999998437
+          },
+          {
+            "t": 24.149999999999473,
+            "reason": "referee_stop",
+            "exit_reason": "referee_stop",
+            "initial_speed": 0.4779841843312866,
+            "max_next_command": 1e-06,
+            "min_height": 0.5225051816334123,
+            "max_tilt": 7.8081831962412505,
+            "max_angular_rate": 2.284929337683641,
+            "fall": false,
+            "observed_seconds": 2.0200000000024687
+          }
+        ]
+      },
+      {
+        "path": "logs/amp-speed-20261025/handoff-3/14_0_-25-r2-direct",
+        "case": "14_0_-25",
+        "repeat": 2,
+        "speed_profile": 3.0,
+        "controlled_exit": false,
+        "duration": 35.160000000005866,
+        "first_kick": 5.08,
+        "launch": 7.86,
+        "foot_contact": true,
+        "peak_ball_speed": 5.7213067501420465,
+        "overall_fall": false,
+        "entries": [
+          {
+            "t": 5.080000000000529,
+            "settle_s": 0.3000000000000007,
+            "before_settle_speed": 2.3300053450585154,
+            "at_kick_speed": 1.796268575468726,
+            "max_approach_command": 3.0,
+            "min_height": 0.45394693336898645,
+            "max_tilt": 8.25378438293548,
+            "max_angular_rate": 1.8345026010179297,
+            "fall": false,
+            "observed_seconds": 2.300000000000768
+          }
+        ],
+        "exits": [
+          {
+            "t": 18.43000000000053,
+            "reason": "referee_stop",
+            "exit_reason": "referee_stop",
+            "initial_speed": 2.1775389955429465,
+            "max_next_command": 1e-06,
+            "min_height": 0.510511060054336,
+            "max_tilt": 2.6166582716868345,
+            "max_angular_rate": 0.6710723109066369,
+            "fall": false,
+            "observed_seconds": 2.0199999999988805
+          }
+        ]
+      },
+      {
+        "path": "logs/amp-speed-20261025/handoff-3/14_0_0-r0-direct",
+        "case": "14_0_0",
+        "repeat": 0,
+        "speed_profile": 3.0,
+        "controlled_exit": false,
+        "duration": 35.08000000000729,
+        "first_kick": 4.62,
+        "launch": 7.36,
+        "foot_contact": true,
+        "peak_ball_speed": 6.558128105307457,
+        "overall_fall": false,
+        "entries": [
+          {
+            "t": 4.620000000000655,
+            "settle_s": 0.3000000000000007,
+            "before_settle_speed": 2.4897117447402657,
+            "at_kick_speed": 2.188624554074516,
+            "max_approach_command": 3.0,
+            "min_height": 0.4418972308167236,
+            "max_tilt": 14.2438669083407,
+            "max_angular_rate": 2.8763018697525773,
+            "fall": false,
+            "observed_seconds": 2.300000000000768
+          }
+        ],
+        "exits": [
+          {
+            "t": 18.050000000000658,
+            "reason": "referee_stop",
+            "exit_reason": "referee_stop",
+            "initial_speed": 1.99353167283283,
+            "max_next_command": 1.0,
+            "min_height": 0.4770831849609518,
+            "max_tilt": 5.077707455433184,
+            "max_angular_rate": 3.0824407746219227,
+            "fall": false,
+            "observed_seconds": 2.0199999999988805
+          }
+        ]
+      },
+      {
+        "path": "logs/amp-speed-20261025/handoff-3/14_0_0-r1-direct",
+        "case": "14_0_0",
+        "repeat": 1,
+        "speed_profile": 3.0,
+        "controlled_exit": false,
+        "duration": 35.20000000000157,
+        "first_kick": 5.01,
+        "launch": 7.76,
+        "foot_contact": true,
+        "peak_ball_speed": 5.605403075158234,
+        "overall_fall": false,
+        "entries": [
+          {
+            "t": 5.01000000000017,
+            "settle_s": 0.3000000000000007,
+            "before_settle_speed": 2.4979136483981645,
+            "at_kick_speed": 1.9705442878109578,
+            "max_approach_command": 3.0,
+            "min_height": 0.4373626050579246,
+            "max_tilt": 19.545189726971383,
+            "max_angular_rate": 3.3857661834292156,
+            "fall": false,
+            "observed_seconds": 2.3200000000007748
+          }
+        ],
+        "exits": [
+          {
+            "t": 18.450000000000173,
+            "reason": "referee_stop",
+            "exit_reason": "referee_stop",
+            "initial_speed": 2.003583037768011,
+            "max_next_command": 1e-06,
+            "min_height": 0.5152907669402159,
+            "max_tilt": 5.088000977145884,
+            "max_angular_rate": 0.8883964498958662,
+            "fall": false,
+            "observed_seconds": 2.0199999999988805
+          }
+        ]
+      },
+      {
+        "path": "logs/amp-speed-20261025/handoff-3/14_0_0-r2-direct",
+        "case": "14_0_0",
+        "repeat": 2,
+        "speed_profile": 3.0,
+        "controlled_exit": false,
+        "duration": 35.260000000003245,
+        "first_kick": 5.05,
+        "launch": 7.92,
+        "foot_contact": true,
+        "peak_ball_speed": 5.097845429562738,
+        "overall_fall": false,
+        "entries": [
+          {
+            "t": 5.050000000000303,
+            "settle_s": 0.3000000000000007,
+            "before_settle_speed": 2.104618015993999,
+            "at_kick_speed": 1.7075701421800313,
+            "max_approach_command": 3.0,
+            "min_height": 0.46449756225862127,
+            "max_tilt": 10.56051941605705,
+            "max_angular_rate": 2.7521535244686515,
+            "fall": false,
+            "observed_seconds": 2.3200000000007748
+          },
+          {
+            "t": 34.8200000000003,
+            "settle_s": 0.29999999999999716,
+            "before_settle_speed": 1.1371414641059507,
+            "at_kick_speed": 1.243545174856253,
+            "max_approach_command": 3.0,
+            "min_height": 0.4679883981786263,
+            "max_tilt": 14.105622852579828,
+            "max_angular_rate": 2.9718179240875493,
+            "fall": false,
+            "observed_seconds": 0.7400000000009044
+          }
+        ],
+        "exits": [
+          {
+            "t": 18.750000000000306,
+            "reason": "referee_stop",
+            "exit_reason": "referee_stop",
+            "initial_speed": 2.20495856992241,
+            "max_next_command": 1.0,
+            "min_height": 0.47683765971811504,
+            "max_tilt": 10.877478822765312,
+            "max_angular_rate": 3.101969506477001,
+            "fall": false,
+            "observed_seconds": 2.0199999999988805
+          }
+        ]
+      },
+      {
+        "path": "logs/amp-speed-20261025/handoff-3/14_0_25-r0-direct",
+        "case": "14_0_25",
+        "repeat": 0,
+        "speed_profile": 3.0,
+        "controlled_exit": false,
+        "duration": 35.16000000000403,
+        "first_kick": 4.9,
+        "launch": 7.88,
+        "foot_contact": true,
+        "peak_ball_speed": 4.557309246474032,
+        "overall_fall": false,
+        "entries": [
+          {
+            "t": 4.900000000000377,
+            "settle_s": 0.3000000000000007,
+            "before_settle_speed": 1.637346050770521,
+            "at_kick_speed": 1.188246805044187,
+            "max_approach_command": 3.0,
+            "min_height": 0.4625794252400502,
+            "max_tilt": 11.416356673174509,
+            "max_angular_rate": 2.965118257218839,
+            "fall": false,
+            "observed_seconds": 2.300000000000768
+          },
+          {
+            "t": 20.550000000000374,
+            "settle_s": 0.29999999999999716,
+            "before_settle_speed": 0.4803092258629835,
+            "at_kick_speed": 0.10579026764963427,
+            "max_approach_command": 3.0,
+            "min_height": 0.4254168626242122,
+            "max_tilt": 37.66590104030892,
+            "max_angular_rate": 5.608416216588288,
+            "fall": false,
+            "observed_seconds": 2.319999999998714
+          }
+        ],
+        "exits": [
+          {
+            "t": 19.050000000000374,
+            "reason": "cooldown",
+            "exit_reason": "session_timeout",
+            "initial_speed": 1.757689605853005,
+            "max_next_command": 1.67413,
+            "min_height": 0.4654658933336577,
+            "max_tilt": 4.936130616090593,
+            "max_angular_rate": 1.8634025056117811,
+            "fall": false,
+            "observed_seconds": 1.4999999999991687
+          },
+          {
+            "t": 22.49000000000038,
+            "reason": "referee_stop",
+            "exit_reason": "referee_stop",
+            "initial_speed": 1.0096910436607667,
+            "max_next_command": 1e-06,
+            "min_height": 0.47940201732647475,
+            "max_tilt": 11.944324448141073,
+            "max_angular_rate": 4.3212176801664794,
+            "fall": false,
+            "observed_seconds": 2.0199999999988805
+          }
+        ]
+      },
+      {
+        "path": "logs/amp-speed-20261025/handoff-3/14_0_25-r1-direct",
+        "case": "14_0_25",
+        "repeat": 1,
+        "speed_profile": 3.0,
+        "controlled_exit": false,
+        "duration": 35.200000000003044,
+        "first_kick": 4.95,
+        "launch": 7.66,
+        "foot_contact": true,
+        "peak_ball_speed": 5.605558556465196,
+        "overall_fall": false,
+        "entries": [
+          {
+            "t": 4.950000000000291,
+            "settle_s": 0.29999999999999893,
+            "before_settle_speed": 2.338240369678311,
+            "at_kick_speed": 1.654078306254951,
+            "max_approach_command": 3.0,
+            "min_height": 0.42796596024617023,
+            "max_tilt": 22.944586655838673,
+            "max_angular_rate": 4.023213809996365,
+            "fall": false,
+            "observed_seconds": 2.3200000000007748
+          }
+        ],
+        "exits": [
+          {
+            "t": 19.09000000000029,
+            "reason": "cooldown",
+            "exit_reason": "session_timeout",
+            "initial_speed": 1.5782325621125926,
+            "max_next_command": 3.0,
+            "min_height": 0.4738954675502799,
+            "max_tilt": 5.061464607536389,
+            "max_angular_rate": 1.995934919339671,
+            "fall": false,
+            "observed_seconds": 2.0199999999988805
+          }
+        ]
+      },
+      {
+        "path": "logs/amp-speed-20261025/handoff-3/14_0_25-r2-direct",
+        "case": "14_0_25",
+        "repeat": 2,
+        "speed_profile": 3.0,
+        "controlled_exit": false,
+        "duration": 35.08000000000196,
+        "first_kick": 4.81,
+        "launch": 7.76,
+        "foot_contact": true,
+        "peak_ball_speed": 5.235223253058129,
+        "overall_fall": true,
+        "entries": [
+          {
+            "t": 4.810000000000214,
+            "settle_s": 0.29999999999999893,
+            "before_settle_speed": 1.8377583604024887,
+            "at_kick_speed": 1.3790629399731618,
+            "max_approach_command": 3.0,
+            "min_height": 0.45455243350692864,
+            "max_tilt": 15.161987833310723,
+            "max_angular_rate": 3.1418281502295016,
+            "fall": false,
+            "observed_seconds": 2.3200000000007748
+          }
+        ],
+        "exits": [
+          {
+            "t": 18.590000000000217,
+            "reason": "referee_stop",
+            "exit_reason": "none",
+            "initial_speed": 0.01783026059020837,
+            "max_next_command": 0.0,
+            "min_height": 0.5343800189123512,
+            "max_tilt": 2.7735162921092242,
+            "max_angular_rate": 0.932198739940295,
+            "fall": false,
+            "observed_seconds": 2.0199999999988805
+          }
+        ]
+      },
+      {
+        "path": "logs/amp-speed-20261025/handoff-exit-2/14_0_0-r0-direct",
+        "case": "14_0_0",
+        "repeat": 0,
+        "speed_profile": 2.0,
+        "controlled_exit": true,
+        "duration": 20.239999999997718,
+        "first_kick": 5.69,
+        "launch": 8.66,
+        "foot_contact": true,
+        "peak_ball_speed": 4.781075187741178,
+        "overall_fall": false,
+        "entries": [
+          {
+            "t": 5.690000000000206,
+            "settle_s": 0.3000000000000007,
+            "before_settle_speed": 1.726904876553879,
+            "at_kick_speed": 1.1303572372413386,
+            "max_approach_command": 2.0,
+            "min_height": 0.4714735495145723,
+            "max_tilt": 8.57252279200608,
+            "max_angular_rate": 1.557848988239912,
+            "fall": false,
+            "observed_seconds": 2.3200000000007748
+          },
+          {
+            "t": 13.420000000000206,
+            "settle_s": 0.3000000000000007,
+            "before_settle_speed": 1.7333218089982927,
+            "at_kick_speed": 1.1250523644170096,
+            "max_approach_command": 2.0,
+            "min_height": 0.4675409898098361,
+            "max_tilt": 8.617984288776622,
+            "max_angular_rate": 1.5339515238799606,
+            "fall": false,
+            "observed_seconds": 2.2999999999987253
+          }
+        ],
+        "exits": [
+          {
+            "t": 10.020000000000206,
+            "reason": "cooldown",
+            "exit_reason": "ball_out_of_range",
+            "initial_speed": 1.3278772694995657,
+            "max_next_command": 2.0,
+            "min_height": 0.4795014348691685,
+            "max_tilt": 7.637831027275667,
+            "max_angular_rate": 1.4159853718435533,
+            "fall": false,
+            "observed_seconds": 2.000000000000668
+          }
+        ]
+      },
+      {
+        "path": "logs/amp-speed-20261025/handoff-exit-2/14_0_0-r1-direct",
+        "case": "14_0_0",
+        "repeat": 1,
+        "speed_profile": 2.0,
+        "controlled_exit": true,
+        "duration": 20.159999999997975,
+        "first_kick": 5.65,
+        "launch": 8.58,
+        "foot_contact": true,
+        "peak_ball_speed": 4.730875657691868,
+        "overall_fall": false,
+        "entries": [
+          {
+            "t": 5.650000000000153,
+            "settle_s": 0.3000000000000007,
+            "before_settle_speed": 1.7801267905495277,
+            "at_kick_speed": 1.2454606492676905,
+            "max_approach_command": 2.0,
+            "min_height": 0.4743709553078527,
+            "max_tilt": 8.758045665646675,
+            "max_angular_rate": 2.366042389155806,
+            "fall": false,
+            "observed_seconds": 2.3200000000007748
+          },
+          {
+            "t": 13.460000000000152,
+            "settle_s": 0.3000000000000007,
+            "before_settle_speed": 1.7792260595996152,
+            "at_kick_speed": 1.517054371509314,
+            "max_approach_command": 2.0,
+            "min_height": 0.4732433779399039,
+            "max_tilt": 10.348847131064197,
+            "max_angular_rate": 2.891647089658139,
+            "fall": false,
+            "observed_seconds": 2.2999999999987253
+          }
+        ],
+        "exits": [
+          {
+            "t": 9.940000000000152,
+            "reason": "cooldown",
+            "exit_reason": "ball_out_of_range",
+            "initial_speed": 1.1341595301000942,
+            "max_next_command": 2.0,
+            "min_height": 0.4697319125656482,
+            "max_tilt": 9.356670506437307,
+            "max_angular_rate": 1.138268142756747,
+            "fall": false,
+            "observed_seconds": 2.000000000000668
+          }
+        ]
+      },
+      {
+        "path": "logs/amp-speed-20261025/handoff-exit-2/14_0_0-r2-direct",
+        "case": "14_0_0",
+        "repeat": 2,
+        "speed_profile": 2.0,
+        "controlled_exit": true,
+        "duration": 20.159999999997034,
+        "first_kick": 5.58,
+        "launch": 8.5,
+        "foot_contact": true,
+        "peak_ball_speed": 4.799964033030556,
+        "overall_fall": false,
+        "entries": [
+          {
+            "t": 5.5800000000003855,
+            "settle_s": 0.29999999999999893,
+            "before_settle_speed": 1.7326634985701665,
+            "at_kick_speed": 1.1691332522892202,
+            "max_approach_command": 2.0,
+            "min_height": 0.4723455325461281,
+            "max_tilt": 11.179461252129542,
+            "max_angular_rate": 3.0886201043239656,
+            "fall": false,
+            "observed_seconds": 2.300000000000768
+          },
+          {
+            "t": 13.340000000000385,
+            "settle_s": 0.3000000000000007,
+            "before_settle_speed": 1.781505386619588,
+            "at_kick_speed": 1.109346092862859,
+            "max_approach_command": 2.0,
+            "min_height": 0.4678427336136151,
+            "max_tilt": 11.551541753512305,
+            "max_angular_rate": 2.1692085707714575,
+            "fall": false,
+            "observed_seconds": 2.2999999999987253
+          }
+        ],
+        "exits": [
+          {
+            "t": 9.840000000000385,
+            "reason": "cooldown",
+            "exit_reason": "ball_out_of_range",
+            "initial_speed": 1.1592375198668705,
+            "max_next_command": 2.0,
+            "min_height": 0.4686244773876583,
+            "max_tilt": 8.760918208469974,
+            "max_angular_rate": 1.0695441163532535,
+            "fall": false,
+            "observed_seconds": 1.9999999999994582
+          }
+        ]
+      },
+      {
+        "path": "logs/amp-speed-20261025/handoff-exit-2.25/14_0_0-r0-direct",
+        "case": "14_0_0",
+        "repeat": 0,
+        "speed_profile": 2.25,
+        "controlled_exit": true,
+        "duration": 20.239999999997593,
+        "first_kick": 5.57,
+        "launch": 8.5,
+        "foot_contact": true,
+        "peak_ball_speed": 4.922975599141607,
+        "overall_fall": false,
+        "entries": [
+          {
+            "t": 5.5700000000002365,
+            "settle_s": 0.3000000000000007,
+            "before_settle_speed": 1.953999057298267,
+            "at_kick_speed": 1.2630224787351225,
+            "max_approach_command": 2.25,
+            "min_height": 0.47224165049770667,
+            "max_tilt": 9.219690451839535,
+            "max_angular_rate": 1.5098198987873521,
+            "fall": false,
+            "observed_seconds": 2.3200000000007748
+          },
+          {
+            "t": 13.140000000000237,
+            "settle_s": 0.3000000000000007,
+            "before_settle_speed": 1.9530706551945707,
+            "at_kick_speed": 1.6825351019528783,
+            "max_approach_command": 2.25,
+            "min_height": 0.4742918821759587,
+            "max_tilt": 10.258819457866553,
+            "max_angular_rate": 2.368238346394308,
+            "fall": false,
+            "observed_seconds": 2.2999999999987253
+          }
+        ],
+        "exits": [
+          {
+            "t": 9.860000000000236,
+            "reason": "cooldown",
+            "exit_reason": "ball_out_of_range",
+            "initial_speed": 0.98874267978007,
+            "max_next_command": 2.25,
+            "min_height": 0.45519693982348425,
+            "max_tilt": 10.535223809051981,
+            "max_angular_rate": 0.9727227571428047,
+            "fall": false,
+            "observed_seconds": 2.0000000000006484
+          }
+        ]
+      },
+      {
+        "path": "logs/amp-speed-20261025/handoff-exit-2.25/14_0_0-r1-direct",
+        "case": "14_0_0",
+        "repeat": 1,
+        "speed_profile": 2.25,
+        "controlled_exit": true,
+        "duration": 20.119999999996608,
+        "first_kick": 5.18,
+        "launch": 8.04,
+        "foot_contact": true,
+        "peak_ball_speed": 4.852092253972736,
+        "overall_fall": true,
+        "entries": [
+          {
+            "t": 5.180000000000495,
+            "settle_s": 0.29999999999999893,
+            "before_settle_speed": 1.9398450267380245,
+            "at_kick_speed": 1.673848927659211,
+            "max_approach_command": 2.25,
+            "min_height": 0.4635116779791447,
+            "max_tilt": 8.982547239682168,
+            "max_angular_rate": 2.3398640864114433,
+            "fall": false,
+            "observed_seconds": 2.300000000000768
+          },
+          {
+            "t": 17.330000000000496,
+            "settle_s": 0.3000000000000007,
+            "before_settle_speed": 1.9278488077644318,
+            "at_kick_speed": 1.3175632019585186,
+            "max_approach_command": 2.25,
+            "min_height": 0.4695950111220821,
+            "max_tilt": 15.210150850935737,
+            "max_angular_rate": 2.811297265504067,
+            "fall": false,
+            "observed_seconds": 2.319999999998714
+          }
+        ],
+        "exits": [
+          {
+            "t": 9.400000000000496,
+            "reason": "cooldown",
+            "exit_reason": "ball_out_of_range",
+            "initial_speed": 1.1393112857433476,
+            "max_next_command": 2.25,
+            "min_height": 0.05879313511615305,
+            "max_tilt": 90.16856148977271,
+            "max_angular_rate": 7.23051005824142,
+            "fall": true,
+            "observed_seconds": 1.9999999999989608
+          }
+        ]
+      },
+      {
+        "path": "logs/amp-speed-20261025/handoff-exit-2.25/14_0_0-r2-direct",
+        "case": "14_0_0",
+        "repeat": 2,
+        "speed_profile": 2.25,
+        "controlled_exit": true,
+        "duration": 20.099999999992555,
+        "first_kick": 5.38,
+        "launch": 8.3,
+        "foot_contact": true,
+        "peak_ball_speed": 5.1232549034027866,
+        "overall_fall": false,
+        "entries": [
+          {
+            "t": 5.3799999999993755,
+            "settle_s": 0.29999999999999716,
+            "before_settle_speed": 1.9794864740303555,
+            "at_kick_speed": 1.5159212102694557,
+            "max_approach_command": 2.25,
+            "min_height": 0.46920328688920016,
+            "max_tilt": 11.030165380897637,
+            "max_angular_rate": 2.4738396319053506,
+            "fall": false,
+            "observed_seconds": 2.2999999999987253
+          },
+          {
+            "t": 12.969999999999375,
+            "settle_s": 0.29999999999999716,
+            "before_settle_speed": 1.97542039790237,
+            "at_kick_speed": 1.2737723041729332,
+            "max_approach_command": 2.25,
+            "min_height": 0.45050301019918276,
+            "max_tilt": 13.439977290476756,
+            "max_angular_rate": 2.603837449003581,
+            "fall": false,
+            "observed_seconds": 2.319999999998714
+          }
+        ],
+        "exits": [
+          {
+            "t": 9.609999999999376,
+            "reason": "cooldown",
+            "exit_reason": "ball_out_of_range",
+            "initial_speed": 0.9095447911425815,
+            "max_next_command": 2.25,
+            "min_height": 0.4608260229205418,
+            "max_tilt": 11.593832049345561,
+            "max_angular_rate": 0.87244684644097,
+            "fall": false,
+            "observed_seconds": 2.0199999999988805
+          },
+          {
+            "t": 19.989999999999377,
+            "reason": "referee_stop",
+            "exit_reason": "referee_stop",
+            "initial_speed": 2.2050814977027566,
+            "max_next_command": 1e-06,
+            "min_height": 0.49242966726814436,
+            "max_tilt": 3.9706721112959866,
+            "max_angular_rate": 1.62229437052837,
+            "fall": false,
+            "observed_seconds": 0.09999999999994458
+          }
+        ]
+      },
+      {
+        "path": "logs/amp-speed-20261025/handoff-exit-2.5/14_0_0-r0-direct",
+        "case": "14_0_0",
+        "repeat": 0,
+        "speed_profile": 2.5,
+        "controlled_exit": true,
+        "duration": 20.119999999998086,
+        "first_kick": 5.29,
+        "launch": 8.14,
+        "foot_contact": true,
+        "peak_ball_speed": 6.027207200508092,
+        "overall_fall": false,
+        "entries": [
+          {
+            "t": 5.290000000000131,
+            "settle_s": 0.3000000000000007,
+            "before_settle_speed": 2.12981963763907,
+            "at_kick_speed": 1.5371308668775605,
+            "max_approach_command": 2.5,
+            "min_height": 0.4662456198275493,
+            "max_tilt": 9.743725161920235,
+            "max_angular_rate": 1.5284537806291252,
+            "fall": false,
+            "observed_seconds": 2.3200000000007748
+          },
+          {
+            "t": 12.50000000000013,
+            "settle_s": 0.29999999999999893,
+            "before_settle_speed": 2.1444278918861994,
+            "at_kick_speed": 1.4560442977798043,
+            "max_approach_command": 2.5,
+            "min_height": 0.4480421985024512,
+            "max_tilt": 13.916173622074282,
+            "max_angular_rate": 2.360078019635358,
+            "fall": false,
+            "observed_seconds": 2.2999999999992564
+          }
+        ],
+        "exits": [
+          {
+            "t": 9.50000000000013,
+            "reason": "cooldown",
+            "exit_reason": "ball_out_of_range",
+            "initial_speed": 1.2220464636121617,
+            "max_next_command": 2.5,
+            "min_height": 0.44661343555850663,
+            "max_tilt": 7.804712353688367,
+            "max_angular_rate": 1.6213853485843615,
+            "fall": false,
+            "observed_seconds": 2.000000000000668
+          }
+        ]
+      },
+      {
+        "path": "logs/amp-speed-20261025/handoff-exit-2.5/14_0_0-r1-direct",
+        "case": "14_0_0",
+        "repeat": 1,
+        "speed_profile": 2.5,
+        "controlled_exit": true,
+        "duration": 20.079999999996808,
+        "first_kick": 5.34,
+        "launch": 8.16,
+        "foot_contact": true,
+        "peak_ball_speed": 6.115610507974045,
+        "overall_fall": false,
+        "entries": [
+          {
+            "t": 5.340000000000453,
+            "settle_s": 0.3000000000000007,
+            "before_settle_speed": 2.1244599134667297,
+            "at_kick_speed": 1.6898071509353607,
+            "max_approach_command": 2.5,
+            "min_height": 0.4491220349749955,
+            "max_tilt": 14.082661437283381,
+            "max_angular_rate": 2.9524543210830694,
+            "fall": false,
+            "observed_seconds": 2.300000000000768
+          },
+          {
+            "t": 12.820000000000453,
+            "settle_s": 0.3000000000000007,
+            "before_settle_speed": 2.148696399259445,
+            "at_kick_speed": 1.6986974817760898,
+            "max_approach_command": 2.5,
+            "min_height": 0.4481104700992723,
+            "max_tilt": 13.370237072720144,
+            "max_angular_rate": 2.2202099379297047,
+            "fall": false,
+            "observed_seconds": 2.2999999999987253
+          }
+        ],
+        "exits": [
+          {
+            "t": 9.520000000000453,
+            "reason": "cooldown",
+            "exit_reason": "ball_out_of_range",
+            "initial_speed": 0.8667360173554803,
+            "max_next_command": 2.5,
+            "min_height": 0.4629161344238722,
+            "max_tilt": 9.690353753153682,
+            "max_angular_rate": 0.9120078621648753,
+            "fall": false,
+            "observed_seconds": 1.9999999999992095
+          },
+          {
+            "t": 18.790000000000454,
+            "reason": "referee_stop",
+            "exit_reason": "referee_stop",
+            "initial_speed": 2.0687195098104456,
+            "max_next_command": 1e-06,
+            "min_height": 0.5146625268368304,
+            "max_tilt": 3.8042858470702527,
+            "max_angular_rate": 1.459229747885097,
+            "fall": false,
+            "observed_seconds": 1.2799999999992906
+          }
+        ]
+      },
+      {
+        "path": "logs/amp-speed-20261025/handoff-exit-2.5/14_0_0-r2-direct",
+        "case": "14_0_0",
+        "repeat": 2,
+        "speed_profile": 2.5,
+        "controlled_exit": true,
+        "duration": 20.119999999996665,
+        "first_kick": 5.06,
+        "launch": 7.96,
+        "foot_contact": true,
+        "peak_ball_speed": 5.114921381386537,
+        "overall_fall": false,
+        "entries": [
+          {
+            "t": 5.060000000000484,
+            "settle_s": 0.3000000000000007,
+            "before_settle_speed": 2.1198710653532262,
+            "at_kick_speed": 1.7935537305026819,
+            "max_approach_command": 2.5,
+            "min_height": 0.46735663229979846,
+            "max_tilt": 11.494183695956218,
+            "max_angular_rate": 1.6622221535806692,
+            "fall": false,
+            "observed_seconds": 2.300000000000768
+          },
+          {
+            "t": 12.340000000000481,
+            "settle_s": 0.29999999999999716,
+            "before_settle_speed": 2.100892206219232,
+            "at_kick_speed": 1.5449087749610824,
+            "max_approach_command": 2.5,
+            "min_height": 0.46949739587370104,
+            "max_tilt": 9.971070390805316,
+            "max_angular_rate": 1.7687219131183727,
+            "fall": false,
+            "observed_seconds": 2.2999999999987253
+          }
+        ],
+        "exits": [
+          {
+            "t": 9.320000000000483,
+            "reason": "cooldown",
+            "exit_reason": "ball_out_of_range",
+            "initial_speed": 1.2366124238481404,
+            "max_next_command": 2.5,
+            "min_height": 0.45016842127659845,
+            "max_tilt": 9.423683758281193,
+            "max_angular_rate": 1.436988653832705,
+            "fall": false,
+            "observed_seconds": 1.9999999999991385
+          }
+        ]
+      },
+      {
+        "path": "logs/amp-speed-20261025/handoff-exit-3/14_0_0-r0-direct",
+        "case": "14_0_0",
+        "repeat": 0,
+        "speed_profile": 3.0,
+        "controlled_exit": true,
+        "duration": 20.11999999999773,
+        "first_kick": 4.69,
+        "launch": 7.46,
+        "foot_contact": true,
+        "peak_ball_speed": 4.942390942076844,
+        "overall_fall": false,
+        "entries": [
+          {
+            "t": 4.690000000000218,
+            "settle_s": 0.29999999999999893,
+            "before_settle_speed": 2.325735741238385,
+            "at_kick_speed": 2.080426462839938,
+            "max_approach_command": 3.0,
+            "min_height": 0.44885673872109627,
+            "max_tilt": 12.42705203556692,
+            "max_angular_rate": 2.9650777390298364,
+            "fall": false,
+            "observed_seconds": 2.3200000000007748
+          },
+          {
+            "t": 12.140000000000219,
+            "settle_s": 0.3000000000000007,
+            "before_settle_speed": 2.3947416515934443,
+            "at_kick_speed": 2.1348984882157453,
+            "max_approach_command": 3.0,
+            "min_height": 0.44444682633466304,
+            "max_tilt": 14.977351910742291,
+            "max_angular_rate": 2.876328420064936,
+            "fall": false,
+            "observed_seconds": 2.2999999999988656
+          }
+        ],
+        "exits": [
+          {
+            "t": 8.820000000000219,
+            "reason": "cooldown",
+            "exit_reason": "ball_out_of_range",
+            "initial_speed": 0.8802828461439725,
+            "max_next_command": 3.0,
+            "min_height": 0.4579181259817071,
+            "max_tilt": 7.7026986574087175,
+            "max_angular_rate": 1.4512120946991969,
+            "fall": false,
+            "observed_seconds": 2.000000000000668
+          }
+        ]
+      },
+      {
+        "path": "logs/amp-speed-20261025/handoff-exit-3/14_0_0-r1-direct",
+        "case": "14_0_0",
+        "repeat": 1,
+        "speed_profile": 3.0,
+        "controlled_exit": true,
+        "duration": 20.279999999996043,
+        "first_kick": 4.98,
+        "launch": 7.76,
+        "foot_contact": true,
+        "peak_ball_speed": 6.074987985930508,
+        "overall_fall": false,
+        "entries": [
+          {
+            "t": 4.980000000000615,
+            "settle_s": 0.3000000000000007,
+            "before_settle_speed": 2.4975640490668534,
+            "at_kick_speed": 1.9772109151320973,
+            "max_approach_command": 3.0,
+            "min_height": 0.4274894665265165,
+            "max_tilt": 27.922050738777028,
+            "max_angular_rate": 4.34977324173081,
+            "fall": false,
+            "observed_seconds": 2.300000000000768
+          },
+          {
+            "t": 12.450000000000616,
+            "settle_s": 0.3000000000000007,
+            "before_settle_speed": 2.0774650890482658,
+            "at_kick_speed": 1.5967308262089834,
+            "max_approach_command": 3.0,
+            "min_height": 0.43462825011626216,
+            "max_tilt": 18.412206716933866,
+            "max_angular_rate": 3.203189931986627,
+            "fall": false,
+            "observed_seconds": 2.319999999998714
+          }
+        ],
+        "exits": [
+          {
+            "t": 9.120000000000614,
+            "reason": "cooldown",
+            "exit_reason": "ball_out_of_range",
+            "initial_speed": 0.9416458373513604,
+            "max_next_command": 3.0,
+            "min_height": 0.44435670316966386,
+            "max_tilt": 8.485516788654465,
+            "max_angular_rate": 1.172861358625946,
+            "fall": false,
+            "observed_seconds": 1.9999999999988916
+          },
+          {
+            "t": 18.330000000000616,
+            "reason": "referee_stop",
+            "exit_reason": "referee_stop",
+            "initial_speed": 2.1473351352063785,
+            "max_next_command": 1e-06,
+            "min_height": 0.5043737616615941,
+            "max_tilt": 2.912702335155822,
+            "max_angular_rate": 1.2964563398273123,
+            "fall": false,
+            "observed_seconds": 1.9399999999989248
+          }
+        ]
+      },
+      {
+        "path": "logs/amp-speed-20261025/handoff-exit-3/14_0_0-r2-direct",
+        "case": "14_0_0",
+        "repeat": 2,
+        "speed_profile": 3.0,
+        "controlled_exit": true,
+        "duration": 20.279999999997123,
+        "first_kick": 4.98,
+        "launch": 7.72,
+        "foot_contact": true,
+        "peak_ball_speed": 5.399048258692331,
+        "overall_fall": false,
+        "entries": [
+          {
+            "t": 4.980000000000347,
+            "settle_s": 0.3100000000000005,
+            "before_settle_speed": 2.4751944111539124,
+            "at_kick_speed": 2.026631555567945,
+            "max_approach_command": 3.0,
+            "min_height": 0.4462027128239406,
+            "max_tilt": 14.475455055654818,
+            "max_angular_rate": 2.7826073256358863,
+            "fall": false,
+            "observed_seconds": 2.3200000000007748
+          },
+          {
+            "t": 12.620000000000347,
+            "settle_s": 0.3000000000000007,
+            "before_settle_speed": 2.4556401762046214,
+            "at_kick_speed": 1.8061362367487495,
+            "max_approach_command": 3.0,
+            "min_height": 0.4473253751533986,
+            "max_tilt": 10.748234488135632,
+            "max_angular_rate": 1.6185776003446395,
+            "fall": false,
+            "observed_seconds": 2.2999999999987253
+          }
+        ],
+        "exits": [
+          {
+            "t": 9.060000000000347,
+            "reason": "cooldown",
+            "exit_reason": "ball_out_of_range",
+            "initial_speed": 1.0854805242796148,
+            "max_next_command": 3.0,
+            "min_height": 0.45315647954798133,
+            "max_tilt": 12.138940969903624,
+            "max_angular_rate": 1.6335270483831525,
+            "fall": false,
+            "observed_seconds": 2.0000000000004707
+          },
+          {
+            "t": 18.650000000000347,
+            "reason": "referee_stop",
+            "exit_reason": "referee_stop",
+            "initial_speed": 2.1527963787055353,
+            "max_next_command": 1e-06,
+            "min_height": 0.5107288053187381,
+            "max_tilt": 3.220391304223028,
+            "max_angular_rate": 1.254767184374398,
+            "fall": false,
+            "observed_seconds": 1.6199999999991022
+          }
+        ]
+      }
+    ]
+  },
+  "offline_physics": [
+    {
+      "path": "/home/robotics/ZJUDancer/BHumanCodeRelease/logs/amp-speed-20261025/steady.json",
+      "trials": 110,
+      "height_failure_threshold": 0.35,
+      "groups": [
+        {
+          "case": "forward1.25",
+          "trials": 5,
+          "threshold_breaches": 0,
+          "actual_mean": [
+            1.2459528649923128,
+            0.0069083814009402,
+            -0.013794462481104252
+          ],
+          "min_height": 0.5134484351715473,
+          "max_tilt": 5.819676544329601
+        },
+        {
+          "case": "forward1.5",
+          "trials": 5,
+          "threshold_breaches": 0,
+          "actual_mean": [
+            1.4227363062032008,
+            0.004470028514319076,
+            -0.009457674105343957
+          ],
+          "min_height": 0.5107606971707135,
+          "max_tilt": 5.7801457341198565
+        },
+        {
+          "case": "forward2",
+          "trials": 5,
+          "threshold_breaches": 0,
+          "actual_mean": [
+            1.7816592539294582,
+            -0.0012374993773271068,
+            -0.0065148465375902765
+          ],
+          "min_height": 0.5017915725280648,
+          "max_tilt": 6.723413652069351
+        },
+        {
+          "case": "forward2.25",
+          "trials": 5,
+          "threshold_breaches": 0,
+          "actual_mean": [
+            1.985429708939893,
+            -0.0027921311091079534,
+            -0.00046685668351922427
+          ],
+          "min_height": 0.49668107986054205,
+          "max_tilt": 6.670427403455717
+        },
+        {
+          "case": "forward2.5",
+          "trials": 5,
+          "threshold_breaches": 0,
+          "actual_mean": [
+            2.1875232858864995,
+            -0.007089090084558405,
+            -0.0021776835529609094
+          ],
+          "min_height": 0.4915308751945017,
+          "max_tilt": 7.215561166201423
+        },
+        {
+          "case": "forward2.75",
+          "trials": 5,
+          "threshold_breaches": 0,
+          "actual_mean": [
+            2.3798893251506312,
+            -0.024411904365960038,
+            0.009838878695812434
+          ],
+          "min_height": 0.4857195061379836,
+          "max_tilt": 7.211804094991344
+        },
+        {
+          "case": "forward3",
+          "trials": 5,
+          "threshold_breaches": 0,
+          "actual_mean": [
+            2.5559381047185226,
+            -0.043775048767004415,
+            0.015167611379131741
+          ],
+          "min_height": 0.48137133567976215,
+          "max_tilt": 7.405908008209945
+        },
+        {
+          "case": "forward3.5",
+          "trials": 5,
+          "threshold_breaches": 0,
+          "actual_mean": [
+            2.8673127497742428,
+            -0.07533928016308059,
+            0.030543298618541898
+          ],
+          "min_height": 0.4679542800520045,
+          "max_tilt": 10.757984595552614
+        },
+        {
+          "case": "forward4",
+          "trials": 5,
+          "threshold_breaches": 5,
+          "actual_mean": [
+            2.8485055103821386,
+            -0.07683676149486939,
+            0.03359777161270618
+          ],
+          "min_height": 0.3388734071378095,
+          "max_tilt": 23.489246829350144
+        },
+        {
+          "case": "forward5",
+          "trials": 5,
+          "threshold_breaches": 5,
+          "actual_mean": [
+            2.2942317787427267,
+            0.20939834496020632,
+            -0.016063293734825113
+          ],
+          "min_height": 0.33907006002037365,
+          "max_tilt": 17.524743085300834
+        },
+        {
+          "case": "side1.5",
+          "trials": 5,
+          "threshold_breaches": 0,
+          "actual_mean": [
+            0.05594656158689413,
+            1.3731739449308367,
+            -0.04063895156535785
+          ],
+          "min_height": 0.4712693763865253,
+          "max_tilt": 3.2919566574417436
+        },
+        {
+          "case": "side1.75",
+          "trials": 5,
+          "threshold_breaches": 0,
+          "actual_mean": [
+            0.05060965862294852,
+            1.5252960445164654,
+            -0.057803956492926106
+          ],
+          "min_height": 0.46013628417085684,
+          "max_tilt": 3.917232682169807
+        },
+        {
+          "case": "side2",
+          "trials": 5,
+          "threshold_breaches": 0,
+          "actual_mean": [
+            0.06401271289277798,
+            1.612340528608361,
+            -0.06554330879501974
+          ],
+          "min_height": 0.45968212188602503,
+          "max_tilt": 4.468783145813572
+        },
+        {
+          "case": "side2.5",
+          "trials": 5,
+          "threshold_breaches": 0,
+          "actual_mean": [
+            0.16239305787402905,
+            1.4970253636988766,
+            -0.057545943526487134
+          ],
+          "min_height": 0.4505305860230754,
+          "max_tilt": 3.5204782783647963
+        },
+        {
+          "case": "back1",
+          "trials": 5,
+          "threshold_breaches": 0,
+          "actual_mean": [
+            -0.9674211130488907,
+            -0.005024316225261696,
+            -0.012964606695867095
+          ],
+          "min_height": 0.5130690649808511,
+          "max_tilt": 4.21035300508901
+        },
+        {
+          "case": "back1.5",
+          "trials": 5,
+          "threshold_breaches": 0,
+          "actual_mean": [
+            -1.300134079297162,
+            -0.022325228747434634,
+            -0.0036307435291934834
+          ],
+          "min_height": 0.49221226097783155,
+          "max_tilt": 4.6324322991517155
+        },
+        {
+          "case": "back2",
+          "trials": 5,
+          "threshold_breaches": 0,
+          "actual_mean": [
+            -1.4255522511470948,
+            -0.022859969880145773,
+            0.0030325603333609644
+          ],
+          "min_height": 0.4813035555866075,
+          "max_tilt": 4.905335131271314
+        },
+        {
+          "case": "back2.5",
+          "trials": 5,
+          "threshold_breaches": 0,
+          "actual_mean": [
+            -1.2054796973241813,
+            -0.016991340098756556,
+            0.0026357709408035327
+          ],
+          "min_height": 0.4988153457128543,
+          "max_tilt": 5.115052194232975
+        },
+        {
+          "case": "yaw1.57",
+          "trials": 5,
+          "threshold_breaches": 0,
+          "actual_mean": [
+            0.08706164666070895,
+            0.017259169572609836,
+            1.700665831219387
+          ],
+          "min_height": 0.519380261183433,
+          "max_tilt": 4.232642231080171
+        },
+        {
+          "case": "yaw2.09",
+          "trials": 5,
+          "threshold_breaches": 0,
+          "actual_mean": [
+            0.1260093887087581,
+            0.0005860904616884859,
+            2.278667559656064
+          ],
+          "min_height": 0.5234990541131299,
+          "max_tilt": 4.933017946987332
+        },
+        {
+          "case": "yaw3",
+          "trials": 5,
+          "threshold_breaches": 0,
+          "actual_mean": [
+            0.17454864236998718,
+            -0.05482020889059774,
+            3.1621709051098885
+          ],
+          "min_height": 0.5145250439697705,
+          "max_tilt": 3.2513899634710706
+        },
+        {
+          "case": "yaw4",
+          "trials": 5,
+          "threshold_breaches": 0,
+          "actual_mean": [
+            0.21047806319470486,
+            -0.18759519901312324,
+            3.4190972056279887
+          ],
+          "min_height": 0.48099873769956186,
+          "max_tilt": 8.027080229795457
+        }
+      ]
+    },
+    {
+      "path": "/home/robotics/ZJUDancer/BHumanCodeRelease/logs/amp-speed-20261025/stress.json",
+      "trials": 60,
+      "height_failure_threshold": 0.35,
+      "groups": [
+        {
+          "case": "forward2",
+          "trials": 10,
+          "threshold_breaches": 0,
+          "actual_mean": [
+            1.777987620370402,
+            -0.001722762334399543,
+            -0.0017926011513575103
+          ],
+          "min_height": 0.477395448170037,
+          "max_tilt": 6.5747917007014784
+        },
+        {
+          "case": "forward2.5",
+          "trials": 10,
+          "threshold_breaches": 0,
+          "actual_mean": [
+            2.171433573028886,
+            -0.009866915179050115,
+            0.006447456083759639
+          ],
+          "min_height": 0.47170306383924576,
+          "max_tilt": 6.884175337748792
+        },
+        {
+          "case": "forward3",
+          "trials": 10,
+          "threshold_breaches": 0,
+          "actual_mean": [
+            2.4974575769056635,
+            -0.03899758880646831,
+            0.020451700540185445
+          ],
+          "min_height": 0.4666565290596447,
+          "max_tilt": 7.277495952553355
+        },
+        {
+          "case": "forward3.5",
+          "trials": 10,
+          "threshold_breaches": 0,
+          "actual_mean": [
+            2.7049821609028966,
+            -0.06960198944397443,
+            0.037278573091319454
+          ],
+          "min_height": 0.4612736833615225,
+          "max_tilt": 9.621845016191056
+        },
+        {
+          "case": "forward4",
+          "trials": 10,
+          "threshold_breaches": 0,
+          "actual_mean": [
+            2.6592310947251767,
+            -0.06454051909762842,
+            0.05408883157202981
+          ],
+          "min_height": 0.4264500267230429,
+          "max_tilt": 10.530194142009623
+        },
+        {
+          "case": "forward5",
+          "trials": 10,
+          "threshold_breaches": 10,
+          "actual_mean": [
+            2.0078706798176094,
+            0.3057646755139635,
+            -0.09538160090417454
+          ],
+          "min_height": 0.33632992073847673,
+          "max_tilt": 16.702814831628015
+        }
+      ]
+    },
+    {
+      "path": "/home/robotics/ZJUDancer/BHumanCodeRelease/logs/amp-speed-20261025/long/abrupt.json",
+      "trials": 60,
+      "height_failure_threshold": 0.25,
+      "groups": [
+        {
+          "case": "forward2",
+          "trials": 10,
+          "threshold_breaches": 0,
+          "actual_mean": [
+            1.7878458131062476,
+            -0.0010108430359056792,
+            -0.0063863448252344844
+          ],
+          "min_height": 0.49297006894996825,
+          "max_tilt": 6.392660226151286
+        },
+        {
+          "case": "forward2.5",
+          "trials": 10,
+          "threshold_breaches": 0,
+          "actual_mean": [
+            2.2003581851739553,
+            -0.011224818882417801,
+            -7.399726794597571e-05
+          ],
+          "min_height": 0.4833029441652199,
+          "max_tilt": 6.946025110882713
+        },
+        {
+          "case": "forward3",
+          "trials": 10,
+          "threshold_breaches": 0,
+          "actual_mean": [
+            2.573157724237011,
+            -0.0426043063462112,
+            0.012981504185480336
+          ],
+          "min_height": 0.4793160065368189,
+          "max_tilt": 7.532745612748323
+        },
+        {
+          "case": "forward3.5",
+          "trials": 10,
+          "threshold_breaches": 0,
+          "actual_mean": [
+            2.860892044289664,
+            -0.06726461226429782,
+            0.025138990148891673
+          ],
+          "min_height": 0.4645912442893827,
+          "max_tilt": 11.143102620433105
+        },
+        {
+          "case": "forward3.75",
+          "trials": 10,
+          "threshold_breaches": 0,
+          "actual_mean": [
+            2.917759255482393,
+            -0.0805158972713216,
+            0.032932711055342
+          ],
+          "min_height": 0.4477949903833592,
+          "max_tilt": 13.62240458312145
+        },
+        {
+          "case": "forward4",
+          "trials": 10,
+          "threshold_breaches": 10,
+          "actual_mean": [
+            2.655724367917132,
+            -0.04094692810531137,
+            0.012099209559373726
+          ],
+          "min_height": 0.25199564029828403,
+          "max_tilt": 54.336665939095255
+        }
+      ]
+    },
+    {
+      "path": "/home/robotics/ZJUDancer/BHumanCodeRelease/logs/amp-speed-20261025/joint-limits/stress.json",
+      "trials": 60,
+      "height_failure_threshold": 0.25,
+      "groups": [
+        {
+          "case": "forward2",
+          "trials": 10,
+          "threshold_breaches": 0,
+          "actual_mean": [
+            1.7341752389744094,
+            0.0005559045411387937,
+            -0.004256516430809878
+          ],
+          "min_height": 0.47610243293112,
+          "max_tilt": 6.777144232899271
+        },
+        {
+          "case": "forward2.5",
+          "trials": 10,
+          "threshold_breaches": 0,
+          "actual_mean": [
+            2.0524480257203295,
+            -0.009239322997737718,
+            0.00846068259277653
+          ],
+          "min_height": 0.4692103291525116,
+          "max_tilt": 7.140669866793072
+        },
+        {
+          "case": "forward2.75",
+          "trials": 10,
+          "threshold_breaches": 0,
+          "actual_mean": [
+            2.1882585817892695,
+            -0.018694943670316905,
+            0.016142321730441417
+          ],
+          "min_height": 0.4644699856698398,
+          "max_tilt": 7.1130382869901165
+        },
+        {
+          "case": "forward3",
+          "trials": 10,
+          "threshold_breaches": 0,
+          "actual_mean": [
+            2.309836015368611,
+            -0.028752958909460835,
+            0.01784949938687176
+          ],
+          "min_height": 0.46541753112235956,
+          "max_tilt": 7.246337982707347
+        },
+        {
+          "case": "forward3.25",
+          "trials": 10,
+          "threshold_breaches": 0,
+          "actual_mean": [
+            2.406146808589017,
+            -0.04446994021966583,
+            0.03209000548459814
+          ],
+          "min_height": 0.4602029579679925,
+          "max_tilt": 8.475799254565263
+        },
+        {
+          "case": "forward3.5",
+          "trials": 10,
+          "threshold_breaches": 0,
+          "actual_mean": [
+            2.4789546966269107,
+            -0.0554966664271073,
+            0.030566461070812602
+          ],
+          "min_height": 0.4560665132504903,
+          "max_tilt": 8.965156515739125
+        }
+      ]
+    },
+    {
+      "path": "/home/robotics/ZJUDancer/BHumanCodeRelease/logs/amp-speed-20261025/joint-limits-long/abrupt.json",
+      "trials": 20,
+      "height_failure_threshold": 0.25,
+      "groups": [
+        {
+          "case": "forward2.5",
+          "trials": 5,
+          "threshold_breaches": 0,
+          "actual_mean": [
+            2.0764910265307654,
+            -0.010953190655718115,
+            0.003304721225489574
+          ],
+          "min_height": 0.48732796970390196,
+          "max_tilt": 7.047668125553512
+        },
+        {
+          "case": "forward3",
+          "trials": 5,
+          "threshold_breaches": 0,
+          "actual_mean": [
+            2.3753988243210604,
+            -0.030261979866283036,
+            0.014480641317296386
+          ],
+          "min_height": 0.47429240474675605,
+          "max_tilt": 7.36130179508514
+        },
+        {
+          "case": "forward3.25",
+          "trials": 5,
+          "threshold_breaches": 0,
+          "actual_mean": [
+            2.501274844053644,
+            -0.04085555115022069,
+            0.01936261674637615
+          ],
+          "min_height": 0.466274428510411,
+          "max_tilt": 7.429779246373785
+        },
+        {
+          "case": "forward3.5",
+          "trials": 5,
+          "threshold_breaches": 0,
+          "actual_mean": [
+            2.608405694353067,
+            -0.05319624904961869,
+            0.022849112830287406
+          ],
+          "min_height": 0.4576945529287821,
+          "max_tilt": 8.03240923599858
+        }
+      ]
+    }
+  ],
+  "failure_case_notes": [
+    {
+      "path": "logs/amp-speed-20261025/handoff-2/14_0_0-r0-direct",
+      "meaning": "Baseline fell about 1.54 s into its second Kick session after a session_timeout; initial high-speed entry succeeded."
+    },
+    {
+      "path": "logs/amp-speed-20261025/handoff-3/14_0_25-r2-direct",
+      "meaning": "Fell while VisualKick had already been active for several seconds, outside the first-entry 2 s window; no proof that enlarged AMP command caused it."
+    },
+    {
+      "path": "logs/amp-speed-20261025/handoff-exit-2.25/14_0_0-r1-direct",
+      "meaning": "Ball-out-of-range stress exit. During exit_prepare, before AMP, height already dropped from .525 to .476 m and vertical speed reached -1.08 m/s; subsequently failed near the handoff."
+    }
+  ],
+  "manifest": {
+    "scope": "Current dancer AMP, standard K1, fifa7vs7, --bhuman-physics (2 ms Euler), inference/network 20 ms",
+    "production_changed": false,
+    "hashes": {
+      "BHumanCodeRelease/Config/NeuralNets/Dancer/amp.json": "fddb72d88e9eb06fdeb29aa01ce990689f692c86435b27ca68474066f47f822a",
+      "BHumanCodeRelease/Config/NeuralNets/Dancer/amp_vel/2026-10-04_10-24-37.onnx": "0d044e509de3ae231735cbaf41c8660b1b460a59de9ca39b1a408977bd885a5b",
+      "BHumanCodeRelease/Config/Robots/SimulatedK1/walkingEngine.cfg": "c9f597405c0b94dd6963b547d9e380848a36c4171b710dcd262c8ce6ae303aff",
+      "BHumanCodeRelease/Config/Robots/Default/K1/jointLimits.cfg": "6d06bcc3680ac983cadbe8268658df4d7a7e55fbaf670930c4a445c916e56c44",
+      "BHumanCodeRelease/build_sim/rcss_dancer_policy_probe": "aa44fcb0027028048228776a2d93db2f29b47e76048c88bce0c2cabbcfbb9de9",
+      "BHumanCodeRelease/build_sim/run_player": "128d9ed91ddd1106220245408ccdf9699d810ff2674ce6f1d602c6eb4e2c3602",
+      "rcssservermj/src/rcsssmj/resources/robots/K1/robot.xml": "aed717d353f53e801e86b99f5ed616672081c555dc359da49cb280de2c64e4fb",
+      "rcssservermj/src/rcsssmj/games/soccer/sim/soccer_sim.py": "c7de3a575ccc2f48d6744894925d4f0782afd7562f838125f4301c06ee62c568"
+    },
+    "branches": {
+      "BHumanCodeRelease": "feature/rcssservermj-7v7",
+      "rcssservermj": "feature/bhuman-7v7"
+    },
+    "baseline_full": "logs/dancer-motion-2_xyyyj_",
+    "raised_screen_full": "logs/dancer-motion-olkzi19p",
+    "repeated_full": "logs/dancer-motion-3w7fpc0h"
+  },
+  "production_hashes_unchanged": true,
+  "artifacts": "/home/robotics/ZJUDancer/BHumanCodeRelease/logs/amp-speed-20261025",
+  "scripts": [
+    "scripts/experiments/amp_speed_sweep.py",
+    "scripts/experiments/dancer_motion_smoke.py",
+    "scripts/experiments/kick_alignment.py",
+    "scripts/experiments/kick_alignment_server.py",
+    "scripts/experiments/analyze_amp_handoffs.py"
+  ]
+}

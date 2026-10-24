@@ -15,6 +15,7 @@ def main():
     parser.add_argument('--host', default='127.0.0.1')
     parser.add_argument('--port', type=int, default=60000)
     parser.add_argument('--monitor-port', type=int, default=60001)
+    parser.add_argument('--server-model', choices=['K1', 'K1BHuman', 'T1BHuman'], help='Override both teams server model; default follows run_player.')
     parser.add_argument('--robot', choices=['K1', 'T1'], default='K1')
     parser.add_argument('--robot-a', choices=['K1', 'T1'], help='Override the left team robot type.')
     parser.add_argument('--robot-b', choices=['K1', 'T1'], help='Override the right team robot type.')
@@ -25,6 +26,7 @@ def main():
     parser.add_argument('--team-id-b', type=int, default=82)
     parser.add_argument('--localization', choices=['truth', 'measured'], default='truth')
     parser.add_argument('--strategy', choices=['current', 'balanced', 'attacking'], default='current')
+    parser.add_argument('--motion-policy', choices=['native', 'dancer'], default='native')
     parser.add_argument('--kick-mode', choices=['fast-max', 'native'], default='fast-max',
                         help='Measured localization only; truth always uses strong/max speed with pose constraints.')
     parser.add_argument('--kickoff', choices=['none', 'left', 'right'], default='none')
@@ -32,6 +34,10 @@ def main():
     parser.add_argument('--duration', type=float, help='Optional wall-clock seconds for diagnostics.')
     parser.add_argument('--log-dir', type=Path, default=Path('/tmp') / ('bhuman-rcss7v7-' + datetime.now().strftime('%Y%m%d-%H%M%S-%f')))
     args = parser.parse_args()
+    if args.server_model and any(args.server_model not in (['K1', 'K1BHuman'] if robot == 'K1' else ['T1BHuman']) for robot in (args.robot_a or args.robot, args.robot_b or args.robot)):
+        parser.error('--server-model does not match both teams robot types')
+    if args.motion_policy == 'dancer' and any(robot != 'K1' for robot in (args.robot_a or args.robot, args.robot_b or args.robot)):
+        parser.error('--motion-policy dancer requires K1 on both teams')
     if args.team_a == args.team_b or args.team_id_a == args.team_id_b:
         parser.error('The two teams need different names and UDP team IDs.')
     if any(not 1 <= n <= 99 for n in [args.team_id_a, args.team_id_b]):
@@ -60,9 +66,11 @@ def main():
             '--robot', (args.robot_a or args.robot) if team == args.team_a else (args.robot_b or args.robot),
             '--localization', args.localization, '--sim-speed', str(args.sim_speed),
             '--strategy', args.strategy,
+            '--motion-policy', args.motion_policy,
             '--kick-mode', args.kick_mode,
             '--trace', str(args.log_dir / f'{team}_{number}.csv'),
-        ], cwd=repo, stdout=log, stderr=subprocess.STDOUT)
+        ] + (['--server-model', args.server_model] if args.server_model else []),
+            cwd=repo, stdout=log, stderr=subprocess.STDOUT)
         children.append(child)
 
     def ready(team, number):

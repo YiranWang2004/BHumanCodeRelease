@@ -1,7 +1,7 @@
 # B-Human 2026 接入 rcssservermj：K1/T1 7v7
 
 分支 `feature/rcssservermj-7v7`，基于官方 Code Release 2026 `2e3374ba8`。
-服务器为 `/home/robotics/ZJUDancer/rcssservermj` 的同名分支。
+服务器为 `/home/robotics/ZJUDancer/rcssservermj` 的 `feature/bhuman-7v7` 分支。
 
 本分支现统一维护在 `/home/robotics/ZJUDancer/BHumanCodeRelease`，使用该仓库既有的
 个人 fork 远程；原 `test/HSLServer` 分支独立保留。迁移完成后已删除重复目录
@@ -17,6 +17,34 @@
 [远距离对手位置实验报告](reports/opponent_range.md)。这不是全场特权对手真值接口，
 仍需目标在相机视野中，且在线精度受自身姿态和跟踪过程影响。
 
+## 当前临时模型实验（2026-10-25）
+
+当前 `--robot K1` 临时默认生成服务器的普通 **K1**，其 XML 对齐 server 本地
+`test/unfair_kick` 的 `42c8f60`（原生训练力矩上限 ×1.1）。不是 K1BHuman。
+`--robot T1` 仍生成 T1BHuman。运动策略选择独立，继续用
+`--motion-policy dancer` 启用 AMP / VisualKick / 新起身。
+
+```bash
+# 当前默认普通 K1；保存比赛行为日志
+for n in {1..7}; do
+  ./build_sim/run_player --num "$n" --motion-policy dancer --log &
+done
+# 单机恢复旧模型，其他参数不变
+./build_sim/run_player --num 1 --motion-policy dancer --server-model K1BHuman --log
+```
+
+相机位置已随所选模型切换，普通 K1 使用 server 的 ±60° 水平/垂直检测范围，
+沿用普通 K1 的 MuJoCo PD 和 XML 合力矩上限；不套用 K1BHuman 的速度滤波和较低力矩上限。
+启动信息、CSV 和监视数据中的 `server_model` 标识实际模型。
+双队脚本 `scripts/start_7v7.py` 同样支持 `--server-model`。
+
+服务器 fifa7vs7 的完整球物理已对齐 `test/unfair_kick`：半径 0.11 m、质量 0.41 kg、
+各轴惯量 0.0019844 kg·m²、摩擦 (0.4, 0.01, 0.01)、solref (−5000, −20)。
+客户端 `RCSS_fifa7vs7/ballSpecification.cfg` 质量也同步为 0.41 kg。
+重力对齐 −9.81 m/s²、空气阻力为零；地面和 2 ms / Euler 求解配置保留。
+这不是切换整个 server 到 unfair_kick 分支；重启 server 和客户端生效，无须重新编译。
+历史 K1BHuman 测试结果不代表普通 K1 的整场表现。
+
 ## 首次编译
 
 ```bash
@@ -24,7 +52,7 @@ cd /home/robotics/ZJUDancer/BHumanCodeRelease
 python3 -m pip install zstandard
 python3 scripts/setup_sim_toolchain.py
 scripts/build_sim.sh
-cmake --build build_sim --target rcss_protocol_test rcss_imu_test rcss_team_message_test rcss_formation_test -j4
+cmake --build build_sim --target rcss_protocol_test rcss_imu_test rcss_team_message_test rcss_formation_test rcss_dancer_gate_test -j4
 ctest --test-dir build_sim --output-on-failure
 ```
 
@@ -53,6 +81,96 @@ for n in {1..7}; do ./build_sim/run_player --num "$n" --log & done
 
 T1 在上述命令中添加 `--robot T1`。诊断用 `--trace FILE` 仍可显式指定 CSV 路径，
 与 `--log` 互斥。下文的双队测试启动器仍显式通过 `--trace` 保存其测试日志。
+
+### 可选 Dancer 行走、踢球与起身（K1）
+
+默认 `--motion-policy native` 保持原有策略。指定 `--motion-policy dancer` 时，
+走路及站立改用 AMP velocity，踢球改用 `5070Ti_equivariant_student.onnx`，
+起身改用 `recovery_mjlab/model_4999.onnx`。三套模型和部署配置来自 `dancer-robocupdemo` 的 `test/7vs7` 分支
+`aba39596950847771d9ab558a00afab995ff8335`，已随仓库放入 `Config/NeuralNets/Dancer/`，
+运行不依赖旁边的 dancer 仓库、Python 运控进程或 ROS。
+
+```bash
+scripts/build_sim.sh
+for n in {1..7}; do
+  ./build_sim/run_player --num "$n" --motion-policy dancer &
+done
+```
+
+可叠加 `--log`、`--monitor` 和 `--strategy balanced|attacking`。去掉
+`--motion-policy dancer` 即恢复原策略。`scripts/start_7v7.py` 的同名参数作用于双方；
+新策略仅支持 K1，和 `--robot T1` 同时使用会在连接服务器前报错。
+
+本节原始接入使用 **K1BHuman**；当前临时默认已改为普通 **K1**，以文首实验说明为准。
+每 20 ms 推理一次，身体 20 个关节使用模型的默认姿态、动作缩放和 Kp/Kd。
+行走、站立和踢球期间保留 B-Human 头控；起身期间由新 policy 接管全部 22 个关节，
+交还 AMP 后恢复 B-Human 头控。摔倒检测和进入起身的时机仍由 B-Human 决定。
+AMP 接收 B-Human 行走规划产生的速度（m/s、rad/s），部署限幅为
+`vx ±2.5、vy ±1.75、yaw ±3`，来自 `Config/NeuralNets/Dancer/amp.json`。
+普通 **K1 + dancer** 模式同时以该配置的 vx 上限设置规划层快速前进、最大前进
+和前进目标速度映射，当前为 **2.5 m/s**。正常速度档仍为 1.25 m/s，后退、横移、
+转向、加减速及组合运动限制沿用原配置；`native` 和 `K1BHuman` 的规划速度不变。
+这项调整不改变 VisualKick 的固定 command，也不改变下述交接时序。
+单机实测实际直行约 2.14 m/s（原约 1.75 m/s）；2.5 档通过本轮两向交接测试，
+但交接姿态波动有所增大，尚未证明整场比赛稳定性等同原配置。
+详细条件、数据及失败个例见 [AMP 速度与踢球衔接实验](reports/dancer_amp_speed_results.json)。
+
+VisualKick 的方向使用 B-Human 当前射门、传球或解围方向，经里程计和机身姿态转换。
+固定 command 为 `(1,0,1)`，步频 1.8 Hz。它没有原 Kick 的力度、球速或
+`allow_deviation` 输入，因此 `--kick-mode` 不调整这个模型，也不保证按原传球距离出球。
+球观测来自 server 相机检测，使用**当前 server 模型的相机几何**转换为完整身体坐标；
+丢帧时保持最近测量，不二次采样、不用全局球真值替代，也不使用外推后的 BallModel
+作为网络输入。首次进入用 49 个零帧和当前帧初始化 50×75 历史，动作和相位清零。
+
+仅新模式使用以下接管条件，truth 和 measured 均适用。过渡规则对齐
+`dancer-robocupdemo` 的 `test/7vs7`（`aba3959695`）：
+
+- 当前视觉看到球、身体坐标水平球距 ≤6 m、球偏角绝对值 ≤0.65 rad（约 37°），
+  且 B-Human 请求处理球、有球队主罚权并获裁判许可，先以 AMP 零速保持 300 ms。
+  期间持续检查视觉、角度、距离和主罚权，失去条件则取消并冷却。
+- 进入后保持 Kick 会话；普通 walk/stand 请求、避障路径、截球和让球标记均不直接
+  打断它，不再使用 `native_motion_guard`。B-Human 仍选择射门/传球方向；瞬时切换为
+  非处理球请求时保持先前的场地坐标踢球方向。头控仍由 B-Human 负责。
+- 失去球队处理球许可、球姿态异常持续 600 ms（球距 >0.10 m 且球 x<−0.10 m 或
+  偏角 >1.75 rad）、球距 >8.5 m 持续 600 ms 且本轮已执行 >1500 ms、
+  无可用球源持续 1000 ms、5 秒无进展或会话满 14 秒，启动退出准备。
+  单轮超过 7 秒时，有可用球源可延长一轮，最多一次。
+- “进展”指球距缩短 ≥0.12 m、球沿基准踢球方向前进 ≥0.15 m、机器人平移 ≥0.20 m
+  或转向 ≥0.25 rad，任一满足就重置进展基线和计时。
+- 退出准备持续 140 ms，仍由 Kick 输出动作，发送的 Walk 速度为零；这与 dancer
+  的调用顺序一致，**不表示 Kick 固定 command 已减速**。之后切 AMP 零速，下一帧
+  恢复规划速度；冷却从实际恢复 Walk 开始计 1200 ms，再次进入仍需 300 ms 准备。
+- 裁判停止、对方定位球、罚下立即禁止 Kick；摔倒和起身继续由原优先级接管。
+  模型历史只在实际策略切换或中断后重置，不因瞬时运动请求变化而清空。
+
+可用球源采用 dancer 的视觉时间语义：See 每 40 ms 到达，检测标记在消息之间保持；
+新鲜观测最多 650 ms，有限球估计可保留至最后观测后 1000 ms，但未检出且球距
+≤0.45 m 时不采用记忆。再连续 1000 ms 无可用源才退出，因此不是简单“最后看到球后
+恰好 1 秒退出”。B-Human BallModel 仅用于过渡判断/进展统计，网络球输入仍只用相机测量。
+球队仲裁沿用 B-Human 的处理球角色或策略层处理球技能，不移植 dancer 自己的队内 cost 仲裁。
+
+起身沿用 dancer 当前部署语义：先 20 帧（0.4 秒）阻尼落稳，再输出力矩；
+机身重力投影 `gravity_z < -0.85`（倾斜约小于 32°）且根高度 ≥0.30 m 时，
+下一控制帧交给 AMP 完成站直。单次 300 帧（6 秒）仍未完成，则释放力矩一帧后
+清空状态重试。起身输出 `Kp=0`、配置 Kd 和 `tau=训练Kp×0.6×action`，
+由 server 在每个物理子步计算阻尼并限制合力矩，未把力矩动作转换为位置目标。
+
+CSV 和监视数据记录实际模型名、`motion_policy`、`dancer_gate`、
+`dancer_exit_reason`（最近一次退出原因）及 `dancer_ball_owner`。
+`dancer_kick_direction_world` 记录会话实际采用的场地坐标踢球方向（rad）。
+`dancer_native_flags` 记录最近一次走路/踢球推理时的约束，仅供诊断：按位 1=截球、2=让球、4=避障、8=停止步、16=站立阶段；
+这些标记不再决定 Dancer Kick 的退出。CSV 的
+`dancer_walk_vx/vy/yaw` 是送往 AMP 接口的规划速度；Kick 执行期间网络实际使用上述固定
+command。`kick_flags_available=0` 表示原四个 Kick 指令字段不适用于新模型，不能把它们
+显示的零解释为低力度。起身另记录 `dancer_recovery_state/row/attempts`；
+CSV 的 `getup_inferences` 为累计起身推理次数，`gravity_z` 为机身重力竖直分量。
+非起身帧的 recovery state 为 `inactive`，row/attempts 保留最近一次起身记录。
+
+已完成数值对照、相机几何检查、接管边界测试、独立走路/踢球和起身实验。
+目前新模式在 K1BHuman 上的侧走及小角速度响应较弱，短场景接入通过不代表整场比赛
+性能优于原策略。实验数据与复现命令见 [Dancer 策略接入报告](reports/dancer_motion.md) 和
+[起身策略接入报告](reports/dancer_recovery.md)。本次完整过渡规则及复测见
+[Walk / VisualKick 过渡报告](reports/dancer_transitions.md)。
 
 ### 可选的动态 7v7 阵型
 
@@ -276,7 +394,7 @@ python3 scripts/start_7v7.py --robot-a T1 --robot-b K1 --kickoff left
 | 行走、站立 | `Config/NeuralNets/Walk/K1_walk.onnx` |
 | 普通/强踢球 | `Config/NeuralNets/Walk/K1_kick_inner.onnx` |
 | 旧柔和踢球 | `Config/NeuralNets/Walk/K1_kick_inner_soft.onnx` |
-| 起身 | `Config/NeuralNets/GetUpEngine/` 的 K1 模型 |
+| 起身 | 默认 `Config/NeuralNets/GetUpEngine/` 的 K1 模型；Dancer 模式使用 `Config/NeuralNets/Dancer/recovery_mjlab/model_4999.onnx` |
 
 踢球模型的观测、推理与切换条件由原版 WalkingEngine 执行。新增推理记录回调仅在
 `BUILD_RCSS_SERVER=ON` 构建中启用，不改模型输入输出。CSV 的 `policy`、

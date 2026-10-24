@@ -12,6 +12,8 @@ void RCSSSensorProvider::update(CameraInfo& data)
   data.width = t1 ? 640 : 544; data.height = t1 ? 480 : 448;
   data.openingAngleWidth = t1 ? 79.2_deg : 105_deg;
   data.openingAngleHeight = t1 ? 63.6_deg : 94_deg;
+  if(rcss::Runtime::get().options.serverModel == "K1")
+    data.openingAngleWidth = data.openingAngleHeight = 120_deg;
   data.opticalCenter = Vector2f(data.width * .5f, data.height * .5f);
   data.updateFocalLength();
 }

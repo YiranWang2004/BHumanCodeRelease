@@ -1,0 +1,626 @@
+{
+  "dancer-motion-7jzkqgjf": [
+    {
+      "policy": "native",
+      "command": "0,0,0",
+      "exit_code": 0,
+      "frames": 600,
+      "active_frames": 459,
+      "seconds": 9.17,
+      "min_height": 0.52,
+      "dx": -0.006,
+      "dy": -0.17,
+      "yaw_delta": -0.10385607000000001,
+      "phases": [
+        "2"
+      ],
+      "policies": [
+        "K1_walk.onnx"
+      ]
+    },
+    {
+      "policy": "native",
+      "command": "0.8,0,0",
+      "exit_code": 0,
+      "frames": 600,
+      "active_frames": 490,
+      "seconds": 9.790000000000001,
+      "min_height": 0.485,
+      "dx": 7.85,
+      "dy": 0.147,
+      "yaw_delta": 0.14025493,
+      "phases": [
+        "2"
+      ],
+      "policies": [
+        "K1_walk.onnx"
+      ]
+    },
+    {
+      "policy": "native",
+      "command": "0,0.4,0",
+      "exit_code": 0,
+      "frames": 600,
+      "active_frames": 462,
+      "seconds": 9.23,
+      "min_height": 0.515,
+      "dx": 0.021,
+      "dy": 3.683,
+      "yaw_delta": -0.17007407,
+      "phases": [
+        "2"
+      ],
+      "policies": [
+        "K1_walk.onnx"
+      ]
+    },
+    {
+      "policy": "native",
+      "command": "0,0,0.6",
+      "exit_code": 0,
+      "frames": 600,
+      "active_frames": 481,
+      "seconds": 9.61,
+      "min_height": 0.521,
+      "dx": 0.12,
+      "dy": -0.133,
+      "yaw_delta": 1.41820196,
+      "phases": [
+        "2"
+      ],
+      "policies": [
+        "K1_walk.onnx"
+      ]
+    },
+    {
+      "policy": "dancer",
+      "command": "0,0,0",
+      "exit_code": 0,
+      "frames": 600,
+      "active_frames": 493,
+      "seconds": 9.85,
+      "min_height": 0.548,
+      "dx": 0.008,
+      "dy": 0.002,
+      "yaw_delta": -0.0400581,
+      "phases": [
+        "2"
+      ],
+      "policies": [
+        "2026-10-04_10-24-37.onnx"
+      ]
+    },
+    {
+      "policy": "dancer",
+      "command": "0.8,0,0",
+      "exit_code": 0,
+      "frames": 600,
+      "active_frames": 490,
+      "seconds": 9.79,
+      "min_height": 0.518,
+      "dx": 6.538,
+      "dy": -1.127,
+      "yaw_delta": -0.20878219999999997,
+      "phases": [
+        "2"
+      ],
+      "policies": [
+        "2026-10-04_10-24-37.onnx"
+      ]
+    },
+    {
+      "policy": "dancer",
+      "command": "0,0.4,0",
+      "exit_code": 0,
+      "frames": 600,
+      "active_frames": 482,
+      "seconds": 9.629999999999999,
+      "min_height": 0.531,
+      "dx": 0.177,
+      "dy": 1.177,
+      "yaw_delta": -0.31216720000000003,
+      "phases": [
+        "2"
+      ],
+      "policies": [
+        "2026-10-04_10-24-37.onnx"
+      ]
+    },
+    {
+      "policy": "dancer",
+      "command": "0,0,0.6",
+      "exit_code": 0,
+      "frames": 600,
+      "active_frames": 482,
+      "seconds": 9.63,
+      "min_height": 0.548,
+      "dx": 0.006,
+      "dy": -0.002,
+      "yaw_delta": 0.24615179999999998,
+      "phases": [
+        "2"
+      ],
+      "policies": [
+        "2026-10-04_10-24-37.onnx"
+      ]
+    }
+  ],
+  "dancer-motion-bozfqeif": [
+    {
+      "policy": "native",
+      "command": "0,0,0",
+      "exit_code": 0,
+      "frames": 1800,
+      "active_frames": 1664,
+      "seconds": 33.26,
+      "min_height": 0.056,
+      "dx": -1.225,
+      "dy": -0.504,
+      "yaw_delta": 3.11753196,
+      "phases": [
+        "1",
+        "2",
+        "3",
+        "4"
+      ],
+      "final_height": 0.545,
+      "policies": [
+        "K1.onnx",
+        "K1_walk.onnx"
+      ]
+    },
+    {
+      "policy": "dancer",
+      "command": "0,0,0",
+      "exit_code": 0,
+      "frames": 1800,
+      "active_frames": 1669,
+      "seconds": 33.36,
+      "min_height": 0.057,
+      "dx": 0.786,
+      "dy": -0.323,
+      "yaw_delta": 1.1569802,
+      "phases": [
+        "1",
+        "2",
+        "3",
+        "4"
+      ],
+      "final_height": 0.548,
+      "policies": [
+        "2026-10-04_10-24-37.onnx",
+        "K1.onnx"
+      ]
+    }
+  ],
+  "kick-alignment-x5514m1o": [
+    {
+      "case": "3_0_0",
+      "repeat": 0,
+      "mode": "direct",
+      "t0": 3.2399999999998648,
+      "first_policy": 0.27,
+      "launch": 2.62,
+      "falls": false,
+      "penalized": false,
+      "walkclose_s": 0.0,
+      "speed_120ms": 3.098,
+      "error_deg": 2.15,
+      "command_world_deg": -11.24,
+      "contact_parts": [
+        "r-0-4-left_foot_link_collision_4"
+      ],
+      "mode_at_launch": "PlayOn",
+      "falls_before_kick": false,
+      "success": true
+    },
+    {
+      "case": "6_0_0",
+      "repeat": 0,
+      "mode": "direct",
+      "t0": 3.1799999999998714,
+      "first_policy": 0.53,
+      "launch": 4.04,
+      "falls": false,
+      "penalized": false,
+      "walkclose_s": 0.0,
+      "speed_120ms": 3.131,
+      "error_deg": 7.7,
+      "command_world_deg": -11.49,
+      "contact_parts": [
+        "r-0-4-left_foot_link_collision_4"
+      ],
+      "mode_at_launch": "PlayOn",
+      "falls_before_kick": false,
+      "success": true
+    }
+  ],
+  "kick-alignment-o_fh88ab": [
+    {
+      "case": "3_0_60",
+      "repeat": 0,
+      "mode": "baseline",
+      "t0": 3.3799999999998493,
+      "first_policy": 1.75,
+      "launch": 2.54,
+      "falls": false,
+      "penalized": false,
+      "walkclose_s": 0.0,
+      "speed_120ms": 1.379,
+      "error_deg": 31.73,
+      "command_world_deg": -7.77,
+      "contact_parts": [
+        "r-0-4-right_foot_link_collision_4"
+      ],
+      "mode_at_launch": "PlayOn",
+      "falls_before_kick": false,
+      "success": false
+    },
+    {
+      "case": "3_0_60",
+      "repeat": 0,
+      "mode": "direct",
+      "t0": 3.299999999999858,
+      "first_policy": 0.61,
+      "launch": 2.66,
+      "falls": false,
+      "penalized": false,
+      "walkclose_s": 0.0,
+      "speed_120ms": 3.557,
+      "error_deg": 0.26,
+      "command_world_deg": -9.51,
+      "contact_parts": [
+        "r-0-4-right_foot_link_collision_4"
+      ],
+      "mode_at_launch": "PlayOn",
+      "falls_before_kick": false,
+      "success": true
+    },
+    {
+      "case": "6_0_0",
+      "repeat": 0,
+      "mode": "baseline",
+      "t0": 3.1799999999998714,
+      "first_policy": 3.91,
+      "launch": 4.92,
+      "falls": false,
+      "penalized": false,
+      "walkclose_s": 0.0,
+      "speed_120ms": 5.25,
+      "error_deg": 6.91,
+      "command_world_deg": -11.9,
+      "contact_parts": [
+        "r-0-4-Right_Shank_collision_4",
+        "r-0-4-right_foot_link_collision_4"
+      ],
+      "mode_at_launch": "PlayOn",
+      "falls_before_kick": false,
+      "success": true
+    },
+    {
+      "case": "6_0_0",
+      "repeat": 0,
+      "mode": "direct",
+      "t0": 11.840000000000623,
+      "first_policy": 0.36,
+      "launch": 3.86,
+      "falls": false,
+      "penalized": false,
+      "walkclose_s": 0.0,
+      "speed_120ms": 3.201,
+      "error_deg": 6.17,
+      "command_world_deg": -11.15,
+      "contact_parts": [
+        "r-0-4-left_foot_link_collision_4"
+      ],
+      "mode_at_launch": "PlayOn",
+      "falls_before_kick": false,
+      "success": true
+    }
+  ],
+  "dancer-team-rhfkb8v6": [
+    {
+      "player": "BHumanRed_4",
+      "frames": 1350,
+      "active_frames": 1300,
+      "modes": {
+        "BeforeKickOff": 50,
+        "KickOff_Left": 269,
+        "PlayOn": 1031
+      },
+      "policies": {
+        "2026-10-04_10-24-37.onnx": 906,
+        "5070Ti_equivariant_student.onnx": 394
+      },
+      "teammates_max": 6,
+      "min_height": 0.438,
+      "last_mode": "PlayOn",
+      "last_time": "28.03",
+      "phases": {
+        "1": 319,
+        "2": 981
+      }
+    },
+    {
+      "player": "BHumanBlue_2",
+      "frames": 1350,
+      "active_frames": 1300,
+      "modes": {
+        "BeforeKickOff": 50,
+        "KickOff_Left": 269,
+        "PlayOn": 1031
+      },
+      "policies": {
+        "2026-10-04_10-24-37.onnx": 1300
+      },
+      "teammates_max": 6,
+      "min_height": 0.484,
+      "last_mode": "PlayOn",
+      "last_time": "28.03",
+      "phases": {
+        "1": 73,
+        "2": 1227
+      }
+    },
+    {
+      "player": "BHumanBlue_5",
+      "frames": 1350,
+      "active_frames": 1300,
+      "modes": {
+        "BeforeKickOff": 50,
+        "KickOff_Left": 269,
+        "PlayOn": 1031
+      },
+      "policies": {
+        "2026-10-04_10-24-37.onnx": 1297,
+        "5070Ti_equivariant_student.onnx": 3
+      },
+      "teammates_max": 6,
+      "min_height": 0.457,
+      "last_mode": "PlayOn",
+      "last_time": "28.03",
+      "phases": {
+        "1": 119,
+        "2": 1181
+      }
+    },
+    {
+      "player": "BHumanBlue_4",
+      "frames": 1350,
+      "active_frames": 1300,
+      "modes": {
+        "BeforeKickOff": 50,
+        "KickOff_Left": 269,
+        "PlayOn": 1031
+      },
+      "policies": {
+        "2026-10-04_10-24-37.onnx": 1300
+      },
+      "teammates_max": 6,
+      "min_height": 0.491,
+      "last_mode": "PlayOn",
+      "last_time": "28.03",
+      "phases": {
+        "1": 243,
+        "2": 1057
+      }
+    },
+    {
+      "player": "BHumanRed_1",
+      "frames": 1350,
+      "active_frames": 1300,
+      "modes": {
+        "BeforeKickOff": 50,
+        "KickOff_Left": 269,
+        "PlayOn": 1031
+      },
+      "policies": {
+        "2026-10-04_10-24-37.onnx": 1300
+      },
+      "teammates_max": 6,
+      "min_height": 0.525,
+      "last_mode": "PlayOn",
+      "last_time": "28.03",
+      "phases": {
+        "1": 703,
+        "2": 597
+      }
+    },
+    {
+      "player": "BHumanBlue_6",
+      "frames": 1350,
+      "active_frames": 1300,
+      "modes": {
+        "BeforeKickOff": 50,
+        "KickOff_Left": 269,
+        "PlayOn": 1031
+      },
+      "policies": {
+        "2026-10-04_10-24-37.onnx": 1059,
+        "5070Ti_equivariant_student.onnx": 45,
+        "K1.onnx": 196
+      },
+      "teammates_max": 6,
+      "min_height": 0.058,
+      "last_mode": "PlayOn",
+      "last_time": "28.03",
+      "phases": {
+        "1": 90,
+        "2": 835,
+        "3": 129,
+        "4": 246
+      }
+    },
+    {
+      "player": "BHumanRed_2",
+      "frames": 1350,
+      "active_frames": 1300,
+      "modes": {
+        "BeforeKickOff": 50,
+        "KickOff_Left": 269,
+        "PlayOn": 1031
+      },
+      "policies": {
+        "2026-10-04_10-24-37.onnx": 1108,
+        "5070Ti_equivariant_student.onnx": 192
+      },
+      "teammates_max": 6,
+      "min_height": 0.409,
+      "last_mode": "PlayOn",
+      "last_time": "28.03",
+      "phases": {
+        "1": 325,
+        "2": 975
+      }
+    },
+    {
+      "player": "BHumanRed_6",
+      "frames": 1350,
+      "active_frames": 1300,
+      "modes": {
+        "BeforeKickOff": 50,
+        "KickOff_Left": 269,
+        "PlayOn": 1031
+      },
+      "policies": {
+        "2026-10-04_10-24-37.onnx": 1300
+      },
+      "teammates_max": 6,
+      "min_height": 0.502,
+      "last_mode": "PlayOn",
+      "last_time": "28.03",
+      "phases": {
+        "1": 551,
+        "2": 749
+      }
+    },
+    {
+      "player": "BHumanRed_3",
+      "frames": 1350,
+      "active_frames": 1300,
+      "modes": {
+        "BeforeKickOff": 50,
+        "KickOff_Left": 269,
+        "PlayOn": 1031
+      },
+      "policies": {
+        "2026-10-04_10-24-37.onnx": 1300
+      },
+      "teammates_max": 6,
+      "min_height": 0.501,
+      "last_mode": "PlayOn",
+      "last_time": "28.03",
+      "phases": {
+        "1": 876,
+        "2": 424
+      }
+    },
+    {
+      "player": "BHumanBlue_1",
+      "frames": 1402,
+      "active_frames": 1300,
+      "modes": {
+        "BeforeKickOff": 102,
+        "KickOff_Left": 269,
+        "PlayOn": 1031
+      },
+      "policies": {
+        "2026-10-04_10-24-37.onnx": 1300
+      },
+      "teammates_max": 6,
+      "min_height": 0.493,
+      "last_mode": "PlayOn",
+      "last_time": "28.03",
+      "phases": {
+        "1": 73,
+        "2": 1227
+      }
+    },
+    {
+      "player": "BHumanRed_5",
+      "frames": 1350,
+      "active_frames": 1300,
+      "modes": {
+        "BeforeKickOff": 50,
+        "KickOff_Left": 269,
+        "PlayOn": 1031
+      },
+      "policies": {
+        "2026-10-04_10-24-37.onnx": 1300
+      },
+      "teammates_max": 6,
+      "min_height": 0.502,
+      "last_mode": "PlayOn",
+      "last_time": "28.03",
+      "phases": {
+        "1": 562,
+        "2": 738
+      }
+    },
+    {
+      "player": "BHumanBlue_3",
+      "frames": 1350,
+      "active_frames": 1300,
+      "modes": {
+        "BeforeKickOff": 50,
+        "KickOff_Left": 269,
+        "PlayOn": 1031
+      },
+      "policies": {
+        "2026-10-04_10-24-37.onnx": 1300
+      },
+      "teammates_max": 6,
+      "min_height": 0.454,
+      "last_mode": "PlayOn",
+      "last_time": "28.03",
+      "phases": {
+        "1": 633,
+        "2": 667
+      }
+    },
+    {
+      "player": "BHumanBlue_7",
+      "frames": 1350,
+      "active_frames": 1300,
+      "modes": {
+        "BeforeKickOff": 50,
+        "KickOff_Left": 269,
+        "PlayOn": 1031
+      },
+      "policies": {
+        "2026-10-04_10-24-37.onnx": 1049,
+        "5070Ti_equivariant_student.onnx": 251
+      },
+      "teammates_max": 6,
+      "min_height": 0.423,
+      "last_mode": "PlayOn",
+      "last_time": "28.03",
+      "phases": {
+        "1": 73,
+        "2": 1227
+      }
+    },
+    {
+      "player": "BHumanRed_7",
+      "frames": 1350,
+      "active_frames": 1300,
+      "modes": {
+        "BeforeKickOff": 50,
+        "KickOff_Left": 269,
+        "PlayOn": 1031
+      },
+      "policies": {
+        "2026-10-04_10-24-37.onnx": 1299,
+        "5070Ti_equivariant_student.onnx": 1
+      },
+      "teammates_max": 6,
+      "min_height": 0.49,
+      "last_mode": "PlayOn",
+      "last_time": "28.03",
+      "phases": {
+        "1": 281,
+        "2": 1019
+      }
+    }
+  ]
+}

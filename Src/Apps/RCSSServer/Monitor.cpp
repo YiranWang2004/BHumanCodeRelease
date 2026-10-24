@@ -47,6 +47,19 @@ std::string monitorSnapshot(const Runtime& r)
       << ",\"team_id\":" << r.options.teamId << ",\"player\":" << r.options.number
       << ",\"robot\":" << quoted(r.options.robot) << ",\"localization\":" << quoted(r.options.localization)
       << ",\"strategy\":" << quoted(r.options.strategy)
+      << ",\"server_model\":" << quoted(r.options.serverModel)
+      << ",\"motion_policy\":" << quoted(r.options.motionPolicy)
+      << ",\"dancer_gate\":" << quoted(r.dancerGate)
+      << ",\"dancer_exit_reason\":" << quoted(r.dancerExitReason)
+      << ",\"dancer_ball_owner\":" << (r.dancerBallOwner ? "true" : "false")
+      << ",\"dancer_native_flags\":" << r.dancerNativeFlags
+      << ",\"dancer_kick_direction_world\":" << r.dancerKickDirectionWorld
+      << ",\"dancer_recovery_state\":" << quoted(r.dancerRecoveryState)
+      << ",\"dancer_recovery_attempts\":" << r.dancerRecoveryAttempts
+      << ",\"dancer_recovery_row\":" << r.dancerRecoveryRow
+      << ",\"kick_flags_available\":" << (r.options.motionPolicy == "native" ? "true" : "false")
+      << ",\"dancer_kick_command\":[1,0,1],\"dancer_gait_frequency\":1.8"
+      << ",\"dancer_walk_command\":[" << r.dancerVelocity[0] << ',' << r.dancerVelocity[1] << ',' << r.dancerVelocity[2] << ']'
       << ",\"session\":" << quoted([] { static const std::string session = std::to_string(getpid()) + "-" + std::to_string(std::chrono::system_clock::now().time_since_epoch().count()); return session; }()) << ",\"sequence\":" << r.sequence
       << ",\"time\":" << r.frame.time << ",\"play_time\":" << r.frame.playTime
       << ",\"mode\":" << quoted(r.frame.mode) << ",\"left\":" << (r.left ? "true" : "false")

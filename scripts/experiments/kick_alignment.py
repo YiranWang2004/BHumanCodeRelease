@@ -28,6 +28,7 @@ import time
 from pathlib import Path
 P = argparse.ArgumentParser()
 P.add_argument('--cases', default='replay')
+P.add_argument('--incoming-speed', type=float, default=0., help='Test rolling incoming ball in PlayOn (m/s); initial speed, not a maintained force.')
 P.add_argument('--robot', choices=['K1', 'T1'], default='K1')
 P.add_argument('--repeats', type=int, default=1)
 P.add_argument('--seconds', type=float, default=12)
@@ -37,6 +38,10 @@ P.add_argument('--server-repo', type=Path, default=Path(__file__).resolve().pare
 P.add_argument('--server-python', default=sys.executable)
 P.add_argument('--baseline', type=Path, required=True)
 P.add_argument('--candidate', type=Path, required=True)
+P.add_argument('--candidate-motion-policy', choices=['native', 'dancer'], default='native')
+P.add_argument('--candidate-assets', type=Path, help='Isolated configuration for the direct variant.')
+P.add_argument('--actor-only', action='store_true', help='Only player 4; removes teammate ownership competition.')
+P.add_argument('--force-exit-after-contact', action='store_true', help='Test fixture: move ball 12 m ahead .5 s after first foot contact to exercise normal Kick exit.')
 P.add_argument('--accurate', type=Path)
 P.add_argument('--modes', default='baseline,direct')
 a = P.parse_args()
@@ -76,7 +81,13 @@ def scene(name, rep):
     if rep:
         poses[3]['yaw'] += math.radians(3 if rep % 2 else -3)
         poses[3]['x'] += 0.02 * (1 if rep % 2 else -1)
-    return dict(poses=poses, ball=ball, kind=kind)
+    velocity = [0., 0., 0.]
+    if a.incoming_speed:
+        actor = poses[3]
+        distance = math.hypot(actor['x'] - ball[0], actor['y'] - ball[1])
+        velocity[:2] = [a.incoming_speed * (actor[k] - ball[i]) / distance for i, k in enumerate(('x', 'y'))]
+        kind = 'incoming'
+    return dict(poses=poses, ball=ball, kind=kind, velocity=velocity, force_exit_after_contact=a.force_exit_after_contact)
 
 def run(name, rep, mode):
     d = OUT / f'{name}-r{rep}-{mode}'
@@ -121,7 +132,7 @@ def run(name, rep, mode):
         ap, mp = (port(), port())
         env = os.environ.copy()
         env['PYTHONPATH'] = str(SERVER / 'src')
-        server = spawn([a.server_python, bootstrap, ap, mp, d / 'scene.json', d / 'truth.jsonl'], 'server', SERVER, env)
+        server = spawn([a.server_python, bootstrap, ap, mp, d / 'scene.json', d / 'truth.jsonl'], 'server', d, env)
         end = time.monotonic() + 25
         while True:
             assert server.poll() is None, 'server exited: ' + str(d)
@@ -140,12 +151,14 @@ def run(name, rep, mode):
             except OSError:
                 pass
         threading.Thread(target=drain, daemon=True).start()
-        for n in range(1, 8):
+        player_numbers = [4] if a.actor_only else list(range(1, 8))
+        for n in player_numbers:
             pose = scene(name, rep)['poses'][n - 1]
-            spawn([BINARIES[mode], '--port', ap, '--team', 'AlignmentTest', '--team-id', a.team_id, '--num', n, '--robot', a.robot if n == 4 else 'K1', '--beam-x', pose['x'], '--beam-y', pose['y'], '--beam-theta', math.degrees(pose['yaw']), '--assets-dir', REPO, '--monitor', '--monitor-port', udp.getsockname()[1], '--sim-speed', 2, '--trace', d / f'{n}.csv', '--max-frames', 3000] + (['--test-stand'] if n != 4 else []), str(n))
-            if n == 1:
-                wait_for(lambda: 1 in latest)
-        wait_for(lambda: len(latest) == 7 and min((p['sequence'] for p in latest.values())) >= 150)
+            assets = a.candidate_assets.resolve() if mode == 'direct' and a.candidate_assets else REPO
+            spawn([BINARIES[mode], '--port', ap, '--team', 'AlignmentTest', '--team-id', a.team_id, '--num', n, '--robot', a.robot if n == 4 else 'K1', '--beam-x', pose['x'], '--beam-y', pose['y'], '--beam-theta', math.degrees(pose['yaw']), '--assets-dir', assets, '--monitor', '--monitor-port', udp.getsockname()[1], '--sim-speed', 2, '--trace', d / f'{n}.csv', '--max-frames', 3000] + (['--test-stand'] if n != 4 else ['--motion-policy', a.candidate_motion_policy if mode == 'direct' else 'native']), str(n))
+            if n == player_numbers[0]:
+                wait_for(lambda: n in latest)
+        wait_for(lambda: len(latest) == len(player_numbers) and min((p['sequence'] for p in latest.values())) >= 150)
         wait_for(lambda: latest[4]['ball_age'] < 0.1 and abs(math.hypot(latest[4]['ball_x'], latest[4]['ball_y']) - math.hypot(scene(name, rep)['ball'][0] - latest[4]['truth_x'], scene(name, rep)['ball'][1] - latest[4]['truth_y'])) < 0.1)
         (d / 'warmup.json').write_text(json.dumps(latest[4]))
         b = b'(testAlignment)'
@@ -184,12 +197,19 @@ def run(name, rep, mode):
     rows = list(csv.DictReader((d / '4.csv').open()))
     rows = [r for r in rows if float(r['time']) >= t0]
     kicks = [r for i, r in enumerate(rows) if i and int(r['kick_inferences']) > int(rows[i - 1]['kick_inferences'])]
-    launch = next((v for v in truth if math.hypot(*v['vel'][:2]) >= 1.0), None)
+    # An incoming ball already has speed before any robot kicks it. Measure
+    # launch only at/after the actor's first contact in that case.
+    contact_time = next((v['t'] for v in truth if any('r-0-4-' in part for part in v['parts'])), float('inf')) if a.incoming_speed else -float('inf')
+    launch = next((v for v in truth if v['t'] >= contact_time and math.hypot(*v['vel'][:2]) >= 1.0), None)
     report = dict(case=name, repeat=rep, mode=mode, t0=t0, first_policy=round(float(kicks[0]['time']) - t0, 3) if kicks else None, launch=None, falls=any((v['actor'][2] < 0.35 for v in truth)), penalized=any((r['penalized'] == '1' for r in rows)), walkclose_s=0.02 * sum(('GoToBallWaitAndKick:notAtBall' in r['behavior'] and 'WalkToPoint:walkClose' in r['behavior'] for r in rows)))
+    report['kick_native_constraint_frames'] = sum(int(r.get('dancer_native_flags', '0')) != 0 for r in kicks)
+    report['entry_settle_s'] = .02 * sum(r.get('dancer_gate') == 'entry_settle' for r in rows)
+    report['transition_events'] = [dict(time=round(float(r['time']) - t0, 3), state=r.get('dancer_gate'))
+                                   for i, r in enumerate(rows) if i == 0 or r.get('dancer_gate') != rows[i-1].get('dancer_gate')]
     if launch:
         lt = launch['t']
         row = min(rows, key=lambda r: abs(float(r['time']) - (lt - 0.02)))
-        direction = float(row['truth_yaw']) + float(row['kick_direction'])
+        direction = float(row['dancer_kick_direction_world']) if mode == 'direct' and a.candidate_motion_policy == 'dancer' else float(row['truth_yaw']) + float(row['kick_direction'])
         end = min(truth, key=lambda v: abs(v['t'] - lt - 0.12))
         vx, vy = end['vel'][:2]
         err = abs((math.atan2(vy, vx) - direction + math.pi) % (2 * math.pi) - math.pi)
@@ -200,7 +220,7 @@ def run(name, rep, mode):
         report['success'] = False
     (d / 'report.json').write_text(json.dumps(report, indent=2))
     return report
-(OUT / 'manifest.json').write_text(json.dumps(dict(binaries={k: dict(path=str(v), sha256=hashlib.sha256(v.read_bytes()).hexdigest()) for k, v in BINARIES.items() if v}, server=str(SERVER), robot=a.robot, seconds=a.seconds, repeats=a.repeats, cases=a.cases, modes=a.modes, note='Matched stationary fixtures, not joint-state replays; only actor 4 moves. Before timing, server holds its root pose and points head at ball. Native visual ball model must be fresh.'), indent=2))
+(OUT / 'manifest.json').write_text(json.dumps(dict(binaries={k: dict(path=str(v), sha256=hashlib.sha256(v.read_bytes()).hexdigest()) for k, v in BINARIES.items() if v}, server=str(SERVER), robot=a.robot, candidate_motion_policy=a.candidate_motion_policy, candidate_assets=str(a.candidate_assets.resolve()) if a.candidate_assets else str(REPO), actor_only=a.actor_only, incoming_speed=a.incoming_speed, seconds=a.seconds, repeats=a.repeats, cases=a.cases, modes=a.modes, note='Matched stationary fixtures, not joint-state replays; only actor 4 moves. Before timing, server holds its root pose and points head at ball. Native visual ball model must be fresh.'), indent=2))
 reports = []
 for rep in range(a.repeats):
     for name in a.cases.split(','):

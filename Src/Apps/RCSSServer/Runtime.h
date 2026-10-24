@@ -20,6 +20,8 @@ struct Options
   std::string host = "127.0.0.1", team = "BHuman", field = "fifa7vs7", localization = "truth", role;
   std::string assets = RCSS_ASSETS_DIR, trace, robot = "K1", kickMode = "fast-max";
   std::string strategy = "current";
+  std::string motionPolicy = "native";
+  std::string serverModel;
   int port = 60000, teamId = 2, number = 1, players = 7, maxFrames = 0, motionSubframes = 10;
   std::string monitorHost = "127.0.0.1";
   int monitorPort = 10190;
@@ -76,6 +78,18 @@ struct Runtime
   // Actual inputs from the most recent kick inference; speed is in m/s.
   float kickStrong = 0.f, kickInaccurate = 0.f, kickAllowDeviation = 0.f, kickTargetSpeed = 0.f;
   unsigned getUpInferences = 0;
+  std::array<double, 22> dancerKp{}, dancerKd{};
+  std::array<double, 3> dancerVelocity{};
+  double dancerKickDirectionWorld = 0.;
+  unsigned dancerSequence = 0;
+  bool dancerCommand = false;
+  std::string dancerGate = "inactive", dancerExitReason = "none";
+  bool dancerBallOwner = false, dancerGameAllowed = false, dancerForcedStop = false;
+  unsigned dancerNativeFlags = 0; // diagnostic only: intercept=1, yield=2, obstacle=4, stop=8, stand=16
+  std::array<float, 22> dancerRecoveryTau{}, dancerRecoveryKd{};
+  unsigned dancerRecoverySequence = 0, dancerRecoveryRow = 0, dancerRecoveryAttempts = 0;
+  bool dancerRecoveryCommand = false;
+  std::string dancerRecoveryState = "inactive";
   unsigned teamSent = 0, teamReceived = 0, teamUnsynchronized = 0;
   void stop();
   std::string action() const;
