@@ -63,7 +63,10 @@ TeamMessageHandler::TeamMessageHandler() :
   teamCommunicationTypeRegistry.addTypes(source);
   teamCommunicationTypeRegistry.compile();
   teamMessageType = teamCommunicationTypeRegistry.getTypeByName("TeamMessage");
-#ifndef TARGET_ROBOT
+#if defined(BHUMAN_HSL_SERVER)
+  extern int bhumanHSLTeamPort();
+  theTeamMessageChannel.startLocal(bhumanHSLTeamPort(), static_cast<unsigned>(Global::getSettings().playerNumber));
+#elif !defined(TARGET_ROBOT)
   theTeamMessageChannel.startLocal(Settings::getPortForTeam(Global::getSettings().teamNumber), static_cast<unsigned>(Global::getSettings().playerNumber));
 #else
   theTeamMessageChannel.start(Settings::getPortForTeam(Global::getSettings().teamNumber));

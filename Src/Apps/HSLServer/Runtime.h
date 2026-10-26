@@ -18,7 +18,8 @@ struct Options
 {
   std::string host = "127.0.0.1", team = "BHuman", field = "hsl_m", localization = "measured", role;
   std::string assets = HSL_ASSETS_DIR, trace;
-  int port = 60000, teamId = 2, number = 1, players = 3, maxFrames = 0, motionSubframes = 10;
+  std::string kickPolicy = "native", dancerRepo, dancerPython = "python3";
+  int port = 60000, teamPort = 0, teamId = 2, number = 1, players = 3, maxFrames = 0, motionSubframes = 10, halfSeconds = 1200;
   double speed = 1., beamX = 0., beamY = 0., beamYaw = 0.;
   bool beamExplicit = false, debugWalk = false, debugStand = false;
   Pose2f debugVelocity;
@@ -47,7 +48,7 @@ struct Runtime
   JointAngles measurements;
   RobotPose estimate;
   Pose2f odometry;
-  MotionRequest motion;
+  MotionRequest motion, dancerMotionRequest;
   MotionInfo motionInfo;
   BallModel ball;
   int gameState = 0, playerState = 0, teammates = 0, gcState = 0;
@@ -58,6 +59,14 @@ struct Runtime
   unsigned walkInferences = 0, kickInferences = 0, policyTime = 0;
   unsigned teamSent = 0, teamReceived = 0, teamUnsynchronized = 0;
   std::string tactic = "none", position = "none", behaviorRole = "none";
+  bool kickAllowed = false, ballOwner = false, dancerHolding = false;
+  bool ownSetPlayKicker = false;
+  float goalX = 7.f, fieldHalfWidth = 4.5f, goalieAreaX = -3.f, goalieAreaY = 3.25f;
+  Vector2f visualBall = Vector2f::Zero();
+  unsigned visualBallTime = 0, visionTime = 0;
+  bool visualDetected = false;
+  unsigned dancerInferences = 0, ampInferences = 0;
+  std::string dancerAction, dancerPhase = "idle", dancerFault;
   void stop();
   std::string action() const;
   Pose2f truth() const;

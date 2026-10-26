@@ -1,4 +1,5 @@
 #include "Runtime.h"
+#include "DancerKick.h"
 #include "Framework/Robot.h"
 #include "Framework/Debug.h"
 #include "Platform/SystemCall.h"
@@ -73,7 +74,10 @@ int main(int argc, char** argv)
         options.trace = (std::filesystem::path(directory) / (options.team + "_" + std::to_string(options.number) + ".csv")).string();
       }
     options.assets = std::filesystem::absolute(options.assets).string();
+    if(!options.dancerRepo.empty()) options.dancerRepo = std::filesystem::absolute(options.dancerRepo).string();
+    if(options.dancerPython.find('/') != std::string::npos) options.dancerPython = std::filesystem::absolute(options.dancerPython).string();
     if(chdir(options.assets.c_str())) throw std::runtime_error("Cannot enter B-Human assets directory");
+    hsl::startDancerKick();
     FunctionList::execute();
     Time::initialize(); Time::setSimulatedTime(true);
     Settings settings("SimulatedK1", .02f / options.motionSubframes, Settings::k1,
@@ -106,7 +110,7 @@ int main(int argc, char** argv)
     {
       trace.open(options.trace);
       if(!trace) throw std::runtime_error("Cannot open trace file");
-      trace << "time,mode,penalized,height,truth_x,truth_y,truth_yaw,estimate_x,estimate_y,estimate_yaw,odom_x,odom_y,motion,game_state,teammates,objects,phase,player_state,ball_age,ball_x,ball_y,kicking,gc_state,gc_time,cognition_time,motion_ticks,phase_started,odom_yaw,imu_yaw,native_yaw,gyro_z,cog_odom_x,cog_odom_y,cog_odom_yaw,policy,walk_inferences,kick_inferences,policy_time,pose_quality,team_sent,team_received,team_unsynchronized,tactic,position,role\n";
+      trace << "time,mode,penalized,height,truth_x,truth_y,truth_yaw,estimate_x,estimate_y,estimate_yaw,odom_x,odom_y,motion,game_state,teammates,objects,phase,player_state,ball_age,ball_x,ball_y,kicking,gc_state,gc_time,cognition_time,motion_ticks,phase_started,odom_yaw,imu_yaw,native_yaw,gyro_z,cog_odom_x,cog_odom_y,cog_odom_yaw,policy,walk_inferences,kick_inferences,policy_time,pose_quality,team_sent,team_received,team_unsynchronized,tactic,position,role,dancer_phase,dancer_inferences,amp_inferences,play_time,left_score,right_score\n";
     }
     bool beamed = false;
     unsigned frames = 0;
@@ -149,7 +153,8 @@ int main(int argc, char** argv)
         if(!runtime.changed.wait_for(lock, std::chrono::seconds(15), [&] { return runtime.completed == runtime.sequence || !runtime.running; }))
           throw std::runtime_error("B-Human module frame timed out; check preceding module-graph errors");
       }
-      auto action = runtime.action();
+      if(!runtime.dancerFault.empty()) throw std::runtime_error(runtime.dancerFault);
+      auto action = runtime.dancerAction.empty() ? runtime.action() : runtime.dancerAction;
       if(runtime.sideKnown && runtime.estimate.translation.allFinite() && std::isfinite(static_cast<float>(runtime.estimate.rotation)))
         action += "(localization " + std::to_string(runtime.estimate.translation.x() * .001f) + " " + std::to_string(runtime.estimate.translation.y() * .001f) + " " + std::to_string(static_cast<float>(runtime.estimate.rotation)) + ")";
       if(runtime.frame.mode == "Initial" && !beamed)
@@ -173,7 +178,7 @@ int main(int argc, char** argv)
               << runtime.gcState << ',' << runtime.gcTime << ',' << runtime.cognitionTime << ',' << runtime.motionTicks << ',' << runtime.motionInfo.lastMotionPhaseStarted << ','
               << static_cast<float>(runtime.odometry.rotation) << ',' << runtime.imuYaw << ',' << runtime.nativeYaw << ',' << runtime.frame.gyro[2] << ','
               << runtime.cognitionOdometry.translation.x() << ',' << runtime.cognitionOdometry.translation.y() << ',' << static_cast<float>(runtime.cognitionOdometry.rotation) << ',' << runtime.policy << ',' << runtime.walkInferences << ',' << runtime.kickInferences << ',' << runtime.policyTime << ',' << static_cast<int>(runtime.estimate.quality) << ',' << runtime.teamSent << ',' << runtime.teamReceived << ',' << runtime.teamUnsynchronized << ','
-              << runtime.tactic << ',' << runtime.position << ',' << runtime.behaviorRole << '\n';
+              << runtime.tactic << ',' << runtime.position << ',' << runtime.behaviorRole << ',' << runtime.dancerPhase << ',' << runtime.dancerInferences << ',' << runtime.ampInferences << ',' << runtime.frame.playTime << ',' << runtime.frame.leftScore << ',' << runtime.frame.rightScore << '\n';
       if(++frames % 100 == 0)
         std::cout << "[HSL] t=" << runtime.frame.time << " pm=" << runtime.frame.mode << " h=" << runtime.frame.position[2]
                   << " pose=" << runtime.estimate.translation.transpose() << " motion=" << TypeRegistry::getEnumName(runtime.motion.motion)

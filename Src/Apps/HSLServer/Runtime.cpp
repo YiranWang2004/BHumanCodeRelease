@@ -36,14 +36,15 @@ Options arguments(int argc, char** argv)
     if(key == "--help" || key == "-h")
     {
       std::cout << "B-Human K1 / dancer-rcssservermj\n"
-                << "  --host HOST --port PORT --team NAME --team-id N\n"
+                << "  --host HOST --port PORT --team NAME --team-id N --team-port UDP_PORT\n"
                 << "  --num N --num-players N --role goal_keeper|striker\n"
                 << "    hsl_l supports up to 11 players; rosters above 7 use native s11v11\n"
                 << "  --field hsl_s|hsl_m|hsl_l|hsl_whrg\n"
                 << "  --localization truth|measured (default measured) --sim-speed FACTOR\n"
                 << "  --assets-dir PATH --beam-x X --beam-y Y --beam-theta DEG\n"
-                << "  --trace FILE --max-frames N (diagnostics)\n"
+                << "  --half-seconds N (default 1200) --trace FILE --max-frames N (diagnostics)\n"
                 << "  --test-stand | --test-cmd VX,VY,WZ (native motion diagnostics, SI units)\n";
+      std::cout << "  --kick-policy native|zjudancer --dancer-repo PATH --dancer-python PYTHON\n";
       std::cout << "  --motion-subframes 1|10 (native Motion scheduling, default 10)\n";
       std::exit(0);
     }
@@ -55,6 +56,7 @@ Options arguments(int argc, char** argv)
     if(key == "--host") options.host = value;
     else if(key == "--port") options.port = integer();
     else if(key == "--team") options.team = value;
+    else if(key == "--team-port") options.teamPort = integer();
     else if(key == "--team-id") options.teamId = integer();
     else if(key == "--num") options.number = integer();
     else if(key == "--num-players") options.players = integer();
@@ -63,7 +65,11 @@ Options arguments(int argc, char** argv)
     else if(key == "--localization") options.localization = value;
     else if(key == "--sim-speed") options.speed = numeric(value);
     else if(key == "--assets-dir") options.assets = value;
+    else if(key == "--kick-policy") options.kickPolicy = value;
+    else if(key == "--dancer-repo") options.dancerRepo = value;
+    else if(key == "--dancer-python") options.dancerPython = value;
     else if(key == "--trace") options.trace = value;
+    else if(key == "--half-seconds") options.halfSeconds = integer();
     else if(key == "--max-frames") options.maxFrames = integer();
     else if(key == "--motion-subframes") options.motionSubframes = integer();
     else if(key == "--beam-x") { options.beamX = numeric(value); options.beamExplicit = true; }
@@ -80,7 +86,10 @@ Options arguments(int argc, char** argv)
     }
     else throw std::runtime_error("Unknown option: " + key);
   }
+  if(options.kickPolicy != "native" && options.kickPolicy != "zjudancer") throw std::runtime_error("--kick-policy must be native or zjudancer");
+  if(options.kickPolicy == "zjudancer" && options.dancerRepo.empty()) throw std::runtime_error("--dancer-repo is required for zjudancer kick policy");
   if(options.localization != "truth" && options.localization != "measured") throw std::runtime_error("--localization must be truth or measured");
+  if(options.halfSeconds < 1) throw std::runtime_error("--half-seconds must be positive");
   if(options.motionSubframes != 1 && options.motionSubframes != 10) throw std::runtime_error("--motion-subframes must be 1 or 10");
   if(options.field != "hsl_s" && options.field != "hsl_m" && options.field != "hsl_l" && options.field != "hsl_whrg") throw std::runtime_error("Unknown HSL field");
   const int maxPlayers = options.field == "hsl_l" ? 11 : 7;
@@ -141,4 +150,10 @@ void bhumanHSLPolicyInference(const char* model)
   runtime.policyTime = hsl::sensorTimestamp;
   if(runtime.policy == "K1_walk.onnx") ++runtime.walkInferences;
   else ++runtime.kickInferences;
+}
+
+// Only the selected HSL team substitutes the native walk/stand actor.
+bool bhumanHSLUsesAmpWalk()
+{
+  return hsl::Runtime::get().options.kickPolicy == "zjudancer";
 }

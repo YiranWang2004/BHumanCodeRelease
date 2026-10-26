@@ -70,8 +70,8 @@ void HSLSensorProvider::update(GameControllerData& data)
   data.playersPerTeam = static_cast<uint8_t>(r.options.players);
   data.competitionType = (r.options.field == "hsl_s" ? COMPETITION_TYPE_SMALL : r.options.field == "hsl_m" ? COMPETITION_TYPE_MIDDLE : COMPETITION_TYPE_LARGE);
   data.gamePhase = GAME_PHASE_NORMAL;
-  data.firstHalf = 1;
-  data.secsRemaining = static_cast<int16_t>(std::clamp(600. - frame.playTime, 0., 600.));
+  data.firstHalf = frame.playTime < r.options.halfSeconds;
+  data.secsRemaining = static_cast<int16_t>(std::clamp(r.options.halfSeconds - std::fmod(frame.playTime, static_cast<double>(r.options.halfSeconds)), 0., static_cast<double>(r.options.halfSeconds)));
   data.setPlay = SET_PLAY_NONE;
   data.state = frame.mode == "Initial" || frame.mode == "BeforeKickOff" || frame.mode.empty() ? STATE_INITIAL :
                frame.mode.rfind("Ready", 0) == 0 ? STATE_READY :

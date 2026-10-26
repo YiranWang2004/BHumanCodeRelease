@@ -18,6 +18,7 @@ MAKE_MODULE(WalkingEngine);
 #ifdef BHUMAN_HSL_SERVER
 // HSL diagnostics: record the network that actually ran, without changing motion.
 extern void bhumanHSLPolicyInference(const char* model);
+extern bool bhumanHSLUsesAmpWalk();
 #endif
 
 WalkingEngine::WalkingEngine():
@@ -754,6 +755,18 @@ void WalkPhase::getNextTargetRequest(JointAngles& target)
   {
     wasKicking = false;
     lastBallNetBallDistance = engine.theMotionRequest.ballEstimate.position.norm() + engine.ballHysteresisPolicySwitch;
+#ifdef BHUMAN_HSL_SERVER
+    if(bhumanHSLUsesAmpWalk())
+    {
+      // Preserve native path/velocity generation and phase bookkeeping. The
+      // HSL adapter applies AMP to the measured state after the final subframe.
+      target = engine.theJointAngles;
+      rawFrequency = 0.f;
+      frequency = engine.frequencyParametersWalk.base;
+      oldBall = ball;
+      return;
+    }
+#endif
     float* input = engine.walkPolicy.input(0).data();
 
     for(std::size_t i = engine.historyBuffer.capacity() - 1; i < engine.historyBuffer.capacity(); i--)

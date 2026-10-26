@@ -1,0 +1,1485 @@
+{
+  "halves": [
+    {
+      "name": "match1-half1",
+      "players": {
+        "BHumanNative_1": {
+          "penalty_entries": 0,
+          "low_body_entries": 0,
+          "seconds": {
+            "observed": 1467.52,
+            "policy_idle": 1467.52
+          },
+          "counters": {
+            "walk_inferences": "73064",
+            "kick_inferences": "1218",
+            "amp_inferences": "0",
+            "dancer_inferences": "0"
+          }
+        },
+        "BHumanNative_2": {
+          "penalty_entries": 1,
+          "low_body_entries": 0,
+          "seconds": {
+            "observed": 1467.52,
+            "policy_idle": 1467.52,
+            "penalized": 15.020000000000095
+          },
+          "counters": {
+            "walk_inferences": "69455",
+            "kick_inferences": "4744",
+            "amp_inferences": "0",
+            "dancer_inferences": "0"
+          }
+        },
+        "BHumanNative_3": {
+          "penalty_entries": 3,
+          "low_body_entries": 0,
+          "seconds": {
+            "observed": 1467.52,
+            "policy_idle": 1467.52,
+            "penalized": 45.060000000000116
+          },
+          "counters": {
+            "walk_inferences": "69168",
+            "kick_inferences": "5020",
+            "amp_inferences": "0",
+            "dancer_inferences": "0"
+          }
+        },
+        "BHumanZJU_1": {
+          "penalty_entries": 0,
+          "low_body_entries": 5,
+          "seconds": {
+            "observed": 1467.52,
+            "policy_idle": 1408.36,
+            "policy_starting": 10.739999999999668,
+            "policy_active": 46.68000000000018,
+            "policy_exiting": 1.740000000000009,
+            "low_body": 22.720000000000255
+          },
+          "counters": {
+            "walk_inferences": "0",
+            "kick_inferences": "0",
+            "amp_inferences": "70455",
+            "dancer_inferences": "2395"
+          }
+        },
+        "BHumanZJU_2": {
+          "penalty_entries": 5,
+          "low_body_entries": 3,
+          "seconds": {
+            "observed": 1467.52,
+            "policy_idle": 1252.8799999999997,
+            "policy_starting": 58.89999999999985,
+            "policy_active": 127.78000000000014,
+            "policy_exiting": 27.960000000000235,
+            "penalized": 75.06000000000009,
+            "low_body": 17.160000000000196
+          },
+          "counters": {
+            "walk_inferences": "0",
+            "kick_inferences": "0",
+            "amp_inferences": "66665",
+            "dancer_inferences": "6430"
+          }
+        },
+        "BHumanZJU_3": {
+          "penalty_entries": 5,
+          "low_body_entries": 4,
+          "seconds": {
+            "observed": 1467.5,
+            "policy_idle": 1251.8,
+            "policy_starting": 52.52000000000058,
+            "policy_active": 137.09999999999974,
+            "policy_exiting": 26.079999999999636,
+            "penalized": 75.03999999999996,
+            "low_body": 24.539999999999964
+          },
+          "counters": {
+            "walk_inferences": "0",
+            "kick_inferences": "0",
+            "amp_inferences": "65871",
+            "dancer_inferences": "6900"
+          }
+        }
+      },
+      "decisions": {
+        "1": {
+          "startups": 20,
+          "active_entries": 15,
+          "gate_seconds": {
+            "native recovery/prepare": 26.099999999999923,
+            "game state forbids kick": 832.6199999999998,
+            "not control owner": 562.8400000000001,
+            "server stopped": 2.0399999999999423,
+            "ready": 0.3999999999999204,
+            "": 58.94000000000011,
+            "outside entry geometry": 0.16000000000008185
+          },
+          "exit_events": {
+            "server stopped": 10,
+            "no usable/fresh ball source": 2,
+            "startup visual reacquisition timeout": 3,
+            "ball range over limit": 6,
+            "lost team ball ownership": 1,
+            "moving ball requires chase": 1,
+            "game state forbids kick": 1
+          },
+          "startup_delay_median": 0.6000000000001364,
+          "startup_delay_max": 0.6200000000000045
+        },
+        "2": {
+          "startups": 114,
+          "active_entries": 80,
+          "gate_seconds": {
+            "native recovery/prepare": 21.000000000000014,
+            "game state forbids kick": 805.2799999999999,
+            "not control owner": 319.18000000000035,
+            "server stopped": 1.9000000000000128,
+            "outside entry geometry": 44.55999999999981,
+            "ready": 2.2799999999989495,
+            "": 213.64000000000084,
+            "penalized": 75.06000000000009,
+            "ball unavailable": 0.01999999999998181
+          },
+          "exit_events": {
+            "moving ball requires chase": 38,
+            "game state forbids kick": 14,
+            "unstable visual-kick approach": 12,
+            "server stopped": 33,
+            "lost ownership during startup": 4,
+            "startup visual reacquisition timeout": 17,
+            "ball range over limit": 2,
+            "no usable/fresh ball source": 3,
+            "native recovery/prepare": 3,
+            "lost team ball ownership": 1
+          },
+          "startup_delay_median": 0.6000000000001364,
+          "startup_delay_max": 0.7399999999999949
+        },
+        "3": {
+          "startups": 103,
+          "active_entries": 75,
+          "gate_seconds": {
+            "native recovery/prepare": 27.22000000000005,
+            "game state forbids kick": 820.2199999999997,
+            "ready": 2.0599999999989507,
+            "": 214.68000000000094,
+            "server stopped": 1.939999999999948,
+            "not control owner": 275.6199999999994,
+            "outside entry geometry": 65.62000000000101,
+            "penalized": 75.03999999999996,
+            "ball unavailable": 0.2999999999999545
+          },
+          "exit_events": {
+            "unstable visual-kick approach": 15,
+            "server stopped": 36,
+            "moving ball requires chase": 34,
+            "game state forbids kick": 13,
+            "ball range over limit": 2,
+            "startup visual reacquisition timeout": 11,
+            "no usable/fresh ball source": 5,
+            "native recovery/prepare": 2,
+            "lost team ball ownership": 1
+          },
+          "startup_delay_median": 0.6000000000000227,
+          "startup_delay_max": 0.6399999999999864
+        }
+      },
+      "result": {
+        "complete": true,
+        "half": 1,
+        "policy_left": true,
+        "score": [
+          2,
+          13
+        ],
+        "status": {
+          "time": 1526.9200000101189,
+          "play_time": 1200.0,
+          "mode": "GameOver",
+          "left": 2,
+          "right": 13,
+          "left_team": "BHumanZJU",
+          "right_team": "BHumanNative"
+        },
+        "wall_seconds": 681.7567766389984
+      },
+      "contacts": {
+        "r-0-3": 34,
+        "r-1-2": 41,
+        "r-0-2": 39,
+        "r-1-3": 44,
+        "r-0-1": 14,
+        "r-1-1": 16
+      },
+      "mode_seconds": {
+        "Initial": 44.58000000000436,
+        "Ready": 281.2200000029765,
+        "KickOff_Left": 27.360000000258054,
+        "PlayOn": 426.5200000025178,
+        "goal_kick_right": 214.90000000156385,
+        "Goal_Right": 13.260000000127093,
+        "KickIn_Right": 276.5200000013915,
+        "KickIn_Left": 109.90000000060174,
+        "goal_kick_left": 40.28000000022075,
+        "corner_kick_left": 30.860000000061973,
+        "corner_kick_right": 50.88000000027887,
+        "Goal_Left": 2.0400000000213367,
+        "KickOff_Right": 7.480000000070959,
+        "GameOver": 1.3000000000283762
+      },
+      "goals": [
+        {
+          "play_time": 11.52,
+          "left": 0,
+          "right": 1,
+          "last_contact": "r-1-2"
+        },
+        {
+          "play_time": 128.76,
+          "left": 0,
+          "right": 2,
+          "last_contact": "r-1-2"
+        },
+        {
+          "play_time": 270.1,
+          "left": 0,
+          "right": 3,
+          "last_contact": "r-0-2"
+        },
+        {
+          "play_time": 417.34,
+          "left": 0,
+          "right": 4,
+          "last_contact": "r-1-2"
+        },
+        {
+          "play_time": 582.02,
+          "left": 1,
+          "right": 4,
+          "last_contact": "r-1-1"
+        },
+        {
+          "play_time": 631.68,
+          "left": 1,
+          "right": 5,
+          "last_contact": "r-0-1"
+        },
+        {
+          "play_time": 659.08,
+          "left": 1,
+          "right": 6,
+          "last_contact": "r-1-3"
+        },
+        {
+          "play_time": 776.9,
+          "left": 1,
+          "right": 7,
+          "last_contact": "r-1-1"
+        },
+        {
+          "play_time": 857.98,
+          "left": 1,
+          "right": 8,
+          "last_contact": "r-0-2"
+        },
+        {
+          "play_time": 941.5,
+          "left": 1,
+          "right": 9,
+          "last_contact": "r-1-3"
+        },
+        {
+          "play_time": 994.22,
+          "left": 1,
+          "right": 10,
+          "last_contact": "r-1-3"
+        },
+        {
+          "play_time": 1014.12,
+          "left": 2,
+          "right": 10,
+          "last_contact": "r-0-2"
+        },
+        {
+          "play_time": 1060.28,
+          "left": 2,
+          "right": 11,
+          "last_contact": "r-1-3"
+        },
+        {
+          "play_time": 1099.92,
+          "left": 2,
+          "right": 12,
+          "last_contact": "r-0-2"
+        },
+        {
+          "play_time": 1175.4,
+          "left": 2,
+          "right": 13,
+          "last_contact": "r-1-2"
+        }
+      ],
+      "last_server": {
+        "time": "1527.1200000101232",
+        "play_time": "1200.0",
+        "mode": "GameOver",
+        "left": "2",
+        "right": "13",
+        "ball_x": "2.2447732691087663",
+        "ball_y": "-1.6709067081125102",
+        "ball_z": "0.08979011927224999",
+        "contact": "",
+        "last_contact": ""
+      },
+      "simultaneous_active_seconds": 0.0,
+      "longest_simultaneous_active_seconds": 0.0
+    },
+    {
+      "name": "match1-half2",
+      "players": {
+        "BHumanNative_1": {
+          "penalty_entries": 0,
+          "low_body_entries": 5,
+          "seconds": {
+            "observed": 1323.04,
+            "policy_idle": 1323.04,
+            "low_body": 23.99999999999997
+          },
+          "counters": {
+            "walk_inferences": "64150",
+            "kick_inferences": "1532",
+            "amp_inferences": "0",
+            "dancer_inferences": "0"
+          }
+        },
+        "BHumanNative_2": {
+          "penalty_entries": 4,
+          "low_body_entries": 4,
+          "seconds": {
+            "observed": 1323.04,
+            "policy_idle": 1323.04,
+            "penalized": 60.06000000000006,
+            "low_body": 26.039999999999964
+          },
+          "counters": {
+            "walk_inferences": "60690",
+            "kick_inferences": "4809",
+            "amp_inferences": "0",
+            "dancer_inferences": "0"
+          }
+        },
+        "BHumanNative_3": {
+          "penalty_entries": 2,
+          "low_body_entries": 7,
+          "seconds": {
+            "observed": 1323.04,
+            "policy_idle": 1323.04,
+            "low_body": 26.71999999999997,
+            "penalized": 30.040000000000077
+          },
+          "counters": {
+            "walk_inferences": "61194",
+            "kick_inferences": "4271",
+            "amp_inferences": "0",
+            "dancer_inferences": "0"
+          }
+        },
+        "BHumanZJU_1": {
+          "penalty_entries": 0,
+          "low_body_entries": 0,
+          "seconds": {
+            "observed": 1323.04,
+            "policy_idle": 1267.6100000000004,
+            "policy_starting": 11.600000000000222,
+            "policy_active": 41.86999999999949,
+            "policy_exiting": 1.9599999999998658
+          },
+          "counters": {
+            "walk_inferences": "0",
+            "kick_inferences": "0",
+            "amp_inferences": "64813",
+            "dancer_inferences": "2160"
+          }
+        },
+        "BHumanZJU_2": {
+          "penalty_entries": 0,
+          "low_body_entries": 12,
+          "seconds": {
+            "observed": 1323.02,
+            "policy_idle": 1084.7999999999995,
+            "policy_starting": 61.299999999999855,
+            "policy_active": 142.28000000000026,
+            "policy_exiting": 34.64000000000054,
+            "low_body": 36.54000000000029
+          },
+          "counters": {
+            "walk_inferences": "0",
+            "kick_inferences": "0",
+            "amp_inferences": "57625",
+            "dancer_inferences": "7186"
+          }
+        },
+        "BHumanZJU_3": {
+          "penalty_entries": 5,
+          "low_body_entries": 10,
+          "seconds": {
+            "observed": 1323.02,
+            "policy_idle": 1087.8899999999994,
+            "policy_starting": 56.30000000000032,
+            "policy_active": 146.97999999999965,
+            "policy_exiting": 31.85000000000069,
+            "penalized": 75.07999999999996,
+            "low_body": 42.97999999999985
+          },
+          "counters": {
+            "walk_inferences": "0",
+            "kick_inferences": "0",
+            "amp_inferences": "57092",
+            "dancer_inferences": "7396"
+          }
+        }
+      },
+      "decisions": {
+        "1": {
+          "startups": 22,
+          "active_entries": 15,
+          "gate_seconds": {
+            "native recovery/prepare": 0.019999999999999574,
+            "game state forbids kick": 691.9900000000002,
+            "not control owner": 589.4499999999998,
+            "ball unavailable": 0.36000000000014865,
+            "ready": 0.43999999999975614,
+            "": 55.230000000000146,
+            "server stopped": 1.9800000000000182
+          },
+          "exit_events": {
+            "game state forbids kick": 1,
+            "unstable visual-kick approach": 1,
+            "startup visual reacquisition timeout": 3,
+            "ball range over limit": 6,
+            "server stopped": 9,
+            "maximum kick duration reached": 1,
+            "no usable/fresh ball source": 2,
+            "lost team ball ownership": 1
+          },
+          "startup_delay_median": 0.6199999999998909,
+          "startup_delay_max": 0.6200000000000045
+        },
+        "2": {
+          "startups": 115,
+          "active_entries": 84,
+          "gate_seconds": {
+            "native recovery/prepare": 42.97999999999996,
+            "game state forbids kick": 676.1900000000004,
+            "not control owner": 322.72000000000025,
+            "server stopped": 1.9800000000000182,
+            "ready": 2.299999999999372,
+            "": 237.44000000000062,
+            "outside entry geometry": 55.51999999999957,
+            "ball unavailable": 0.15999999999996817
+          },
+          "exit_events": {
+            "moving ball requires chase": 42,
+            "server stopped": 30,
+            "startup visual reacquisition timeout": 19,
+            "native recovery/prepare": 3,
+            "unstable visual-kick approach": 17,
+            "game state forbids kick": 6,
+            "no usable/fresh ball source": 7,
+            "lost team ball ownership": 1,
+            "ball range over limit": 3,
+            "lost ownership during startup": 1
+          },
+          "startup_delay_median": 0.6000000000000227,
+          "startup_delay_max": 0.6200000000000045
+        },
+        "3": {
+          "startups": 105,
+          "active_entries": 81,
+          "gate_seconds": {
+            "native recovery/prepare": 49.24000000000005,
+            "game state forbids kick": 635.3700000000001,
+            "ready": 2.0999999999998593,
+            "": 234.2900000000002,
+            "not control owner": 299.28999999999985,
+            "outside entry geometry": 41.46000000000008,
+            "server stopped": 1.860000000000099,
+            "penalized": 75.07999999999996,
+            "ball unavailable": 0.41999999999990223
+          },
+          "exit_events": {
+            "no usable/fresh ball source": 5,
+            "moving ball requires chase": 45,
+            "unstable visual-kick approach": 13,
+            "server stopped": 30,
+            "game state forbids kick": 8,
+            "startup visual reacquisition timeout": 11,
+            "native recovery/prepare": 4,
+            "lost team ball ownership": 1,
+            "lost ownership during startup": 1,
+            "ball range over limit": 1
+          },
+          "startup_delay_median": 0.6000000000001364,
+          "startup_delay_max": 0.6399999999999864
+        }
+      },
+      "result": {
+        "complete": true,
+        "half": 2,
+        "policy_left": false,
+        "score": [
+          3,
+          20
+        ],
+        "status": {
+          "time": 1369.0200000066723,
+          "play_time": 2400.0,
+          "mode": "GameOver",
+          "left": 20,
+          "right": 3,
+          "left_team": "BHumanNative",
+          "right_team": "BHumanZJU"
+        },
+        "wall_seconds": 618.4891533530026
+      },
+      "contacts": {
+        "r-0-3": 43,
+        "r-0-2": 42,
+        "r-1-3": 34,
+        "r-0-1": 12,
+        "r-1-2": 33,
+        "r-1-1": 14
+      },
+      "mode_seconds": {
+        "Initial": 30.31999999999825,
+        "Ready": 138.48000000030234,
+        "KickOff_Left": 5.83999999999898,
+        "PlayOn": 476.3400000027274,
+        "Goal_Left": 7.140000000018148,
+        "KickOff_Right": 17.420000000013715,
+        "KickIn_Right": 100.20000000033089,
+        "goal_kick_left": 171.7600000008424,
+        "KickIn_Left": 339.8600000020906,
+        "goal_kick_right": 37.000000000269665,
+        "corner_kick_left": 24.779999999977463,
+        "corner_kick_right": 18.640000000099008,
+        "Goal_Right": 1.0199999999990723,
+        "GameOver": 0.6000000000130967
+      },
+      "goals": [
+        {
+          "play_time": 1207.54,
+          "left": 14,
+          "right": 2,
+          "last_contact": "r-0-2"
+        },
+        {
+          "play_time": 1360.62,
+          "left": 15,
+          "right": 2,
+          "last_contact": "r-0-2"
+        },
+        {
+          "play_time": 1438.5,
+          "left": 16,
+          "right": 2,
+          "last_contact": "r-0-1"
+        },
+        {
+          "play_time": 1452.12,
+          "left": 17,
+          "right": 2,
+          "last_contact": "r-0-3"
+        },
+        {
+          "play_time": 1531.6,
+          "left": 18,
+          "right": 2,
+          "last_contact": "r-0-3"
+        },
+        {
+          "play_time": 1779.16,
+          "left": 19,
+          "right": 2,
+          "last_contact": "r-1-1"
+        },
+        {
+          "play_time": 1819.44,
+          "left": 19,
+          "right": 3,
+          "last_contact": "r-1-2"
+        },
+        {
+          "play_time": 2380.64,
+          "left": 20,
+          "right": 3,
+          "last_contact": "r-0-3"
+        }
+      ],
+      "last_server": {
+        "time": "1369.420000006681",
+        "play_time": "2400.0",
+        "mode": "GameOver",
+        "left": "20",
+        "right": "3",
+        "ball_x": "-4.0",
+        "ball_y": "-3.0",
+        "ball_z": "0.08997732182460129",
+        "contact": "",
+        "last_contact": ""
+      },
+      "simultaneous_active_seconds": 0.0,
+      "longest_simultaneous_active_seconds": 0.0
+    },
+    {
+      "name": "match2-half1",
+      "players": {
+        "BHumanNative_1": {
+          "penalty_entries": 0,
+          "low_body_entries": 0,
+          "seconds": {
+            "observed": 1449.98,
+            "policy_idle": 1449.98
+          },
+          "counters": {
+            "walk_inferences": "71752",
+            "kick_inferences": "1634",
+            "amp_inferences": "0",
+            "dancer_inferences": "0"
+          }
+        },
+        "BHumanNative_2": {
+          "penalty_entries": 4,
+          "low_body_entries": 5,
+          "seconds": {
+            "observed": 1450.0,
+            "policy_idle": 1450.0,
+            "penalized": 60.059999999999945,
+            "low_body": 27.779999999999916
+          },
+          "counters": {
+            "walk_inferences": "67456",
+            "kick_inferences": "4366",
+            "amp_inferences": "0",
+            "dancer_inferences": "0"
+          }
+        },
+        "BHumanNative_3": {
+          "penalty_entries": 4,
+          "low_body_entries": 5,
+          "seconds": {
+            "observed": 1450.0,
+            "policy_idle": 1450.0,
+            "penalized": 60.069999999999936,
+            "low_body": 29.480000000000132
+          },
+          "counters": {
+            "walk_inferences": "65280",
+            "kick_inferences": "6415",
+            "amp_inferences": "0",
+            "dancer_inferences": "0"
+          }
+        },
+        "BHumanZJU_1": {
+          "penalty_entries": 0,
+          "low_body_entries": 10,
+          "seconds": {
+            "observed": 1449.98,
+            "policy_idle": 1372.8000000000002,
+            "policy_starting": 13.879999999999768,
+            "policy_active": 61.61999999999995,
+            "policy_exiting": 1.6800000000000637,
+            "low_body": 32.18000000000001
+          },
+          "counters": {
+            "walk_inferences": "0",
+            "kick_inferences": "0",
+            "amp_inferences": "68277",
+            "dancer_inferences": "3135"
+          }
+        },
+        "BHumanZJU_2": {
+          "penalty_entries": 9,
+          "low_body_entries": 2,
+          "seconds": {
+            "observed": 1449.98,
+            "policy_idle": 1225.6199999999994,
+            "policy_starting": 49.540000000000376,
+            "policy_active": 147.68000000000038,
+            "policy_exiting": 27.139999999999944,
+            "low_body": 11.639999999999986,
+            "penalized": 135.07999999999993
+          },
+          "counters": {
+            "walk_inferences": "0",
+            "kick_inferences": "0",
+            "amp_inferences": "65125",
+            "dancer_inferences": "7470"
+          }
+        },
+        "BHumanZJU_3": {
+          "penalty_entries": 5,
+          "low_body_entries": 10,
+          "seconds": {
+            "observed": 1449.98,
+            "policy_idle": 1230.0199999999993,
+            "policy_starting": 55.680000000000476,
+            "policy_active": 131.95999999999947,
+            "policy_exiting": 32.32000000000073,
+            "penalized": 75.07999999999996,
+            "low_body": 44.23999999999984
+          },
+          "counters": {
+            "walk_inferences": "0",
+            "kick_inferences": "0",
+            "amp_inferences": "64065",
+            "dancer_inferences": "6644"
+          }
+        }
+      },
+      "decisions": {
+        "1": {
+          "startups": 27,
+          "active_entries": 19,
+          "gate_seconds": {
+            "native recovery/prepare": 37.7800000000001,
+            "game state forbids kick": 791.4700000000001,
+            "not control owner": 556.4799999999996,
+            "server stopped": 1.7400000000003288,
+            "ready": 0.5400000000000631,
+            "": 76.87999999999998,
+            "ball unavailable": 0.67999999999995,
+            "outside entry geometry": 0.5
+          },
+          "exit_events": {
+            "startup visual reacquisition timeout": 5,
+            "game state forbids kick": 6,
+            "unstable visual-kick approach": 1,
+            "server stopped": 7,
+            "native recovery/prepare": 2,
+            "ball range over limit": 7
+          },
+          "startup_delay_median": 0.6199999999998909,
+          "startup_delay_max": 0.7799999999999727
+        },
+        "2": {
+          "startups": 94,
+          "active_entries": 66,
+          "gate_seconds": {
+            "native recovery/prepare": 14.000000000000018,
+            "game state forbids kick": 735.7500000000001,
+            "outside entry geometry": 52.48000000000019,
+            "not control owner": 301.4199999999995,
+            "server stopped": 1.520000000000529,
+            "ready": 1.8799999999993702,
+            "": 223.80000000000047,
+            "penalized": 135.07999999999993
+          },
+          "exit_events": {
+            "no usable/fresh ball source": 6,
+            "lost ownership during startup": 1,
+            "moving ball requires chase": 32,
+            "ball range over limit": 6,
+            "server stopped": 18,
+            "startup visual reacquisition timeout": 16,
+            "unstable visual-kick approach": 12,
+            "game state forbids kick": 8,
+            "lost team ball ownership": 1,
+            "penalized": 1,
+            "native recovery/prepare": 1
+          },
+          "startup_delay_median": 0.6000000000001364,
+          "startup_delay_max": 0.6599999999999966
+        },
+        "3": {
+          "startups": 102,
+          "active_entries": 81,
+          "gate_seconds": {
+            "native recovery/prepare": 51.64000000000012,
+            "game state forbids kick": 740.6700000000003,
+            "not control owner": 317.9000000000001,
+            "ready": 2.0399999999993668,
+            "": 219.18000000000052,
+            "outside entry geometry": 57.499999999999424,
+            "server stopped": 1.6400000000003914,
+            "ball unavailable": 0.23999999999996646,
+            "penalized": 75.07999999999996
+          },
+          "exit_events": {
+            "moving ball requires chase": 41,
+            "startup visual reacquisition timeout": 8,
+            "server stopped": 27,
+            "unstable visual-kick approach": 13,
+            "game state forbids kick": 8,
+            "no usable/fresh ball source": 6,
+            "ball range over limit": 3,
+            "native recovery/prepare": 4,
+            "lost ownership during startup": 1
+          },
+          "startup_delay_median": 0.6000000000001364,
+          "startup_delay_max": 0.7000000000000455
+        }
+      },
+      "result": {
+        "complete": true,
+        "half": 1,
+        "policy_left": false,
+        "score": [
+          3,
+          10
+        ],
+        "status": {
+          "time": 1495.7800000094392,
+          "play_time": 1200.0,
+          "mode": "GameOver",
+          "left": 10,
+          "right": 3,
+          "left_team": "BHumanNative",
+          "right_team": "BHumanZJU"
+        },
+        "wall_seconds": 690.5292504870013
+      },
+      "contacts": {
+        "r-0-3": 48,
+        "r-0-2": 38,
+        "r-1-2": 32,
+        "r-1-3": 28,
+        "r-0-1": 11,
+        "r-1-1": 18
+      },
+      "mode_seconds": {
+        "Initial": 30.039999999998305,
+        "Ready": 264.32000000195626,
+        "KickOff_Left": 12.400000000059833,
+        "PlayOn": 514.560000003359,
+        "KickIn_Left": 274.38000000142637,
+        "KickIn_Right": 106.8400000009492,
+        "Goal_Left": 10.200000000083492,
+        "KickOff_Right": 22.900000000197906,
+        "goal_kick_right": 17.60000000006903,
+        "corner_kick_right": 6.279999999994303,
+        "goal_kick_left": 179.20000000134223,
+        "Goal_Right": 3.060000000020409,
+        "corner_kick_left": 52.57999999995218,
+        "GameOver": 1.5000000000327418
+      },
+      "goals": [
+        {
+          "play_time": 28.54,
+          "left": 1,
+          "right": 0,
+          "last_contact": "r-0-1"
+        },
+        {
+          "play_time": 97.3,
+          "left": 2,
+          "right": 0,
+          "last_contact": "r-0-2"
+        },
+        {
+          "play_time": 105.78,
+          "left": 2,
+          "right": 1,
+          "last_contact": "r-1-3"
+        },
+        {
+          "play_time": 146.48,
+          "left": 2,
+          "right": 2,
+          "last_contact": "r-1-2"
+        },
+        {
+          "play_time": 202.88,
+          "left": 3,
+          "right": 2,
+          "last_contact": "r-0-2"
+        },
+        {
+          "play_time": 260.92,
+          "left": 4,
+          "right": 2,
+          "last_contact": "r-0-3"
+        },
+        {
+          "play_time": 560.64,
+          "left": 5,
+          "right": 2,
+          "last_contact": "r-1-1"
+        },
+        {
+          "play_time": 591.18,
+          "left": 6,
+          "right": 2,
+          "last_contact": "r-0-3"
+        },
+        {
+          "play_time": 977.88,
+          "left": 7,
+          "right": 2,
+          "last_contact": "r-0-1"
+        },
+        {
+          "play_time": 1013.3,
+          "left": 8,
+          "right": 2,
+          "last_contact": "r-0-3"
+        },
+        {
+          "play_time": 1050.94,
+          "left": 9,
+          "right": 2,
+          "last_contact": "r-0-3"
+        },
+        {
+          "play_time": 1092.96,
+          "left": 9,
+          "right": 3,
+          "last_contact": "r-0-1"
+        },
+        {
+          "play_time": 1188.28,
+          "left": 10,
+          "right": 3,
+          "last_contact": "r-0-3"
+        }
+      ],
+      "last_server": {
+        "time": "1495.8800000094413",
+        "play_time": "1200.0",
+        "mode": "GameOver",
+        "left": "10",
+        "right": "3",
+        "ball_x": "-4.0",
+        "ball_y": "3.0",
+        "ball_z": "0.0897821509633287",
+        "contact": "",
+        "last_contact": ""
+      },
+      "simultaneous_active_seconds": 0.0,
+      "longest_simultaneous_active_seconds": 0.0
+    },
+    {
+      "name": "match2-half2",
+      "players": {
+        "BHumanNative_1": {
+          "penalty_entries": 0,
+          "low_body_entries": 0,
+          "seconds": {
+            "observed": 1359.4,
+            "policy_idle": 1359.4
+          },
+          "counters": {
+            "walk_inferences": "67542",
+            "kick_inferences": "1301",
+            "amp_inferences": "0",
+            "dancer_inferences": "0"
+          }
+        },
+        "BHumanNative_2": {
+          "penalty_entries": 2,
+          "low_body_entries": 3,
+          "seconds": {
+            "observed": 1359.4,
+            "policy_idle": 1359.4,
+            "penalized": 30.039999999999992,
+            "low_body": 5.559999999999945
+          },
+          "counters": {
+            "walk_inferences": "63270",
+            "kick_inferences": "5212",
+            "amp_inferences": "0",
+            "dancer_inferences": "0"
+          }
+        },
+        "BHumanNative_3": {
+          "penalty_entries": 0,
+          "low_body_entries": 5,
+          "seconds": {
+            "observed": 1359.4,
+            "policy_idle": 1359.4,
+            "low_body": 26.09999999999968
+          },
+          "counters": {
+            "walk_inferences": "63495",
+            "kick_inferences": "3894",
+            "amp_inferences": "0",
+            "dancer_inferences": "0"
+          }
+        },
+        "BHumanZJU_1": {
+          "penalty_entries": 0,
+          "low_body_entries": 0,
+          "seconds": {
+            "observed": 1359.4,
+            "policy_idle": 1316.74,
+            "policy_starting": 10.080000000000268,
+            "policy_active": 31.240000000000094,
+            "policy_exiting": 1.3399999999996908
+          },
+          "counters": {
+            "walk_inferences": "0",
+            "kick_inferences": "0",
+            "amp_inferences": "67138",
+            "dancer_inferences": "1622"
+          }
+        },
+        "BHumanZJU_2": {
+          "penalty_entries": 4,
+          "low_body_entries": 6,
+          "seconds": {
+            "observed": 1359.4,
+            "policy_idle": 1134.5600000000002,
+            "policy_starting": 56.40000000000086,
+            "policy_active": 138.4399999999997,
+            "policy_exiting": 29.999999999999233,
+            "penalized": 60.059999999999945,
+            "low_body": 24.81999999999948
+          },
+          "counters": {
+            "walk_inferences": "0",
+            "kick_inferences": "0",
+            "amp_inferences": "60383",
+            "dancer_inferences": "6962"
+          }
+        },
+        "BHumanZJU_3": {
+          "penalty_entries": 2,
+          "low_body_entries": 9,
+          "seconds": {
+            "observed": 1359.4,
+            "policy_idle": 1140.9999999999982,
+            "policy_starting": 56.88000000000156,
+            "policy_active": 130.59999999999982,
+            "policy_exiting": 30.920000000000442,
+            "low_body": 27.17999999999995,
+            "penalized": 38.83999999999992
+          },
+          "counters": {
+            "walk_inferences": "0",
+            "kick_inferences": "0",
+            "amp_inferences": "60575",
+            "dancer_inferences": "6605"
+          }
+        }
+      },
+      "decisions": {
+        "1": {
+          "startups": 18,
+          "active_entries": 16,
+          "gate_seconds": {
+            "native recovery/prepare": 0.020000000000003126,
+            "game state forbids kick": 735.0999999999998,
+            "not control owner": 595.44,
+            "server stopped": 1.8000000000002956,
+            "ready": 0.3599999999998147,
+            "": 42.46000000000009,
+            "ball unavailable": 0.040000000000020464
+          },
+          "exit_events": {
+            "server stopped": 9,
+            "moving ball requires chase": 1,
+            "ball range over limit": 5,
+            "startup visual reacquisition timeout": 1,
+            "no usable/fresh ball source": 3,
+            "lost team ball ownership": 1,
+            "game state forbids kick": 1
+          },
+          "startup_delay_median": 0.6000000000001364,
+          "startup_delay_max": 0.6200000000001182
+        },
+        "2": {
+          "startups": 107,
+          "active_entries": 73,
+          "gate_seconds": {
+            "native recovery/prepare": 28.059999999999967,
+            "game state forbids kick": 697.5199999999996,
+            "not control owner": 295.16000000000037,
+            "server stopped": 1.680000000000291,
+            "outside entry geometry": 66.37999999999984,
+            "ready": 2.139999999999688,
+            "": 224.02000000000027,
+            "penalized": 60.059999999999945
+          },
+          "exit_events": {
+            "moving ball requires chase": 40,
+            "unstable visual-kick approach": 12,
+            "startup visual reacquisition timeout": 17,
+            "server stopped": 26,
+            "game state forbids kick": 12,
+            "ball range over limit": 2,
+            "no usable/fresh ball source": 4,
+            "lost ownership during startup": 3,
+            "native recovery/prepare": 3
+          },
+          "startup_delay_median": 0.6000000000001364,
+          "startup_delay_max": 0.6599999999999966
+        },
+        "3": {
+          "startups": 115,
+          "active_entries": 70,
+          "gate_seconds": {
+            "native recovery/prepare": 11.83999999999994,
+            "game state forbids kick": 712.9799999999998,
+            "ready": 2.2999999999999403,
+            "": 217.52000000000098,
+            "server stopped": 1.760000000000332,
+            "not control owner": 332.4599999999996,
+            "outside entry geometry": 56.899999999999565,
+            "ball unavailable": 0.37999999999999545,
+            "penalized": 38.83999999999992
+          },
+          "exit_events": {
+            "unstable visual-kick approach": 17,
+            "moving ball requires chase": 37,
+            "server stopped": 30,
+            "no usable/fresh ball source": 8,
+            "lost team ball ownership": 2,
+            "game state forbids kick": 13,
+            "startup visual reacquisition timeout": 21,
+            "ball range over limit": 4,
+            "lost ownership during startup": 3,
+            "native recovery/prepare": 1
+          },
+          "startup_delay_median": 0.6000000000001364,
+          "startup_delay_max": 0.6400000000000148
+        }
+      },
+      "result": {
+        "complete": true,
+        "half": 2,
+        "policy_left": true,
+        "score": [
+          5,
+          19
+        ],
+        "status": {
+          "time": 1432.14000000805,
+          "play_time": 2400.0,
+          "mode": "GameOver",
+          "left": 5,
+          "right": 19,
+          "left_team": "BHumanZJU",
+          "right_team": "BHumanNative"
+        },
+        "wall_seconds": 620.6856563860056
+      },
+      "contacts": {
+        "r-0-3": 27,
+        "r-1-3": 43,
+        "r-0-2": 40,
+        "r-1-2": 40,
+        "r-0-1": 10,
+        "r-1-1": 9
+      },
+      "mode_seconds": {
+        "Initial": 57.42000000001093,
+        "Ready": 173.9000000007102,
+        "KickOff_Left": 21.06000000011727,
+        "PlayOn": 433.5600000029399,
+        "goal_kick_right": 229.70000000158143,
+        "Goal_Right": 9.180000000061227,
+        "KickIn_Right": 269.7400000004677,
+        "KickIn_Left": 116.46000000079812,
+        "goal_kick_left": 32.340000000403506,
+        "Goal_Left": 2.0399999999981446,
+        "KickOff_Right": 6.51999999999407,
+        "corner_kick_right": 39.50000000055343,
+        "corner_kick_left": 39.90000000039663,
+        "GameOver": 0.9000000000196451
+      },
+      "goals": [
+        {
+          "play_time": 1212.38,
+          "left": 3,
+          "right": 11,
+          "last_contact": "r-0-3"
+        },
+        {
+          "play_time": 1360.06,
+          "left": 4,
+          "right": 11,
+          "last_contact": "r-0-3"
+        },
+        {
+          "play_time": 1629.72,
+          "left": 4,
+          "right": 12,
+          "last_contact": "r-1-2"
+        },
+        {
+          "play_time": 1732.02,
+          "left": 4,
+          "right": 13,
+          "last_contact": "r-1-2"
+        },
+        {
+          "play_time": 1766.64,
+          "left": 5,
+          "right": 13,
+          "last_contact": "r-0-3"
+        },
+        {
+          "play_time": 1845.08,
+          "left": 5,
+          "right": 14,
+          "last_contact": "r-0-1"
+        },
+        {
+          "play_time": 1895.96,
+          "left": 5,
+          "right": 15,
+          "last_contact": "r-0-1"
+        },
+        {
+          "play_time": 2025.9,
+          "left": 5,
+          "right": 16,
+          "last_contact": "r-1-3"
+        },
+        {
+          "play_time": 2094.16,
+          "left": 5,
+          "right": 17,
+          "last_contact": "r-1-2"
+        },
+        {
+          "play_time": 2164.4,
+          "left": 5,
+          "right": 18,
+          "last_contact": "r-1-2"
+        },
+        {
+          "play_time": 2344.74,
+          "left": 5,
+          "right": 19,
+          "last_contact": "r-1-3"
+        }
+      ],
+      "last_server": {
+        "time": "1432.2400000080522",
+        "play_time": "2400.0",
+        "mode": "GameOver",
+        "left": "5",
+        "right": "19",
+        "ball_x": "-2.735251247779089",
+        "ball_y": "2.915731534264649",
+        "ball_z": "0.08967029260340326",
+        "contact": "",
+        "last_contact": ""
+      },
+      "simultaneous_active_seconds": 0.0,
+      "longest_simultaneous_active_seconds": 0.0
+    }
+  ],
+  "matches": [
+    {
+      "match": 1,
+      "score": [
+        3,
+        20
+      ],
+      "halves": [
+        {
+          "complete": true,
+          "half": 1,
+          "policy_left": true,
+          "score": [
+            2,
+            13
+          ],
+          "status": {
+            "time": 1526.9200000101189,
+            "play_time": 1200.0,
+            "mode": "GameOver",
+            "left": 2,
+            "right": 13,
+            "left_team": "BHumanZJU",
+            "right_team": "BHumanNative"
+          },
+          "wall_seconds": 681.7567766389984
+        },
+        {
+          "complete": true,
+          "half": 2,
+          "policy_left": false,
+          "score": [
+            3,
+            20
+          ],
+          "status": {
+            "time": 1369.0200000066723,
+            "play_time": 2400.0,
+            "mode": "GameOver",
+            "left": 20,
+            "right": 3,
+            "left_team": "BHumanNative",
+            "right_team": "BHumanZJU"
+          },
+          "wall_seconds": 618.4891533530026
+        }
+      ]
+    },
+    {
+      "match": 2,
+      "score": [
+        5,
+        19
+      ],
+      "halves": [
+        {
+          "complete": true,
+          "half": 1,
+          "policy_left": false,
+          "score": [
+            3,
+            10
+          ],
+          "status": {
+            "time": 1495.7800000094392,
+            "play_time": 1200.0,
+            "mode": "GameOver",
+            "left": 10,
+            "right": 3,
+            "left_team": "BHumanNative",
+            "right_team": "BHumanZJU"
+          },
+          "wall_seconds": 690.5292504870013
+        },
+        {
+          "complete": true,
+          "half": 2,
+          "policy_left": true,
+          "score": [
+            5,
+            19
+          ],
+          "status": {
+            "time": 1432.14000000805,
+            "play_time": 2400.0,
+            "mode": "GameOver",
+            "left": 5,
+            "right": 19,
+            "left_team": "BHumanZJU",
+            "right_team": "BHumanNative"
+          },
+          "wall_seconds": 620.6856563860056
+        }
+      ]
+    }
+  ],
+  "total": {
+    "matches": 2,
+    "wins": 0,
+    "draws": 0,
+    "losses": 2,
+    "goals_for": 8,
+    "goals_against": 39
+  },
+  "aggregate_diagnostics": {
+    "startups": 942,
+    "active_entries": 675,
+    "goalkeeper_active_entries": 65,
+    "simultaneous_active_seconds": 0.0,
+    "exit_events": {
+      "server stopped": 265,
+      "no usable/fresh ball source": 51,
+      "startup visual reacquisition timeout": 132,
+      "ball range over limit": 47,
+      "lost team ball ownership": 10,
+      "moving ball requires chase": 311,
+      "game state forbids kick": 91,
+      "unstable visual-kick approach": 113,
+      "lost ownership during startup": 14,
+      "native recovery/prepare": 23,
+      "maximum kick duration reached": 1,
+      "penalized": 1
+    },
+    "teams": {
+      "BHumanZJU": {
+        "penalty_entries": 35,
+        "penalty_robot_seconds": 534.24,
+        "below_030m_robot_seconds": 284.0
+      },
+      "BHumanNative": {
+        "penalty_entries": 20,
+        "penalty_robot_seconds": 300.35,
+        "below_030m_robot_seconds": 165.68
+      }
+    }
+  },
+  "raw_logs": "/tmp/bhuman-evaluation-final-20261025",
+  "manifest": {
+    "args": {
+      "output": "/tmp/bhuman-evaluation-final-20261025",
+      "port": 61360,
+      "matches": 2,
+      "speed": 100.0,
+      "jobs": 2
+    },
+    "sha256": {
+      "/home/robotics/ZJUDancer/BHumanCodeRelease/build_sim/run_player": "54e13099ae8b0697161d82cf018c1ec9236dd98ca1c3038c722658435015b2e7",
+      "/home/robotics/ZJUDancer/BHumanCodeRelease/scripts/dancer_kick_worker.py": "0a7ac0d15562ad94f0e6e7436d2d1e4ef1f67c2c9d9f5f15b0db03c0a64e61c8",
+      "/home/robotics/ZJUDancer/BHumanCodeRelease/scripts/team_control.py": "803343a08460c2932b8d268fde17928d643349c04295097710765ab00e78f350",
+      "/home/robotics/ZJUDancer/dancer-robocupdemo/models/student_20/model_7900_bhuman_size3.onnx": "3388c8a311e8c2554169f17dd99a86d3ec8628ddfa060dbb3cc5c7e0d68bf9cd",
+      "/home/robotics/ZJUDancer/BHumanCodeRelease/Src/Apps/HSLServer/SensorProvider.h": "c33abff5289fb095a7c36754e1bce89b46a124531de99441420d89cffac3c7e2",
+      "/home/robotics/ZJUDancer/BHumanCodeRelease/Src/Apps/HSLServer/Main.cpp": "336e7c14b6881cca5eb97b925c17bb83cbb3174869c4da7999628609a017b8d6",
+      "/home/robotics/ZJUDancer/BHumanCodeRelease/Src/Apps/HSLServer/Execution.cpp": "355e164fd3491ef8353df9c351ae2f0df30d0e1bbcde2d2fd77897820059ef4b",
+      "/home/robotics/ZJUDancer/BHumanCodeRelease/Src/Apps/HSLServer/DancerKick.cpp": "9f43913c75d424371f950186ef2f5a6e66019ddc9175d5c25230bee141334f06",
+      "/home/robotics/ZJUDancer/BHumanCodeRelease/Src/Apps/HSLServer/Runtime.cpp": "1449148ab65b9985bafcebdaaf04b2726275797ed001d0c18e2fd6ba293e9418",
+      "/home/robotics/ZJUDancer/BHumanCodeRelease/Src/Apps/HSLServer/DancerKick.h": "bf2a22d41dae1ebbf14da879bd080e1457df94964af8b81debbf059fc769e60c",
+      "/home/robotics/ZJUDancer/BHumanCodeRelease/Src/Apps/HSLServer/Protocol.cpp": "d4c7a1a0a4ae7d896ebd4ae16bceceab410ab031dbe067520a86d62827040ea5",
+      "/home/robotics/ZJUDancer/BHumanCodeRelease/Src/Apps/HSLServer/SensorProvider.cpp": "4e9fb04aa9ad2058b0b7a02d48115ba70c889e2f747b88c7c2f8181b249de73a",
+      "/home/robotics/ZJUDancer/BHumanCodeRelease/Src/Apps/HSLServer/Runtime.h": "f82d88ec160b17a73b70b63cbfd864204679caa9ae0ed1384b74aa782680cf02",
+      "/home/robotics/ZJUDancer/BHumanCodeRelease/Src/Apps/HSLServer/IMUOrientation.h": "7e1848eb5e7a9f6ef540c2f9187247da94f6d5d647272ad0eb341a953adf3f84",
+      "/home/robotics/ZJUDancer/BHumanCodeRelease/Src/Apps/HSLServer/VisionProvider.cpp": "ce3af4fea0369f7879e0a071be8e9285a28902e6af72be9b0ee28e57d00c8762",
+      "/home/robotics/ZJUDancer/BHumanCodeRelease/Src/Apps/HSLServer/Protocol.h": "64651555002158904339a903445151b779f3c496be96c228ad7781cd27b627b2",
+      "/home/robotics/ZJUDancer/BHumanCodeRelease/Src/Apps/HSLServer/VisionProvider.h": "fa11f429f7af97702543fee033404bda023edbeabe51d537761415f958b22ff7",
+      "/home/robotics/ZJUDancer/dancer-robocupdemo/src/source_motion/config/models.sha256.json": "33ba9203d8b4e7f7c401dbc2de182ad424b77c7da128421377a6efd0008d22a0",
+      "/home/robotics/ZJUDancer/dancer-robocupdemo/src/source_motion/config/runtime.json": "ffb05f01ac9679f632e14ad942870c68ffc027d572b98149475625de59b7c14a",
+      "/home/robotics/ZJUDancer/dancer-robocupdemo/src/source_motion/config/policies.json": "e37c72598d253ec5b447d13af3ac837ff468cb8d8bb03ea97e347c63da0a2519",
+      "/home/robotics/ZJUDancer/dancer-robocupdemo/models/amp_vel/2026-10-04_10-24-37.onnx": "0d044e509de3ae231735cbaf41c8660b1b460a59de9ca39b1a408977bd885a5b",
+      "/home/robotics/ZJUDancer/BHumanCodeRelease/scripts/start_sim_game.py": "27d4f8f30a21435825a9fe416287fa9e176adc41d9466e2369799c594dfbde3b",
+      "/home/robotics/ZJUDancer/BHumanCodeRelease/Src/Modules/Communication/TeamMessageHandler/TeamMessageHandler.cpp": "0442292c8611d81face3fb730d24b9250107d4eac6329f72adf2bca8ca4fe548",
+      "/home/robotics/ZJUDancer/BHumanCodeRelease/Config/NeuralNets/GetUpEngine/K1.onnx": "44ee5ddb2b64c79b511ed0914ec40fee81b03987061b130ed17bf546e47cc486",
+      "/home/robotics/ZJUDancer/BHumanCodeRelease/Config/NeuralNets/GetUpEngine/K1_fast_standup.onnx": "adae2f0021e3a6c9adabe7df6095e01c86b5226c72834f475ff164cd9ee8aba5",
+      "/home/robotics/ZJUDancer/BHumanCodeRelease/Config/NeuralNets/Odometry/K1_odometry.onnx": "c7b05ab7854eb74d389c1feefdf7e4af93460221c35f771c7c43e97f190cbf3f",
+      "/home/robotics/ZJUDancer/BHumanCodeRelease/Config/NeuralNets/Walk/K1_walk.onnx": "9d1ec18504cb9d05ec708b9430783a2331cabf5415fc0db81c6318472e948e8f",
+      "/home/robotics/ZJUDancer/BHumanCodeRelease/Config/NeuralNets/Walk/K1_kick_inner_soft.onnx": "7943b41c76c841b663d84024168be5ef4ef0af4f5a3524415a40f8665f028da2",
+      "/home/robotics/ZJUDancer/BHumanCodeRelease/Config/NeuralNets/Walk/K1_kick_inner.onnx": "7fb9ea33c36e14332861025f22e92f2f4a7ae7681f4532bdd6e1e78975fe3452"
+    },
+    "half_seconds": 1200,
+    "comparison": "same HSL adapter and K1BHuman model; native motions versus ZJU AMP + VisualKick",
+    "repository_heads": {
+      "BHumanCodeRelease": "0b02bf1dbc7f2457d1e86ddc5053cbecaa72cd35",
+      "dancer-robocupdemo": "e46533ef0ed856a1149031b831daa32cc24c74f1",
+      "dancer-rcssservermj": "d1263ba7675251009d13e7c9d0483630f75495fd"
+    },
+    "udp_team_channels": {
+      "match1": [
+        61360,
+        61361
+      ],
+      "match2": [
+        61370,
+        61371
+      ]
+    }
+  },
+  "finished_at": "2026-10-25T23:56:54.296117+08:00",
+  "validation": {
+    "python_tests": 32,
+    "cpp_tests": 2,
+    "complete_matches": 2,
+    "halves_per_match": 2,
+    "half_seconds": 1200,
+    "runtime_and_models_unchanged": true
+  },
+  "metric_definitions": {
+    "penalty_entries": "0->1 transitions; a sit-out extension is not a new entry",
+    "below_030m_robot_seconds": "Sum over players with server body height <0.30 m; not a direct fall count",
+    "contacts": "Sampled contact entries at 10 Hz; not all physical contacts"
+  }
+}

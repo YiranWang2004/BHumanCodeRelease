@@ -1,4 +1,7 @@
 #include "Runtime.h"
+#include "DancerKick.h"
+#include "Representations/BehaviorControl/SkillRequest.h"
+#include "Representations/Configuration/FieldDimensions.h"
 #include "Framework/Blackboard.h"
 #include "Framework/Configuration.h"
 #include "Tools/Framework/BHExecutionUnit.h"
@@ -68,6 +71,27 @@ class HSLFrame : public BHExecutionUnit
       const bool nativeKickoffWait = Blackboard::getInstance().exists("GameState") &&
         static_cast<const GameState&>(Blackboard::getInstance()["GameState"]).state == GameState::opponentKickOff;
       if(otherKickoff || nativeKickoffWait || r.frame.penalized) request.motion = MotionRequest::stand;
+      if(r.options.kickPolicy == "zjudancer")
+      {
+        if(motionTick == 0) r.dancerMotionRequest = request;
+        if(r.dancerHolding) request.motion = MotionRequest::stand;
+        else if(request.motion == MotionRequest::walkToBallAndKick || request.motion == MotionRequest::dribble ||
+                (r.ownSetPlayKicker && r.kickAllowed && !r.frame.stopped && !r.frame.penalized))
+        {
+          // Suppress ALL native shots/passes, including during cooldown. Keep
+          // native path planning for approach when the visual gate is closed.
+          request.motion = MotionRequest::walkToPose;
+          const auto& ball = r.ownSetPlayKicker ? r.ball.estimate.position : request.ballEstimate.position;
+          request.walkTarget = Pose2f(ball.angle(), ball);
+          if(r.ownSetPlayKicker)
+          {
+            request.walkSpeed = Pose2f(1.f, 1.f, 1.f);
+            // The old global path led to the native pass waiting pose. Keep
+            // local avoidance, but don't follow that obsolete path.
+            request.obstacleAvoidance.path.clear();
+          }
+        }
+      }
     }
   }
   void afterModules() override
@@ -84,12 +108,21 @@ class HSLFrame : public BHExecutionUnit
       if(blackboard.exists("OdometryData")) r.cognitionOdometry = static_cast<const OdometryData&>(blackboard["OdometryData"]);
       copy("RobotPose", r.estimate);
       copy("BallModel", r.ball);
+      if(blackboard.exists("FieldDimensions"))
+      {
+        const auto& field = static_cast<const FieldDimensions&>(blackboard["FieldDimensions"]);
+        r.goalX = field.xPosOpponentGoalLine * .001f;
+        r.fieldHalfWidth = field.yPosLeftTouchline * .001f;
+        r.goalieAreaX = field.xPosOwnPenaltyArea * .001f + 1.f;
+        r.goalieAreaY = field.yPosLeftPenaltyArea * .001f + .25f;
+      }
       if(blackboard.exists("StrategyStatus"))
       {
         const auto& status = static_cast<const StrategyStatus&>(blackboard["StrategyStatus"]);
         r.tactic = TypeRegistry::getEnumName(status.acceptedTactic);
         r.position = TypeRegistry::getEnumName(status.position);
         r.behaviorRole = TypeRegistry::getEnumName(status.role);
+        r.ballOwner = r.behaviorRole == "playBall" || r.behaviorRole == "kickOffForward";
       }
       if(blackboard.exists("GameControllerData"))
       {
@@ -97,10 +130,23 @@ class HSLFrame : public BHExecutionUnit
         r.gcState = data.state; r.gcTime = data.timeLastPacketReceived;
       }
       if(blackboard.exists("FrameInfo")) r.cognitionTime = static_cast<const FrameInfo&>(blackboard["FrameInfo"]).time;
+      r.ownSetPlayKicker = false;
       if(blackboard.exists("GameState"))
       {
         const auto& state = static_cast<const GameState&>(blackboard["GameState"]);
         r.gameState = state.state; r.playerState = state.playerState;
+        if(state.isPlaying() && state.isForOwnTeam() && blackboard.exists("SkillRequest"))
+        {
+          // All own restarts: kick-in, goal/corner/free kicks, kick-off and
+          // penalties. Strategy has chosen the taker, before PassToTeammate's
+          // walk-to-waiting-pose / wait / adjust states produce a kick motion.
+          const auto skill = static_cast<const SkillRequest&>(blackboard["SkillRequest"]).skill;
+          r.ownSetPlayKicker = skill == SkillRequest::pass || skill == SkillRequest::shoot ||
+            skill == SkillRequest::waitShoot || skill == SkillRequest::clear || skill == SkillRequest::dribble;
+        }
+        r.kickAllowed = state.isPlaying() && !state.isPenalized() &&
+          state.state != GameState::opponentKickOff &&
+          (state.state == GameState::playing || state.isForOwnTeam());
       }
       if(blackboard.exists("TeamData"))
       {
@@ -128,6 +174,18 @@ class HSLFrame : public BHExecutionUnit
       if(blackboard.exists("InertialSensorData")) r.imuYaw = static_cast<const InertialSensorData&>(blackboard["InertialSensorData"]).angle.z();
       if(blackboard.exists("InertialData")) r.nativeYaw = Rotation::Euler::getZAngle(static_cast<const InertialData&>(blackboard["InertialData"]).orientation3D);
       if(blackboard.exists("OdometryData")) r.odometry = static_cast<const OdometryData&>(blackboard["OdometryData"]);
+      // Run shared body policies after the native planner has produced this
+      // frame's velocity. Native fall/get-up/prepare phases keep motor control.
+      if(r.options.kickPolicy == "zjudancer" && motionTick == static_cast<unsigned>(r.options.motionSubframes))
+      {
+        try { hsl::stepDancerKick(r.dancerMotionRequest); }
+        catch(const std::exception& error)
+        {
+          r.dancerFault = error.what();
+          r.dancerAction.clear();
+          r.stop();
+        }
+      }
     }
     sequence = r.sequence;
     executed = true;
@@ -149,3 +207,10 @@ class HSLFrame : public BHExecutionUnit
   }
 };
 REGISTER_EXECUTION_UNIT(HSLFrame)
+
+// HSL matches can share a host without sharing native team multicast channels.
+int bhumanHSLTeamPort()
+{
+  const auto& options = hsl::Runtime::get().options;
+  return options.teamPort ? options.teamPort : Settings::getPortForTeam(options.teamId);
+}

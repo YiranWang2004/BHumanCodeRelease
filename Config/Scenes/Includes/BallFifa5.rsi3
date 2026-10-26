@@ -66779,7 +66779,7 @@
     <SphereGeometry radius="0.11">
       <Material friction="0.5" rollingFriction="0.007"/>
     </SphereGeometry>
-    <SphereMass value="0.43" radius="0.011"/>
+    <SphereMass value="0.43" radius="0.11"/>
   </Body>
 
 </Simulation>

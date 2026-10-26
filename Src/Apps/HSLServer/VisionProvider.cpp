@@ -28,12 +28,21 @@ Vector3f HSLVisionProvider::cameraPoint(const hsl::Object& object) const
 void HSLVisionProvider::update(BallPercept& data)
 {
   data.status = BallPercept::notSeen;
-  const auto& frame = hsl::Runtime::get().frame;
-  if(!frame.hasVision || !theCameraMatrix.isValid) return;
+  auto& runtime = hsl::Runtime::get();
+  const auto& frame = runtime.frame;
+  if(!frame.hasVision) return;
+  runtime.visionTime = runtime.timestamp;
+  runtime.visualDetected = false;
+  if(!theCameraMatrix.isValid) return;
   const hsl::Object* closest = nullptr;
   for(const auto& object : frame.objects)
     if(isType(object, 'B') && object.distance > 0. && (!closest || object.distance < closest->distance)) closest = &object;
   if(!closest) return;
+  // Student20 needs the full torso-frame ball, before gravity projection.
+  // Use B-Human's camera extrinsics (different from the server's legacy K1).
+  runtime.visualDetected = true;
+  runtime.visualBall = (theTorsoMatrix.inverse() * cameraPoint(*closest)).head<2>() * .001f;
+  runtime.visualBallTime = runtime.timestamp;
   data.status = BallPercept::seen;
   data.positionOnField = cameraPoint(*closest).head<2>();
   data.covarianceOnField = covariance(data.positionOnField);

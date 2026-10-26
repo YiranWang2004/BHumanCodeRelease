@@ -1,4 +1,5 @@
-# Observational callbacks only; the native 2026 policy and switching logic are unchanged.
+# Native inference callbacks are observational. The optional ZJUDancer override
+# lives exclusively in the HSL adapter; normal B-Human builds are unchanged.
 target_compile_definitions(B-Human PRIVATE BHUMAN_HSL_SERVER)
 set(HSL_SERVER_ROOT "${BHUMAN_PREFIX}/Src/Apps/HSLServer")
 file(GLOB HSL_SERVER_SOURCES CONFIGURE_DEPENDS "${HSL_SERVER_ROOT}/*.cpp")

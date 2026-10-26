@@ -208,3 +208,206 @@ truth 定位的 B-Human 场上球员，记录真实 MuJoCo 脚球接触与球轨
 `/tmp/bhuman2026-kick-7ne12ds_/`。2025 旧版本的测试结论不作为本版本稳定性依据。
 
 许可证见 `License.md`。This product includes software developed by B-Human (http://www.b-human.de).
+
+## B-Human 对踢：一队改用 ZJUDancer AMP + VisualKick
+
+本仓库提供独立入口，无需调用 `dancer-robocupdemo/scripts/start_sim_game.sh`。
+两队都运行 B-Human；默认 A 队使用 ZJUDancer 当前 AMP 行走和 VisualKick，B 队使用原生运动 policy。
+先按前文启动匹配场地/人数的服务器，再运行：
+
+```bash
+cd /home/robotics/ZJUDancer/BHumanCodeRelease
+bash scripts/build_sim.sh
+bash scripts/start_sim_game.sh \
+  --host 127.0.0.1 --port 60000 \
+  --field hsl_m --level foundation \
+  --localization truth --sim-speed 1 \
+  --team-a BHumanZJU --team-b BHumanNative \
+  --policy-team a \
+  --dancer-repo /home/robotics/ZJUDancer/dancer-robocupdemo
+```
+
+- `--policy-team a|b|none`：选择使用 ZJUDancer AMP + VisualKick 的一队，或让双方都用原生运动 policy。
+  球队名字只用作标识，不决定 policy；名字必须不同。
+- `--field/--level`：Middle/Large foundation 为 3v3、advanced 为 5v5；Small 为 4v4/7v7；
+  WHRG 为 5v5；Large 另支持 `--level 11v11`。
+  `--num-players N` 可覆盖每队人数，服务器容量也须匹配。1 号为门将。
+- `--dancer-python PATH`：指定装有 NumPy、ONNX Runtime 的 Python。
+  未指定时依次使用 `K1_PYTHON`、ZJUDancer 的 `.venv/bin/python`、
+  `.venv-sim-motion/bin/python`、`python3`。可按 ZJUDancer 文档安装 source_motion 依赖。
+- `--log-dir PATH` 指定日志目录；默认每场创建独立 `/tmp/bhuman-selfplay-*`。
+  `--dry-run` 只打印双方命令。Ctrl-C 停止本次启动的全部客户端及其推理进程；
+  任意客户端提前退出会结束整组，避免缺人后继续跑。
+
+启动前会校验 ZJUDancer 模型清单和加载推理依赖。不是复制一份 ONNX：直接使用
+`--dancer-repo` 下 `src/source_motion/config/policies.json`、`models.sha256.json`
+和原来的 `source_motion.policies.PolicyBank`，因此切换当前模型后无需重编译 B-Human。
+本次接入时配置指向 `models/student_20/model_7900_bhuman_size3.onnx`。
+双方机器人均为 `K1BHuman`；VisualKick 的球观测通过 B-Human 相机外参转到躯干坐标，
+保留原 Student20 的 20 ms 推理节拍、50 帧历史、隔帧视觉更新、动作缩放及 PD 参数。
+网络偶发的 10/30 ms 分包按仿真时钟采样到 50 Hz，不因额外报文重复推进策略历史。
+
+### 己方定位球统一直接进入 policy
+
+替换队的边线球、球门球、角球、直接/间接任意球、开球及点球，均在比赛允许执行、队内协调选出唯一控球者后，
+就使用普通 VisualKick 的球距离、球方向、新鲜度和冷却条件触发。
+不再等待 `PassToTeammate` 走到等待位置、等队友或调整传球姿态后才发出底层 kick 请求。
+满足条件后仍保留相同的 600 ms 启动过渡；尚未满足条件时直接朝球接近/转向，
+不执行原生定位球准备站位。服务器暂停发球、处罚及同队会话互斥仍有效；对方定位球及 READY/SET 阶段不会提前触发。
+门将执行己方定位球时也走这套公共进入/退出规则，并在首次触球转入 PlayOn 后保持同一会话规则；普通比赛中的门将解围仍保留专用规则。
+
+### 行为及进入/退出规则
+
+替换队的所有 `walkToBallAndKick` 及 `dribble` 请求（原生带球也会调用 kick 模型；
+包括传球、射门、门将解围）都禁用原生
+kick policy。VisualKick 每帧的目标是定位坐标系中的**对方球门中心**，不使用 B-Human
+选择的接球队友或射门落点。战术走位、路径规划、避障、队内通信、定位和角色分配仍由 B-Human 负责。
+正常行走、零速站立以及 VisualKick 启动/退出过渡期，统一使用 ZJUDancer AMP policy。
+适配器在每帧原生 Motion 规划结束后读取最终 `MotionInfo.speed`，将平移速度从 mm/s
+转换为 m/s，角速度保持 rad/s，再交给原版 `AmpVelPolicy`；不另写目标点跟踪器。
+原生 `K1_walk.onnx` 的推理被跳过，仅保留规划及步态阶段管理；对照队不受影响。
+当前 AMP 模型由共享 `policies.json` 的 `loco.model_file` 决定，当前为
+`models/amp_vel/2026-10-04_10-24-37.onnx`。连续行走和站立不重置 AMP 动作历史；
+切换到踢球或交回原生运动后重新进入 AMP 时才重置。
+跌倒、起身、prepare/playDead 等非行走阶段仍由 B-Human 控制；倾斜超出 AMP 的重力
+有效范围时也不发送 AMP 动作。头部继续使用 B-Human 请求，VisualKick 会话内保持既有头部逻辑。
+定位及里程计仍为 B-Human 实现，本次没有换成 ZJUDancer 的里程计。
+单球员参数 `--kick-policy zjudancer` 为兼容已有命令继续保留，现在同时启用 AMP 和 VisualKick。
+
+会话条件依据当前 `StrikerDecide` / `RLVisionKick` 适配，数值从 ZJUDancer
+`brain_node_init.cpp` 的标量默认值及 `config.yaml` 的 strategy 覆盖项读取：
+
+- 场上主攻者在球可用且近于 0.8 m，或距离在 `(0.2, 6.0) m` 且相对球方向绝对值
+  小于 `0.6 × 1.3 rad` 时可以启动。启动过渡 600 ms；开始推理前必须有新鲜真实视觉。
+- 近球场上球员启动时零速；远球启动先 400 ms 的 0.9 m/s，再 0.3 m/s，
+  与当前 `stepDecelerate()` 的实际实现一致。
+- 当前真实球观测最大年龄 650 ms；记忆/预测最多 1000 ms，近于 0.45 m 的丢球
+  不用于新会话；已启动会话允许 800 ms 短时视觉保持。没有新视觉报文的帧不算丢球。
+- 场上球员连续 4 个不同真实观测超出 6 m 才因距离退出；连续丢失控球权、球不可用、
+  球出界、比赛禁止动作或跌倒也会退出。远离中的快球及接近阶段持续倾斜会交回追球。
+  场上球员不会因 7 s/14 s 或“无进展”超时被强行打断。
+- 普通退出保持 140 ms；追球/倾斜交接先释放踢球再由 AMP 稳定 600 ms；
+  再进入冷却 600 ms。球丢失退出期间重新看到球可取消退出，保留推理历史。
+- 普通门将在己方罚球区前扩 1 m、侧向扩 0.25 m 的区域内，球可用且获得控制权时直接启动，
+  不再等待原生 kick/dribble 请求；应用 ZJUDancer 的 5 m 进入距离、
+  3.5 m 退出距离、1.5 s 最短距离退出时间及有界进展/轮次规则。
+
+这是 **B-Human 战术 + ZJUDancer 踢球会话** 的对照模式：ZJUDancer 的 `tmImLead`
+映射为本机队内唯一控制者，不移植其整套主攻成本算法、门将拦截选点或定位球
+传球配合状态机。由于要求始终射向球门，开球传球完成后提前退场的分支也不采用。
+队内控制权覆盖接近球、启动和踢球全过程：以距离和转向成本选人，已启动者优先；
+接近阶段挑战者必须成本低于当前人的 70% 并持续 500 ms 才换人。失去资格或超过
+300 ms 未更新的控制者会释放。未获得控制权但原生策略仍要求追球的场上球员改为
+球后侧方接应，避免两人一起冲球。协调账本使用短时文件锁；同队客户端需运行在
+同一主机、同一用户下，尚不支持跨机器协调。
+
+启动期间短暂看不到球时停步等待，连续超过 200 ms 才取消，不重新计满 600 ms；
+正式进入推理仍要求真实新鲜视觉。仿真是否出界由服务器裁判模式和停止标志决定；
+本地估计出界仅记录诊断，不能覆盖服务器的 PlayOn 或合法定位球。这样持续的
+视觉偏差也不会让仍在线内的球反复取消会话。
+裁判停止、处罚、禁止动作和恢复动作仍立即生效。
+
+启动器默认在日志目录生成 `csv/` 和 `decisions/`。`[DancerKick]` 文本日志记录
+会话状态及退出原因；决策 CSV 每帧记录比赛时间、控制者、原生主攻/踢球请求、
+进入阻挡条件、球龄、距离、倾斜和具体退出原因。`HSL_TRACE_DIR`、
+`HSL_DECISION_DIR` 可分别覆盖输出目录。客户端 CSV 的
+`dancer_phase`、`dancer_inferences` 记录新 policy 的阶段和累计推理次数；
+新增 `amp_inferences` 计数正常行走、站立及过渡期的 AMP 推理。
+原有 `walk_inferences` / `kick_inferences` 仅计数原生模型，替换队两者都应为 0。
+需要逐帧诊断时设置 `HSL_DANCER_TRACE_DIR`，会保存以推理进程 PID 命名的 JSONL 输入/输出。
+
+验证会话边界及启动参数：
+
+```bash
+../dancer-robocupdemo/.venv-sim-motion/bin/python -m unittest discover -s scripts/tests -v
+```
+
+使用不含 ONNX Runtime 的系统 Python 也可运行状态机测试，但实际模型一致性测试会跳过。
+本次已通过编译、原有 2 项 CTest、21 项 Python 测试，以及分别替换左队、右队的独立端口 3v3 短场联调：
+双方各收到 2 名队友；替换队实际调用 VisualKick 且原生 kick 推理次数为 0，
+对照队实际调用原生 kick 且 VisualKick 次数为 0；Ctrl-C 整组退出码为 0。
+这是功能接入验证，不代表整场稳定性或比赛效果评估。
+
+
+### 完整比赛评估
+
+```bash
+python3 scripts/evaluate_selfplay.py --output /tmp/bhuman-evaluation --port 61300
+```
+
+使用独立的服务器和端口，自动完成两场常规比赛（每场两半场各 20 分钟），
+半场间交换场地、开球方并带入比分。服务器每半场到时会结束，因此下半场以
+`--phase 1` 重启双方客户端；这是统一的半场重置，不计为额外比赛。
+第二场反转首次开球方。启动器逐人等待注册，评估器还核对服务器真实左右队名，
+避免加载 policy 较慢导致先后连接顺序颠倒。可加 `--jobs 2` 并行两场。
+启动器还将两队的 UDP 队内通信分别放在服务器端口号及其加一，和 TCP 服务互不冲突；
+可用 `--team-port-base` 覆盖这两个 UDP 端口。这样不同场次不会共享原生
+`10000 + teamNumber` 端口而串话。单机器人入口可用 `--team-port` 显式指定。默认无渲染、同步运行、加速上限 100 倍，实际速度取决于 CPU。
+保持默认比赛物理、3 号球、hsl_m_26 foundation 三人制、真值定位和原生运动子帧数。
+“原版 B-Human”在这里指同一 HSL/K1BHuman 适配器内的原生步行、踢球和战术，
+不是 SimRobot/NAO 平台之间的比较。
+
+`manifest.json` 保存运行参数及二进制/策略摘要；各半场保存服务器球位置、触球、
+比分和模式 CSV、六客户端日志、决策日志以及完成状态。`results.json` 仅包含
+到达正规半场结束时刻的完整场次；进程异常不会伪记为完赛。
+客户端默认按服务器每半场 1200 s 映射剩余时间，单机器人参数 `--half-seconds`
+可适配其他时长；本评估不缩短比赛。
+
+
+### 2026-10-25 完整比赛回归结果
+
+最终版本跑完两场常规比赛：每场 **2 × 20 分钟、3 对 3**，半场交换场地和开球方，
+第二场反转首次开球方。使用上述 hsl_m_26 foundation、真值定位、K1BHuman 和默认比赛物理。
+下表比分均为 **B-HumanZJU : 原生 B-Human**，下半场列只统计下半场新增进球。
+
+| 场次 | 上半场 | 下半场 | 全场 |
+| --- | --- | --- | --- |
+| 第 1 场 | 2:13 | 1:7 | **3:20** |
+| 第 2 场 | 3:10 | 2:9 | **5:19** |
+
+合计 **0 胜 0 平 2 负，进 8 球、失 39 球**。这是两场实测结果，尚未达到击败原版的水平。
+“原版”指同一 HSL 仿真适配器中的原生战术、步行和踢球网络。
+
+完整机器可读结果及运行摘要见
+[`scripts/evaluation_results/2026-10-25-selfplay.json`](scripts/evaluation_results/2026-10-25-selfplay.json)。
+本机逐帧日志位于 `/tmp/bhuman-evaluation-final-20261025/`，包含服务器轨迹、客户端 CSV、
+决策 CSV、模型/二进制摘要及源码快照。四个半场均到达规定的 1200/2400 s 且由服务器进入
+GameOver；运行期间代码和模型摘要未变化。排查阶段的中途试跑不计入此表，串话数据已排除。
+
+本次修复与验证：
+
+- 门将入口不再依赖原生底层踢球请求；定位球不再等待原生准备站位。
+- 队内唯一控制权覆盖接近、启动和踢球；已启动者优先，非控制者改为接应。
+- 启动短暂丢视觉时停车重获；服务器裁判状态决定出界，本地估计出界仅用于诊断。
+- 固定注册顺序、隔离不同比赛的队内 UDP 端口，并修正每半场 1200 s 的客户端时钟。
+- 32 项 Python 测试、2 项 C++ 测试通过。两场共 942 次启动、675 次进入 active，
+  其中门将进入 active 65 次；同队两个 active 会话的时间重叠为 **0 s**，
+  因本地“估计出界”退出为 **0 次**。替换队原生步行/踢球推理计数均为 0。
+
+仍然落后的原因与证据：
+
+1. **门将任务与 policy 适用区域尚不一致。** 原生战术会要求门将到门前区域外追球，
+   普通门将 VisualKick 又要求球位于门前区域。第 1 场上半场 17:40.28 失球前，
+   1 号仍为原生 `playBall` 角色、policy 为 idle，位置约为 `(0.01, -2.65) m`，
+   已接近中场（本方球门位于 x=-7 m）。需要统一门将追球边界、解围和回门决策。
+2. **高速来球的应急接管不足。** 保留的 600 ms 过渡会消耗防守窗口，已有控球者优先也
+   没有门前威胁的紧急抢占。第 2 场上半场 1:36.56 门将开始启动，1:37.16 才进入
+   active，1:37.30 即失球，仅留下约 140 ms 的实际踢球时间。应优先设计门前拦截/
+   紧急控球权让渡，而不是统一放宽所有入场条件。
+3. **视觉和运动稳定性仍中断控制。** 全场有 132 次启动视觉重获超时、51 次球源不可用
+   退出、113 次接近阶段不稳定退出。机身高度低于 0.30 m 的累计时间为本队 284.00
+   机器人秒、原版 165.68 机器人秒；该指标不是直接的跌倒次数。需要分别验证 AMP、
+   VisualKick 和交接流程，当前证据不足以把差距单独归因于某个模型权重。
+4. **定位球避让和进攻协同还需适配。** 本队处罚状态进入 35 次、累计 534.24 机器人秒，
+   原版为 20 次、300.35 机器人秒；本队另有一次受罚期间重新入场导致计时延长。
+   原生传球接应仍按传球意图运行，执行端却固定射向球门中心，两层任务含义不同。
+   后续应统一射门/接应任务，并给对方定位球增加符合服务器规则的退让约束。
+
+这些剩余问题属于上层任务与替换运动之间的协调、应急响应及稳定性；
+本次结果不能证明仅调整入场距离或取消全部启动过渡就能赢得比赛。
+
+重新生成统计：
+
+```bash
+python3 scripts/summarize_selfplay.py /tmp/bhuman-evaluation-final-20261025
+```
